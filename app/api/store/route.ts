@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { readStore, writeStore } from "@/lib/store";
+import { mergeClientStore, readStore, writeStore } from "@/lib/store";
 import type { Store } from "@/lib/types";
 
 export async function GET() {
@@ -8,7 +8,9 @@ export async function GET() {
 }
 
 export async function PUT(req: Request) {
-  const store = (await req.json()) as Store;
+  const incoming = (await req.json()) as Store;
+  const current = await readStore();
+  const store = mergeClientStore(current, incoming);
   await writeStore(store);
   return NextResponse.json(store);
 }

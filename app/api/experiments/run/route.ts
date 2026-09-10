@@ -1,13 +1,22 @@
 import { NLA_SOURCES } from "@/lib/types";
 import { runJudge } from "@/lib/judge";
 import { runNlaExample } from "@/lib/neuronpedia";
-import { readStore, writeStore } from "@/lib/store";
+import { patchStore, readStore } from "@/lib/store";
 import type { Experiment, ExperimentRow, TokenPolicy } from "@/lib/types";
 
 export const maxDuration = 300;
 
 function headerKey(req: Request, name: string): string {
   return req.headers.get(name)?.trim() || "";
+}
+
+async function persistExperiment(experiment: Experiment): Promise<void> {
+  await patchStore((s) => ({
+    ...s,
+    experiments: s.experiments.some((e) => e.id === experiment.id)
+      ? s.experiments.map((e) => (e.id === experiment.id ? experiment : e))
+      : [experiment, ...s.experiments],
+  }));
 }
 
 export async function POST(req: Request) {
@@ -54,8 +63,7 @@ export async function POST(req: Request) {
     status: "running",
     createdAt: new Date().toISOString(),
   };
-  store.experiments.unshift(experiment);
-  await writeStore(store);
+  await persistExperiment(experiment);
 
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
@@ -97,12 +105,7 @@ export async function POST(req: Request) {
             row.error = err instanceof Error ? err.message : String(err);
           }
           experiment.rows.push(row);
-          await writeStore({
-            ...store,
-            experiments: store.experiments.map((e) =>
-              e.id === experiment.id ? experiment : e,
-            ),
-          });
+          await persistExperiment(experiment);
           send({ type: "row", row });
         }
         experiment.status = "done";
@@ -110,12 +113,7 @@ export async function POST(req: Request) {
         experiment.status = "error";
         experiment.error = err instanceof Error ? err.message : String(err);
       }
-      await writeStore({
-        ...store,
-        experiments: store.experiments.map((e) =>
-          e.id === experiment.id ? experiment : e,
-        ),
-      });
+      await persistExperiment(experiment);
       send({ type: "done", experiment });
       controller.close();
     },

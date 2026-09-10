@@ -11,8 +11,10 @@ export default function SettingsPage() {
       <h1 className="text-[20px] font-semibold tracking-tight">API keys</h1>
       <p className="mt-2 text-[13px] leading-relaxed text-[var(--muted)]">
         Stored in this tab&apos;s session only. Sent as request headers to the
-        Next.js proxy. Not written to disk, git, or Supabase. Vault needs a
-        logged-in user — add it later if we deploy this beyond the laptop.
+        Next.js proxy. Not written to disk, git, or Supabase. Datasets and
+        experiment runs persist in Supabase (server-side). Add
+        <code className="mx-1">SUPABASE_URL</code> and
+        <code className="mx-1">SUPABASE_SERVICE_ROLE_KEY</code> on Vercel.
       </p>
       <label className="mt-8 block text-[12px] text-[var(--muted)]">
         OpenAI

@@ -5,12 +5,12 @@ import { useParams, useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useKeys } from "@/lib/keys";
 import { useStore } from "@/lib/store-client";
-import { NLA_SOURCES, type TokenPolicy } from "@/lib/types";
+import { NLA_SOURCES, type Experiment, type TokenPolicy } from "@/lib/types";
 
 export default function DatasetPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { store, save, reload } = useStore();
+  const { store, save, reload, upsertExperiment } = useStore();
   const { keys, headers } = useKeys();
   const [sourceId, setSourceId] = useState<string>(NLA_SOURCES[0].id);
   const [tokenPolicy, setTokenPolicy] = useState<TokenPolicy>("last_user");
@@ -84,9 +84,20 @@ export default function DatasetPage() {
       buf = lines.pop() ?? "";
       for (const line of lines) {
         if (!line.trim()) continue;
-        const ev = JSON.parse(line) as { type: string; row?: { prompt: string } };
+        const ev = JSON.parse(line) as {
+          type: string;
+          row?: { prompt: string };
+          experiment?: Experiment;
+        };
+        if (ev.type === "start" && ev.experiment) {
+          upsertExperiment(ev.experiment);
+          setLog("Running…");
+        }
         if (ev.type === "row" && ev.row) {
           setLog(`Done: ${ev.row.prompt.slice(0, 80)}`);
+        }
+        if (ev.type === "done" && ev.experiment) {
+          upsertExperiment(ev.experiment);
         }
       }
     }
@@ -277,7 +288,12 @@ export default function DatasetPage() {
                   }
                 />
                 <div className="min-w-0 flex-1">
-                  <div className="text-[13px]">{ex.name}</div>
+                  <Link
+                    href={`/datasets/${dataset.id}/compare?ids=${ex.id}`}
+                    className="text-[13px] hover:underline"
+                  >
+                    {ex.name}
+                  </Link>
                   <div className="text-[11px] text-[var(--muted)]">
                     {ex.sourceId} · {ex.tokenPolicy} · {ex.status} ·{" "}
                     {ex.rows.length} rows

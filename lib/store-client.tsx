@@ -1,6 +1,6 @@
 "use client";
 
-import type { Store } from "./types";
+import type { Experiment, Store } from "./types";
 import {
   createContext,
   useCallback,
@@ -13,6 +13,7 @@ const Ctx = createContext<{
   store: Store | null;
   reload: () => Promise<void>;
   save: (next: Store) => Promise<void>;
+  upsertExperiment: (experiment: Experiment) => void;
 } | null>(null);
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
@@ -36,8 +37,16 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setStore((await res.json()) as Store);
   }, []);
 
+  const upsertExperiment = useCallback((experiment: Experiment) => {
+    setStore((prev) => {
+      if (!prev) return prev;
+      const others = prev.experiments.filter((e) => e.id !== experiment.id);
+      return { ...prev, experiments: [experiment, ...others] };
+    });
+  }, []);
+
   return (
-    <Ctx.Provider value={{ store, reload, save }}>{children}</Ctx.Provider>
+    <Ctx.Provider value={{ store, reload, save, upsertExperiment }}>{children}</Ctx.Provider>
   );
 }
 
