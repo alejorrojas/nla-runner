@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import { FeedbackConfig } from "@/components/feedback-config";
 import { mustacheVars } from "@/lib/mustache";
 import { useStore } from "@/lib/store-client";
 import {
   JUDGE_VARS,
   OPENAI_MODELS,
   type Evaluator,
-  type FeedbackField,
   type JudgeVar,
   type Store,
 } from "@/lib/types";
@@ -41,11 +41,6 @@ function Editor({
       ...store,
       evaluators: store.evaluators.map((e) => (e.id === ev.id ? next : e)),
     });
-  }
-
-  function setFeedback(i: number, field: FeedbackField) {
-    const feedback = ev.feedback.map((f, j) => (j === i ? field : f));
-    patch({ ...ev, feedback });
   }
 
   return (
@@ -153,74 +148,12 @@ function Editor({
               ))
             )}
           </div>
-          <div className="mt-8 text-[13px] font-medium">Feedback configuration</div>
-          <p className="mt-1 text-[12px] text-[var(--muted)]">
-            Each field is a top-level key in the judge output. Charts average
-            booleans and numbers.
-          </p>
-          {ev.feedback.map((f, i) => (
-            <div
-              key={i}
-              className="mt-3 grid gap-2 rounded-md border border-[var(--line)] p-3 md:grid-cols-3"
-            >
-              <input
-                value={f.key}
-                onChange={(e) => setFeedback(i, { ...f, key: e.target.value })}
-                placeholder="feedback key"
-              />
-              <select
-                value={f.kind}
-                onChange={(e) =>
-                  setFeedback(i, {
-                    ...f,
-                    kind: e.target.value as FeedbackField["kind"],
-                  })
-                }
-              >
-                <option value="boolean">Boolean</option>
-                <option value="continuous">Continuous 0–1</option>
-                <option value="categorical">Categorical</option>
-              </select>
-              <input
-                value={f.description}
-                onChange={(e) =>
-                  setFeedback(i, { ...f, description: e.target.value })
-                }
-                placeholder="description"
-              />
-              {f.kind === "categorical" ? (
-                <input
-                  className="md:col-span-3"
-                  value={(f.categories ?? []).join(", ")}
-                  onChange={(e) =>
-                    setFeedback(i, {
-                      ...f,
-                      categories: e.target.value
-                        .split(",")
-                        .map((s) => s.trim())
-                        .filter(Boolean),
-                    })
-                  }
-                  placeholder="categories, comma-separated"
-                />
-              ) : null}
-            </div>
-          ))}
-          <button
-            className="btn mt-3"
-            type="button"
-            onClick={() =>
-              patch({
-                ...ev,
-                feedback: [
-                  ...ev.feedback,
-                  { key: "metric", description: "", kind: "boolean" },
-                ],
-              })
-            }
-          >
-            Add feedback key
-          </button>
+          <div className="mt-8">
+            <FeedbackConfig
+              feedback={ev.feedback}
+              onChange={(feedback) => patch({ ...ev, feedback })}
+            />
+          </div>
         </div>
         <div className="p-6 text-[13px] text-[var(--muted)]">
           <div className="font-medium text-[var(--ink)]">What the judge receives</div>

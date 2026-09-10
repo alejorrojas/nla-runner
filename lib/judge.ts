@@ -2,7 +2,7 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { generateText, Output } from "ai";
 import { z } from "zod";
 import { renderMustache } from "./mustache";
-import type { Evaluator, ExperimentRow, JudgeVar } from "./types";
+import type { Evaluator, ExperimentRow, FeedbackField, JudgeVar } from "./types";
 
 function probeText(row: ExperimentRow, label?: string): string {
   const list = label
@@ -41,26 +41,58 @@ function valuesFor(
   return out;
 }
 
+function categoryNames(field: FeedbackField): string[] {
+  const names = (field.categories ?? [])
+    .map((c) => c.name.trim())
+    .filter(Boolean);
+  return names.length ? names : ["yes", "no"];
+}
+
 function schemaFor(evaluator: Evaluator) {
-  const shape: Record<string, z.ZodType> = {
-    reason: z.string().describe("Short justification"),
-  };
+  const shape: Record<string, z.ZodType> = {};
+  if (evaluator.feedback.some((f) => f.includeReasoning !== false)) {
+    shape.reason = z.string().describe("Short justification");
+  }
   for (const field of evaluator.feedback) {
-    if (field.kind === "boolean") {
-      shape[field.key] = z.boolean().describe(field.description);
-    } else if (field.kind === "continuous") {
-      shape[field.key] = z
-        .number()
-        .min(field.min ?? 0)
-        .max(field.max ?? 1)
-        .describe(field.description);
-    } else {
-      const cats = field.categories?.length
-        ? field.categories
-        : ["yes", "no"];
-      shape[field.key] = z.enum(cats as [string, ...string[]]).describe(
-        field.description,
-      );
+    switch (field.kind) {
+      case "boolean":
+        shape[field.key] = z
+          .boolean()
+          .describe(
+            field.description ||
+              "true (1) or false (0) based on the feedback criteria",
+          );
+        break;
+      case "continuous": {
+        const min = field.min ?? 1;
+        const max = field.max ?? 10;
+        const bits = [field.description];
+        if (field.minDescription) bits.push(`min ${min}: ${field.minDescription}`);
+        if (field.maxDescription) bits.push(`max ${max}: ${field.maxDescription}`);
+        shape[field.key] = z
+          .number()
+          .min(min)
+          .max(max)
+          .describe(bits.filter(Boolean).join(" "));
+        break;
+      }
+      case "categorical": {
+        const cats = categoryNames(field);
+        const labeled = (field.categories ?? [])
+          .filter((c) => c.name.trim())
+          .map((c) =>
+            c.description ? `${c.name}: ${c.description}` : c.name,
+          )
+          .join("; ");
+        shape[field.key] = z
+          .enum(cats as [string, ...string[]])
+          .describe(field.description || labeled);
+        break;
+      }
+      default: {
+        const _never: never = field.kind;
+        throw new Error(`Unhandled feedback kind: ${_never}`);
+      }
     }
   }
   return z.object(shape);

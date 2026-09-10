@@ -35,13 +35,21 @@ export type JudgeVar = (typeof JUDGE_VARS)[number];
 export type TokenPolicy = "last_user" | "first_assistant" | "both";
 export type FeedbackKind = "boolean" | "continuous" | "categorical";
 
+export type FeedbackCategory = {
+  name: string;
+  description: string;
+};
+
 export type FeedbackField = {
   key: string;
   description: string;
   kind: FeedbackKind;
   min?: number;
   max?: number;
-  categories?: string[];
+  minDescription?: string;
+  maxDescription?: string;
+  categories?: FeedbackCategory[];
+  includeReasoning?: boolean;
 };
 
 export type Evaluator = {

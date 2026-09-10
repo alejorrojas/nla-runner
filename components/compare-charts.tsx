@@ -8,24 +8,8 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import { expColor, expLetter } from "@/lib/exp-colors";
+import { meanScores } from "@/lib/feedback-display";
 import type { Experiment } from "@/lib/types";
-
-function meanScores(ex: Experiment): Record<string, number> {
-  const acc: Record<string, { sum: number; n: number }> = {};
-  for (const row of ex.rows) {
-    for (const [k, v] of Object.entries(row.scores)) {
-      const n =
-        typeof v === "boolean" ? (v ? 1 : 0) : typeof v === "number" ? v : NaN;
-      if (Number.isNaN(n)) continue;
-      acc[k] ??= { sum: 0, n: 0 };
-      acc[k].sum += n;
-      acc[k].n += 1;
-    }
-  }
-  return Object.fromEntries(
-    Object.entries(acc).map(([k, v]) => [k, v.n ? v.sum / v.n : 0]),
-  );
-}
 
 function meanMse(ex: Experiment): number {
   const vals = ex.rows.flatMap((r) =>

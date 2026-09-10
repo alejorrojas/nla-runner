@@ -37,9 +37,10 @@ export default function EvaluatorsPage() {
                   mapping: { nla: "nla", prompt: "prompt" },
                   feedback: [
                     {
-                      key: "score",
-                      description: "Binary criterion",
+                      key: "conciseness",
+                      description: "Is the output concise?",
                       kind: "boolean",
+                      includeReasoning: true,
                     },
                   ],
                   createdAt: new Date().toISOString(),
