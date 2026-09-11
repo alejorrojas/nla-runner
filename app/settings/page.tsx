@@ -12,7 +12,7 @@ export default function SettingsPage() {
       <p className="mt-2 text-[13px] leading-relaxed text-[var(--muted)]">
         Stored in this tab&apos;s session only. Sent as request headers to the
         Next.js proxy. Not written to disk, git, or Supabase. Datasets and
-        experiment runs persist in Supabase (server-side). Add
+        experiment runs persist in Supabase tables (server-side). Add
         <code className="mx-1">SUPABASE_URL</code> and
         <code className="mx-1">SUPABASE_SERVICE_ROLE_KEY</code> on Vercel.
       </p>

@@ -18,4 +18,6 @@ On Vercel set:
 - `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
 
-The JSON lab store lives in `public.nla_eval_store` (service role only; no anon policies). Without those env vars, local `npm run dev` still uses `data/store.json`.
+The lab store is Postgres on project **nla-runner** (`vamfikbkcewmlzkqxtrs`): `datasets`, `dataset_examples`, `evaluators`, `experiments`, `experiment_rows`. RLS is on with no anon policies; the Next.js server uses the service role.
+
+Without those env vars, local `npm run dev` still uses `data/store.json`.
