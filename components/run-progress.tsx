@@ -36,12 +36,12 @@ export function RunProgress({ tick }: { tick: RunTick | null }) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 8 }}
           transition={spring}
-          className="mt-4 overflow-hidden rounded-xl border border-[var(--ink)] bg-white"
+          className="mt-4 overflow-hidden rounded-xl border border-[var(--accent)] bg-white"
         >
           <div className="flex items-center gap-2 border-b border-[var(--line)] px-4 py-2">
             <span className="relative flex h-2.5 w-2.5">
-              <span className="absolute inline-flex h-full w-2.5 animate-ping rounded-full bg-[var(--ink)] opacity-40" />
-              <span className="relative h-2.5 w-2.5 rounded-full bg-[var(--ink)]" />
+              <span className="absolute inline-flex h-full w-2.5 animate-ping rounded-full bg-[var(--accent)] opacity-40" />
+              <span className="relative h-2.5 w-2.5 rounded-full bg-[var(--accent)]" />
             </span>
             <span className="text-[13px] font-medium">Experiment running</span>
             <span className="ml-auto font-mono text-[12px] text-[var(--muted)]">
@@ -50,7 +50,7 @@ export function RunProgress({ tick }: { tick: RunTick | null }) {
           </div>
           <div className="h-1 bg-[var(--line)]">
             <motion.div
-              className="h-full bg-[var(--ink)]"
+              className="h-full bg-[var(--accent)]"
               initial={false}
               animate={{
                 width: `${Math.max(4, (tick.completed / tick.total) * 100)}%`,

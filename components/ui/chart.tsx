@@ -44,7 +44,7 @@ function ChartContainer({
       <div
         data-chart={chartId}
         className={cn(
-          "flex justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-[var(--muted)] [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-[var(--line)] [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-[#f3f4f7] [&_.recharts-layer]:outline-none [&_.recharts-surface]:outline-none",
+          "flex justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-[var(--muted)] [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-[var(--line)] [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-[#eef4fb] [&_.recharts-layer]:outline-none [&_.recharts-surface]:outline-none",
           className,
         )}
         {...props}

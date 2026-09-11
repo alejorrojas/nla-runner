@@ -1,25 +1,26 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #f3f4f6;
-  --sidebar: #fafafa;
+  --bg: #f3f7fb;
+  --sidebar: #f7fafc;
   --card: #ffffff;
-  --line: #e8e8ec;
-  --line-strong: #d4d4d8;
-  --ink: #0a0a0a;
-  --muted: #6b7280;
-  --hover: #f4f4f5;
-  --active: #ececef;
-  --accent: #0a0a0a;
-  --star: #0a0a0a;
-  --a: #111111;
-  --b: #525252;
-  --c: #8a8a8a;
-  --d: #c4c4c4;
-  --warn: #3f3f46;
-  --ok: #0a0a0a;
-  --score-down: #f4f4f5;
-  --score-up: #e4e4e7;
+  --line: #e3ebf3;
+  --line-strong: #c9d6e5;
+  --ink: #12203a;
+  --muted: #64748b;
+  --hover: #eef4fb;
+  --active: #e3eef9;
+  --accent: #2f6fed;
+  --accent-hover: #245dd4;
+  --star: #4d8ef5;
+  --a: #1d4ed8;
+  --b: #3b82f6;
+  --c: #60a5fa;
+  --d: #93c5fd;
+  --warn: #b45309;
+  --ok: #1d4ed8;
+  --score-down: #eef4fb;
+  --score-up: #dbeafe;
 }
 
 @theme inline {
@@ -42,7 +43,8 @@ body {
 }
 
 .font-display {
-  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-family: var(--font-ui), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
   letter-spacing: -0.03em;
 }
 
@@ -60,14 +62,47 @@ select {
   border: 1px solid var(--line-strong);
   color: var(--ink);
   border-radius: 8px;
-  padding: 0.45rem 0.7rem;
+  padding: 8px 12px;
+  font-size: 13px;
 }
 
-input:focus,
-textarea:focus,
-select:focus {
-  outline: 2px solid color-mix(in srgb, var(--ink) 18%, white);
-  border-color: var(--ink);
+input.title-plain,
+input.title-plain:focus {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  box-shadow: none;
+  outline: none;
+}
+
+.page-body {
+  padding: 24px;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.hint {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
 }
 
 button.btn,
@@ -75,6 +110,7 @@ a.btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   background: #fff;
   border: 1px solid var(--line-strong);
   color: var(--ink);
@@ -92,14 +128,14 @@ a.btn:hover {
 
 button.btn-primary,
 a.btn-primary {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: #fafafa;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
 }
 
 button.btn-primary:hover,
 a.btn-primary:hover {
-  background: #27272a;
+  background: var(--accent-hover);
 }
 
 button.btn-primary:disabled,
@@ -109,7 +145,7 @@ button.btn:disabled {
 
 .crumb {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .crumb a:hover {
@@ -169,6 +205,3 @@ button.btn:disabled {
   border-bottom: 0;
 }
 
-.data-table tbody tr:hover {
-  background: var(--hover);
-}

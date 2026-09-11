@@ -49,7 +49,7 @@ export default function EvaluatorsPage() {
           </button>
         }
       />
-      <div className="p-6">
+      <div className="page-body">
         <div className="surface overflow-hidden">
           <table className="data-table">
             <thead>

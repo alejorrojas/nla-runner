@@ -1,48 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { CosmicField } from "@/components/cosmic-field";
+import { FieldArt } from "@/components/field-art";
 import { PageHeader, PageLoader } from "@/components/page-chrome";
 import { useKeys } from "@/lib/keys";
 import { useStore } from "@/lib/store-client";
 
-const STEPS = [
-  {
-    n: "01",
-    title: "Paste API keys",
-    href: "/settings",
-    cta: "Settings",
-    body: "OpenAI judges. Neuronpedia completes and explains. Session only.",
-  },
-  {
-    n: "02",
-    title: "Dataset",
-    href: "/datasets",
-    cta: "Datasets",
-    body: "Prompts the experiment averages over. Seed Reddit-prior set is ready.",
-  },
-  {
-    n: "03",
-    title: "LLM judge",
-    href: "/evaluators",
-    cta: "Evaluators",
-    body: "Mustache + mapping onto nla / token / mse — not the chat reply.",
-  },
-  {
-    n: "04",
-    title: "Run",
-    href: "/datasets",
-    cta: "Pick a dataset",
-    body: "Source, token policy, judges. The panel shows which test is live.",
-  },
-  {
-    n: "05",
-    title: "Compare",
-    href: "/datasets",
-    cta: "Datasets",
-    body: "Hit rate, MSE, and the AV table. Check two runs on the same set.",
-  },
-] as const;
+function relativeTime(iso?: string): string {
+  if (!iso) return "—";
+  const t = Date.parse(iso);
+  if (!Number.isFinite(t)) return "—";
+  return new Date(t).toISOString().slice(0, 16).replace("T", " ");
+}
 
 export default function LabPage() {
   const { keys } = useKeys();
@@ -74,61 +43,86 @@ export default function LabPage() {
           )
         }
       />
-      <div className="p-6">
-        <div className="mb-3 text-[12px] font-medium tracking-[0.08em] text-[var(--muted)]">
-          LAB
+      <div className="page-body">
+        {keysOk ? null : (
+          <div className="mb-5 rounded-xl border border-[var(--line)] bg-[var(--active)] px-4 py-3 text-[13px]">
+            Add OpenAI and Neuronpedia keys in{" "}
+            <Link href="/settings" className="font-medium text-[var(--accent)] hover:underline">
+              Settings
+            </Link>{" "}
+            before running an experiment.
+          </div>
+        )}
+
+        <div className="mb-3 flex items-center justify-between">
+          <div className="section-title">Datasets</div>
+          <Link href="/datasets" className="text-[13px] text-[var(--accent)] hover:underline">
+            View all →
+          </Link>
         </div>
         <div className="surface overflow-hidden">
           <table className="data-table">
             <thead>
               <tr>
                 <th>Name</th>
-                <th>Count</th>
+                <th>Examples</th>
+                <th>Experiments</th>
+                <th>Latest run</th>
                 <th>Status</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>Datasets</td>
-                <td className="font-mono">{store.datasets.length}</td>
-                <td className="text-[var(--muted)]">
-                  {firstDataset ? firstDataset.name : "—"}
-                </td>
-              </tr>
-              <tr>
-                <td>Evaluators</td>
-                <td className="font-mono">{store.evaluators.length}</td>
-                <td className="text-[var(--muted)]">LLM-as-judge</td>
-              </tr>
-              <tr>
-                <td>Live runs</td>
-                <td className="font-mono">{live.length || 0}</td>
-                <td className="text-[var(--muted)]">
-                  {live.length ? "running" : keysOk ? "idle" : "keys missing"}
-                </td>
-              </tr>
-              <tr>
-                <td>Latest experiment</td>
-                <td className="font-mono">{latest?.rows.length ?? 0} rows</td>
-                <td className="text-[var(--muted)]">{latest?.name ?? "—"}</td>
-              </tr>
+              {store.datasets.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="text-[var(--muted)]">
+                    No datasets yet.
+                  </td>
+                </tr>
+              ) : (
+                store.datasets.map((ds) => {
+                  const runs = store.experiments.filter((e) => e.datasetId === ds.id);
+                  const newest = [...runs].sort(
+                    (a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt),
+                  )[0];
+                  const liveHere = runs.filter((e) => e.status === "running");
+                  return (
+                    <tr key={ds.id}>
+                      <td>
+                        <Link href={`/datasets/${ds.id}`} className="font-medium hover:underline">
+                          {ds.name}
+                        </Link>
+                      </td>
+                      <td className="font-mono">{ds.examples.length}</td>
+                      <td className="font-mono">{runs.length}</td>
+                      <td className="text-[var(--muted)]">{relativeTime(newest?.createdAt)}</td>
+                      <td className="text-[var(--muted)]">
+                        {liveHere.length ? `${liveHere.length} live` : "idle"}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
 
-        <div className="mt-8 grid gap-4 lg:grid-cols-2">
+        <div className="mt-6 grid gap-4 lg:grid-cols-2">
           <Link
             href={firstDataset ? `/datasets/${firstDataset.id}` : "/datasets"}
             className="group relative overflow-hidden rounded-2xl border border-[var(--line)]"
           >
-            <CosmicField variant="panel" className="h-40 w-full" />
-            <div className="absolute inset-0 flex flex-col justify-end p-5 text-white">
-              <div className="text-[11px] tracking-[0.14em] uppercase opacity-70">
-                Evaluate
-              </div>
-              <div className="mt-1 text-[18px] font-medium">Run a dataset</div>
-              <p className="mt-1 text-[13px] text-white/70">
-                Watch which prompt is in flight. Then compare.
+            <div className="relative h-40">
+              <FieldArt src="/visuals/image3.png" />
+            </div>
+            <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/50 to-transparent p-5 text-white">
+              <div className="text-[13px] font-medium opacity-80">Evaluate</div>
+              <div className="mt-1 text-[16px] font-medium">Run a dataset</div>
+              <p className="mt-1 text-[13px] text-white/75">
+                {live.length
+                  ? `${live.length} run${live.length === 1 ? "" : "s"} in flight.`
+                  : latest
+                    ? `Latest: ${latest.name}`
+                    : "Watch which prompt is in flight. Then compare."}
               </p>
             </div>
           </Link>
@@ -136,36 +130,18 @@ export default function LabPage() {
             href="/evaluators"
             className="group relative overflow-hidden rounded-2xl border border-[var(--line)]"
           >
-            <CosmicField variant="hero" className="h-40 w-full" />
-            <div className="absolute inset-0 flex flex-col justify-end p-5 text-white">
-              <div className="text-[11px] tracking-[0.14em] uppercase opacity-70">
-                Judge
-              </div>
-              <div className="mt-1 text-[18px] font-medium">Define an evaluator</div>
-              <p className="mt-1 text-[13px] text-white/70">
+            <div className="relative h-40">
+              <FieldArt src="/visuals/image8.png" />
+            </div>
+            <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/50 to-transparent p-5 text-white">
+              <div className="text-[13px] font-medium opacity-80">Judge</div>
+              <div className="mt-1 text-[16px] font-medium">Define an evaluator</div>
+              <p className="mt-1 text-[13px] text-white/75">
                 Map onto the AV, not the chat reply.
               </p>
             </div>
           </Link>
         </div>
-
-        <ol className="mt-8 grid gap-3 md:grid-cols-2">
-          {STEPS.map((step) => (
-            <li key={step.n} className="surface p-5">
-              <div className="font-mono text-[11px] text-[var(--muted)]">{step.n}</div>
-              <div className="mt-1 text-[16px] font-medium">{step.title}</div>
-              <p className="mt-2 text-[13px] leading-relaxed text-[var(--muted)]">
-                {step.body}
-              </p>
-              <Link
-                href={step.href}
-                className="mt-3 inline-block text-[13px] hover:underline"
-              >
-                {step.cta} →
-              </Link>
-            </li>
-          ))}
-        </ol>
       </div>
     </div>
   );

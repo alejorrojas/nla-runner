@@ -4,7 +4,13 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { CosmicField } from "@/components/cosmic-field";
+import {
+  Database,
+  FlaskConical,
+  Home,
+  Settings,
+} from "lucide-react";
+import { FieldArt } from "@/components/field-art";
 import { Mark } from "@/components/mark";
 import { spring } from "@/components/motion";
 import { KeysProvider, useKeys } from "@/lib/keys";
@@ -15,17 +21,21 @@ function NavLink({
   label,
   count,
   active,
+  icon,
 }: {
   href: string;
   label: string;
   count?: number;
   active: boolean;
+  icon: ReactNode;
 }) {
   return (
     <Link
       href={href}
-      className={`relative flex items-center justify-between rounded-lg px-2.5 py-[7px] text-[13px] ${
-        active ? "font-medium text-[var(--ink)]" : "text-[#5c6370] hover:bg-[var(--hover)]"
+      className={`relative flex items-center gap-2 rounded-lg px-2.5 py-[7px] text-[13px] ${
+        active
+          ? "font-medium text-[var(--ink)]"
+          : "text-[var(--muted)] hover:bg-[var(--hover)] hover:text-[var(--ink)]"
       }`}
     >
       {active ? (
@@ -35,9 +45,10 @@ function NavLink({
           transition={spring}
         />
       ) : null}
-      <span className="relative z-10">{label}</span>
+      <span className="relative z-10">{icon}</span>
+      <span className="relative z-10 flex-1 truncate">{label}</span>
       {count != null ? (
-        <span className="relative z-10 font-mono text-[11px] text-[var(--muted)]">
+        <span className="relative z-10 font-mono text-[13px] text-[var(--muted)]">
           {count}
         </span>
       ) : null}
@@ -47,19 +58,22 @@ function NavLink({
 
 function LandingBar() {
   return (
-    <header className="relative z-30 flex items-center justify-between px-8 py-5">
+    <header className="relative z-30 mx-auto flex max-w-[1180px] items-center justify-between px-6 py-5 md:px-8">
       <Link href="/" className="flex items-center gap-2 text-[var(--ink)]">
-        <Mark className="h-5 w-5" />
-        <span className="text-[17px] font-medium tracking-tight">NLA Eval</span>
+        <Mark className="h-8 w-8 rounded-[9px]" />
+        <span className="text-[15px] font-medium tracking-tight">NLA Eval</span>
       </Link>
-      <div className="flex items-center gap-5 text-[13px]">
-        <Link href="/lab" className="text-[var(--muted)] hover:text-[var(--ink)]">
+      <nav className="flex items-center gap-5 text-[13px]">
+        <a href="#how-it-works" className="hidden text-[var(--muted)] hover:text-[var(--ink)] sm:inline">
           How it works
+        </a>
+        <Link href="/lab" className="text-[var(--muted)] hover:text-[var(--ink)]">
+          Home
         </Link>
         <Link href="/datasets" className="btn btn-primary">
-          Open the lab
+          Get started
         </Link>
-      </div>
+      </nav>
     </header>
   );
 }
@@ -73,11 +87,8 @@ function ShellInner({ children }: { children: ReactNode }) {
 
   if (path === "/") {
     return (
-      <div className="relative min-h-full overflow-hidden bg-[#f7f7f8]">
-        <CosmicField
-          variant="whisper"
-          className="pointer-events-none absolute inset-0 h-full w-full opacity-70"
-        />
+      <div className="relative min-h-full overflow-hidden bg-[#eaf3fc]">
+        <FieldArt src="/visuals/image4.png" className="opacity-90" priority />
         <LandingBar />
         <div className="relative">{children}</div>
       </div>
@@ -86,59 +97,68 @@ function ShellInner({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-full">
-      <aside className="relative flex w-[232px] shrink-0 flex-col border-r border-[var(--line)] bg-[var(--sidebar)]">
+      <aside className="relative flex w-[248px] shrink-0 flex-col border-r border-[var(--line)] bg-[var(--sidebar)]">
         <div className="px-4 pb-4 pt-5">
           <Link href="/" className="flex items-center gap-2">
-            <Mark className="h-4 w-5 text-[var(--ink)]" />
+            <Mark className="h-7 w-7 rounded-[8px]" />
             <span className="text-[15px] font-medium tracking-tight">NLA Eval</span>
           </Link>
-          <div className="mt-1 pl-7 text-[11px] text-[var(--muted)]">Personal</div>
+          <div className="mt-1 pl-9 text-[13px] text-[var(--muted)]">Personal</div>
         </div>
-        <div className="px-3 pb-1 text-[11px] font-medium text-[var(--muted)]">
+        <div className="px-3 pb-1 text-[13px] font-medium text-[var(--muted)]">
           Application
         </div>
         <nav className="flex flex-col gap-0.5 px-2">
-          <NavLink href="/lab" label="Home" active={path === "/lab"} />
+          <NavLink
+            href="/lab"
+            label="Home"
+            icon={<Home size={15} />}
+            active={path === "/lab"}
+          />
           <NavLink
             href="/datasets"
             label="Datasets & Experiments"
+            icon={<Database size={15} />}
             count={store?.datasets.length}
             active={path.startsWith("/datasets")}
           />
           <NavLink
             href="/evaluators"
             label="Evaluators"
+            icon={<FlaskConical size={15} />}
             count={store?.evaluators.length}
             active={path.startsWith("/evaluators")}
           />
         </nav>
-        <div className="mt-6 px-3 pb-1 text-[11px] font-medium text-[var(--muted)]">
+        <div className="mt-6 px-3 pb-1 text-[13px] font-medium text-[var(--muted)]">
           Workspace
         </div>
         <nav className="flex flex-col gap-0.5 px-2">
           <NavLink
             href="/settings"
             label="Settings"
+            icon={<Settings size={15} />}
             active={path.startsWith("/settings")}
           />
         </nav>
         <div className="mt-auto space-y-2 border-t border-[var(--line)] px-3 py-3">
           {running.length > 0 ? (
-            <div className="flex items-center gap-2 text-[12px]">
+            <div className="flex items-center gap-2 text-[13px]">
               <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-2 animate-ping rounded-full bg-[var(--ink)] opacity-40" />
-                <span className="relative h-2 w-2 rounded-full bg-[var(--ink)]" />
+                <span className="absolute inline-flex h-full w-2 animate-ping rounded-full bg-[var(--accent)] opacity-40" />
+                <span className="relative h-2 w-2 rounded-full bg-[var(--accent)]" />
               </span>
               {running.length} run{running.length === 1 ? "" : "s"} live
             </div>
           ) : null}
           {missing ? (
-            <Link href="/settings" className="text-[12px] text-[var(--ink)] hover:underline">
+            <Link href="/settings" className="text-[13px] text-[var(--accent)] hover:underline">
               Add OpenAI + Neuronpedia keys
             </Link>
           ) : (
-            <div className="text-[11px] text-[var(--muted)]">Keys in this session</div>
+            <div className="text-[13px] text-[var(--muted)]">Keys in this session</div>
           )}
+          <div className="pt-1 text-[13px] text-[var(--muted)]">Personal workspace</div>
         </div>
       </aside>
       <main className="min-w-0 flex-1 overflow-auto bg-[var(--bg)]">{children}</main>

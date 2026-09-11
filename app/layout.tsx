@@ -1,17 +1,12 @@
 import type { ReactNode } from "react";
-import { IBM_Plex_Mono, Instrument_Sans, Instrument_Serif } from "next/font/google";
+import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import { AppShell } from "@/components/app-shell";
 import "./globals.css";
 
-const display = Instrument_Serif({
-  variable: "--font-display",
-  subsets: ["latin"],
-  weight: "400",
-});
-
-const ui = Instrument_Sans({
+const ui = IBM_Plex_Sans({
   variable: "--font-ui",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
 });
 
 const ibmMono = IBM_Plex_Mono({
@@ -33,7 +28,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${display.variable} ${ui.variable} ${ibmMono.variable} h-full antialiased`}
+      className={`${ui.variable} ${ibmMono.variable} h-full antialiased`}
     >
       <body className="min-h-full">
         <AppShell>{children}</AppShell>

@@ -83,7 +83,7 @@ export function CompareCharts({ experiments }: { experiments: Experiment[] }) {
         ) : (
           <ChartContainer config={config} className="h-[200px] w-full">
             <BarChart accessibilityLayer data={feedbackData} barGap={4}>
-              <CartesianGrid vertical={false} stroke="#ececef" />
+              <CartesianGrid vertical={false} stroke="#e3ebf3" />
               <XAxis
                 dataKey="metric"
                 tickLine={false}
@@ -122,7 +122,7 @@ export function CompareCharts({ experiments }: { experiments: Experiment[] }) {
           className="h-[200px] w-full"
         >
           <BarChart accessibilityLayer data={mseData}>
-            <CartesianGrid vertical={false} stroke="#ececef" />
+            <CartesianGrid vertical={false} stroke="#e3ebf3" />
             <XAxis dataKey="name" tickLine={false} axisLine={false} />
             <YAxis tickLine={false} axisLine={false} width={32} />
             <ChartTooltip content={<ChartTooltipContent />} />

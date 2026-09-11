@@ -61,8 +61,8 @@ export function scoreCellStyle(
     case "boolean": {
       const ok = numericScore(value) === 1;
       return ok
-        ? { background: "#111111", color: "#fafafa" }
-        : { background: "#f4f4f5", color: "#71717a" };
+        ? { background: "#2f6fed", color: "#ffffff" }
+        : { background: "#eef4fb", color: "#64748b" };
     }
     case "continuous": {
       const n = numericScore(value);
@@ -70,12 +70,12 @@ export function scoreCellStyle(
       const min = field?.min ?? 0;
       const max = field?.max ?? 1;
       const t = Math.min(1, Math.max(0, (n - min) / (max - min || 1)));
-      const background = `color-mix(in srgb, #f4f4f5 ${Math.round((1 - t) * 100)}%, #d4d4d8 ${Math.round(t * 100)}%)`;
-      const color = t >= 0.5 ? "#0a0a0a" : "#71717a";
+      const background = `color-mix(in srgb, #eef4fb ${Math.round((1 - t) * 100)}%, #93c5fd ${Math.round(t * 100)}%)`;
+      const color = t >= 0.5 ? "#12203a" : "#64748b";
       return { background, color };
     }
     case "categorical":
-      return { background: "#f4f4f5", color: "#0a0a0a" };
+      return { background: "#eef4fb", color: "#12203a" };
     default: {
       const _never: never = kind;
       return _never;
