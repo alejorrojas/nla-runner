@@ -1,7 +1,8 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { mkdir, readFile, writeFile } from "fs/promises";
 import path from "path";
 import { emptyStore } from "./seed";
+import { createSecretClient } from "./supabase";
 import type {
   Dataset,
   DatasetExample,
@@ -20,15 +21,6 @@ type DbError = { message: string } | null;
 
 function throwIf(error: DbError): void {
   if (error) throw new Error(error.message);
-}
-
-function supabaseAdmin(): SupabaseClient | null {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) return null;
-  return createClient(url, key, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
 }
 
 function mergeExperiments(server: Experiment[], client: Experiment[]): Experiment[] {
@@ -245,7 +237,7 @@ async function writeStoreToSupabase(
 }
 
 export async function readStore(): Promise<Store> {
-  const sb = supabaseAdmin();
+  const sb = createSecretClient();
   if (sb) return readStoreFromSupabase(sb);
 
   try {
@@ -259,7 +251,7 @@ export async function readStore(): Promise<Store> {
 }
 
 export async function writeStore(store: Store): Promise<void> {
-  const sb = supabaseAdmin();
+  const sb = createSecretClient();
   if (sb) {
     await writeStoreToSupabase(sb, store);
     return;

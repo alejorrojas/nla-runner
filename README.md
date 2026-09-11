@@ -15,9 +15,11 @@ Run an experiment on a dataset, pick NLA source + token policy + evaluators, the
 
 On Vercel set:
 
-- `SUPABASE_URL`
-- `SUPABASE_SERVICE_ROLE_KEY`
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (`sb_publishable_...`)
+- `SUPABASE_URL` (same project URL; server-only)
+- `SUPABASE_SECRET_KEY` (`sb_secret_...`)
 
-The lab store is Postgres on project **nla-runner** (`vamfikbkcewmlzkqxtrs`): `datasets`, `dataset_examples`, `evaluators`, `experiments`, `experiment_rows`. RLS is on with no anon policies; the Next.js server uses the service role.
+Do not use the legacy `anon` / `service_role` JWTs. The lab store is Postgres on **nla-runner** (`vamfikbkcewmlzkqxtrs`): `datasets`, `dataset_examples`, `evaluators`, `experiments`, `experiment_rows`. RLS is on with no anon policies. Server routes use the secret key (bypasses RLS). The publishable key is the public client credential.
 
 Without those env vars, local `npm run dev` still uses `data/store.json`.

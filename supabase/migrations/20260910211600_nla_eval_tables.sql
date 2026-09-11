@@ -1,5 +1,5 @@
 -- NLA Eval lab tables. Applied to juani / nla-runner (vamfikbkcewmlzkqxtrs).
--- RLS on, no anon policies: Next.js uses SUPABASE_SERVICE_ROLE_KEY.
+-- RLS on, no anon policies: Next.js uses SUPABASE_SECRET_KEY (sb_secret_...).
 
 create table if not exists public.datasets (
   id text primary key,

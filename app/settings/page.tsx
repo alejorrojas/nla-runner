@@ -13,8 +13,8 @@ export default function SettingsPage() {
         Stored in this tab&apos;s session only. Sent as request headers to the
         Next.js proxy. Not written to disk, git, or Supabase. Datasets and
         experiment runs persist in Supabase tables (server-side). Add
-        <code className="mx-1">SUPABASE_URL</code> and
-        <code className="mx-1">SUPABASE_SERVICE_ROLE_KEY</code> on Vercel.
+        <code className="mx-1">NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY</code> and
+        <code className="mx-1">SUPABASE_SECRET_KEY</code> on Vercel.
       </p>
       <label className="mt-8 block text-[12px] text-[var(--muted)]">
         OpenAI
