@@ -5,6 +5,19 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { PageHeader, PageLoader } from "@/components/page-chrome";
 import { RunProgress, type RunPhase, type RunTick } from "@/components/run-progress";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import { useKeys } from "@/lib/keys";
 import { useStore } from "@/lib/store-client";
 import { NLA_SOURCES, type Experiment, type ExperimentRow, type TokenPolicy } from "@/lib/types";
@@ -176,8 +189,8 @@ export default function DatasetPage() {
           </>
         }
         title={
-          <input
-            className="title-plain max-w-xl text-[20px] font-medium"
+          <Input
+            className="title-plain h-auto max-w-xl border-0 p-0 text-[20px] font-medium shadow-none focus-visible:ring-0"
             value={dataset.name}
             onChange={(e) =>
               void save({
@@ -191,30 +204,17 @@ export default function DatasetPage() {
         }
         hint={`${dataset.examples.length} prompts · ${experiments.length} experiments`}
         tabs={
-          <>
-            <button
-              type="button"
-              className={`-mb-px border-b-2 pb-2 ${
-                tab === "experiments"
-                  ? "border-[var(--accent)] font-medium text-[var(--ink)]"
-                  : "border-transparent text-[var(--muted)] hover:text-[var(--ink)]"
-              }`}
-              onClick={() => setTab("experiments")}
-            >
-              Experiments
-            </button>
-            <button
-              type="button"
-              className={`-mb-px border-b-2 pb-2 ${
-                tab === "examples"
-                  ? "border-[var(--accent)] font-medium text-[var(--ink)]"
-                  : "border-transparent text-[var(--muted)] hover:text-[var(--ink)]"
-              }`}
-              onClick={() => setTab("examples")}
-            >
-              Examples
-            </button>
-          </>
+          <Tabs
+            value={tab}
+            onValueChange={(value) =>
+              setTab(value as "experiments" | "examples")
+            }
+          >
+            <TabsList variant="line" className="h-auto p-0">
+              <TabsTrigger value="experiments">Experiments</TabsTrigger>
+              <TabsTrigger value="examples">Examples</TabsTrigger>
+            </TabsList>
+          </Tabs>
         }
       />
 
@@ -230,8 +230,7 @@ export default function DatasetPage() {
                     NLA or the judge.
                   </p>
                 </div>
-                <button
-                  className="btn btn-primary"
+                <Button
                   type="button"
                   disabled={running}
                   onClick={() => {
@@ -240,54 +239,67 @@ export default function DatasetPage() {
                   }}
                 >
                   {running ? "Running…" : "Run experiment"}
-                </button>
+                </Button>
               </div>
               <div className="mt-5 grid gap-5 md:grid-cols-3">
-                <label className="field">
-                  NLA source
-                  <select
-                    value={sourceId}
-                    onChange={(e) => setSourceId(e.target.value)}
-                  >
-                    {NLA_SOURCES.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="field">
-                  Token policy
-                  <select
-                    value={tokenPolicy}
-                    onChange={(e) => setTokenPolicy(e.target.value as TokenPolicy)}
-                  >
-                    <option value="last_user">Last user token</option>
-                    <option value="first_assistant">First assistant token</option>
-                    <option value="both">Both</option>
-                  </select>
-                </label>
                 <div className="field">
-                  Evaluators
+                  <Label>NLA source</Label>
+                  <Select value={sourceId} onValueChange={setSourceId}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {NLA_SOURCES.map((s) => (
+                        <SelectItem key={s.id} value={s.id}>
+                          {s.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="field">
+                  <Label>Token policy</Label>
+                  <Select
+                    value={tokenPolicy}
+                    onValueChange={(value) =>
+                      setTokenPolicy(value as TokenPolicy)
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="last_user">Last user token</SelectItem>
+                      <SelectItem value="first_assistant">
+                        First assistant token
+                      </SelectItem>
+                      <SelectItem value="both">Both</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="field">
+                  <Label>Evaluators</Label>
                   <div className="flex flex-col gap-2">
                     {store.evaluators.map((ev) => (
-                      <label
-                        key={ev.id}
-                        className="flex items-center gap-2 text-[13px] text-[var(--ink)]"
-                      >
-                        <input
-                          type="checkbox"
+                      <div key={ev.id} className="flex items-center gap-2">
+                        <Checkbox
+                          id={`evaluator-${ev.id}`}
                           checked={evaluatorIds.includes(ev.id)}
-                          onChange={(e) =>
+                          onCheckedChange={(checked) =>
                             setEvaluatorIds((ids) =>
-                              e.target.checked
+                              checked === true
                                 ? [...ids, ev.id]
                                 : ids.filter((x) => x !== ev.id),
                             )
                           }
                         />
-                        {ev.name}
-                      </label>
+                        <Label
+                          htmlFor={`evaluator-${ev.id}`}
+                          className="font-normal text-[var(--ink)]"
+                        >
+                          {ev.name}
+                        </Label>
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -302,8 +314,8 @@ export default function DatasetPage() {
 
             <section className="mt-6">
               <div className="mb-3 flex items-center justify-end">
-                <button
-                  className="btn"
+                <Button
+                  variant="outline"
                   type="button"
                   disabled={selected.length < 1}
                   onClick={() =>
@@ -313,7 +325,7 @@ export default function DatasetPage() {
                   }
                 >
                   Compare selected
-                </button>
+                </Button>
               </div>
               <div className="surface overflow-hidden">
                 <table className="data-table">
@@ -339,16 +351,16 @@ export default function DatasetPage() {
                       experiments.map((ex) => (
                         <tr key={ex.id}>
                           <td>
-                            <input
-                              type="checkbox"
+                            <Checkbox
                               checked={selected.includes(ex.id)}
-                              onChange={(e) =>
+                              onCheckedChange={(checked) =>
                                 setSelected((ids) =>
-                                  e.target.checked
+                                  checked === true
                                     ? [...ids, ex.id]
                                     : ids.filter((x) => x !== ex.id),
                                 )
                               }
+                              aria-label={`Select ${ex.name}`}
                             />
                           </td>
                           <td>
@@ -380,8 +392,8 @@ export default function DatasetPage() {
         ) : (
           <section>
             <div className="mb-3 flex items-center justify-end">
-              <button
-                className="btn"
+              <Button
+                variant="outline"
                 type="button"
                 onClick={() =>
                   void save({
@@ -401,7 +413,7 @@ export default function DatasetPage() {
                 }
               >
                 Add example
-              </button>
+              </Button>
             </div>
             <div className="flex flex-col gap-5">
               {dataset.examples.map((ex, i) => {
@@ -423,22 +435,25 @@ export default function DatasetPage() {
                         </span>
                       ) : null}
                     </div>
-                    <textarea
+                    <Textarea
                       rows={3}
                       value={ex.prompt}
                       onChange={(e) =>
                         updateExample(ex.id, { prompt: e.target.value })
                       }
                     />
-                    <label className="field">
-                      Reference (optional, for the judge)
-                      <input
+                    <div className="field">
+                      <Label htmlFor={`ref-${ex.id}`}>
+                        Reference (optional, for the judge)
+                      </Label>
+                      <Input
+                        id={`ref-${ex.id}`}
                         value={ex.reference ?? ""}
                         onChange={(e) =>
                           updateExample(ex.id, { reference: e.target.value })
                         }
                       />
-                    </label>
+                    </div>
                   </div>
                 );
               })}

@@ -4,6 +4,17 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { PageHeader, PageLoader } from "@/components/page-chrome";
 import { FeedbackConfig } from "@/components/feedback-config";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { mustacheVars } from "@/lib/mustache";
 import { useStore } from "@/lib/store-client";
 import {
@@ -55,16 +66,16 @@ function Editor({
           </>
         }
         title={
-          <input
-            className="title-plain max-w-xl text-[20px] font-medium"
+          <Input
+            className="title-plain h-auto max-w-xl border-0 p-0 text-[20px] font-medium shadow-none focus-visible:ring-0"
             value={ev.name}
             onChange={(e) => patch({ ...ev, name: e.target.value })}
           />
         }
         action={
           <div className="flex items-center gap-2">
-            <button
-              className="btn"
+            <Button
+              variant="outline"
               type="button"
               onClick={() => {
                 void save({
@@ -75,26 +86,26 @@ function Editor({
               }}
             >
               Delete
-            </button>
-            <button
-              className="btn btn-primary"
+            </Button>
+            <Button
               type="button"
               onClick={() => router.push("/evaluators")}
             >
               Save
-            </button>
+            </Button>
           </div>
         }
       />
       <div className="grid min-h-0 flex-1 bg-[var(--card)] lg:grid-cols-[1.2fr_0.8fr]">
         <div className="page-body stack border-r border-[var(--line)]">
-          <label className="field">
-            Name
-            <input
+          <div className="field">
+            <Label htmlFor="evaluator-name">Name</Label>
+            <Input
+              id="evaluator-name"
               value={ev.name}
               onChange={(e) => patch({ ...ev, name: e.target.value })}
             />
-          </label>
+          </div>
 
           <div className="stack">
             <div>
@@ -104,27 +115,33 @@ function Editor({
                 structured JSON the judge must return.
               </p>
             </div>
-            <label className="field">
-              OpenAI model
-              <select
+            <div className="field">
+              <Label>OpenAI model</Label>
+              <Select
                 value={ev.openaiModel}
-                onChange={(e) => patch({ ...ev, openaiModel: e.target.value })}
+                onValueChange={(value) => patch({ ...ev, openaiModel: value })}
               >
-                {OPENAI_MODELS.map((m) => (
-                  <option key={m} value={m}>
-                    {m}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="field">
-              Prompt
-              <textarea
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {OPENAI_MODELS.map((m) => (
+                    <SelectItem key={m} value={m}>
+                      {m}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="field">
+              <Label htmlFor="evaluator-prompt">Prompt</Label>
+              <Textarea
+                id="evaluator-prompt"
                 className="min-h-[280px] font-mono leading-relaxed"
                 value={ev.prompt}
                 onChange={(e) => patch({ ...ev, prompt: e.target.value })}
               />
-            </label>
+            </div>
           </div>
 
           <div className="stack">
@@ -133,28 +150,33 @@ function Editor({
               <p className="hint">No {"{{vars}}"} in the prompt yet.</p>
             ) : (
               placeholders.map((ph) => (
-                <label key={ph} className="field">
-                  <span className="font-mono text-[var(--accent)]">{`{{${ph}}}`}</span>
-                  <select
-                    value={ev.mapping[ph] ?? ""}
-                    onChange={(e) =>
+                <div key={ph} className="field">
+                  <Label className="font-mono text-[var(--accent)]">{`{{${ph}}}`}</Label>
+                  <Select
+                    value={ev.mapping[ph] || "__unmapped"}
+                    onValueChange={(value) =>
                       patch({
                         ...ev,
                         mapping: {
                           ...ev.mapping,
-                          [ph]: e.target.value as JudgeVar,
+                          [ph]: (value === "__unmapped" ? "" : value) as JudgeVar,
                         },
                       })
                     }
                   >
-                    <option value="">(unmapped)</option>
-                    {JUDGE_VARS.map((v) => (
-                      <option key={v} value={v}>
-                        {v}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="(unmapped)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__unmapped">(unmapped)</SelectItem>
+                      {JUDGE_VARS.map((v) => (
+                        <SelectItem key={v} value={v}>
+                          {v}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               ))
             )}
           </div>

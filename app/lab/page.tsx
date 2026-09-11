@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { FieldArt } from "@/components/field-art";
 import { PageHeader, PageLoader } from "@/components/page-chrome";
+import { Button } from "@/components/ui/button";
 import { useKeys } from "@/lib/keys";
 import { useStore } from "@/lib/store-client";
 
@@ -33,13 +33,13 @@ export default function LabPage() {
         title="Home"
         action={
           firstDataset ? (
-            <Link href={`/datasets/${firstDataset.id}`} className="btn btn-primary">
-              + Experiment
-            </Link>
+            <Button asChild>
+              <Link href={`/datasets/${firstDataset.id}`}>+ Experiment</Link>
+            </Button>
           ) : (
-            <Link href="/datasets" className="btn btn-primary">
-              Open datasets
-            </Link>
+            <Button asChild>
+              <Link href="/datasets">Open datasets</Link>
+            </Button>
           )
         }
       />
@@ -109,37 +109,27 @@ export default function LabPage() {
         <div className="mt-6 grid gap-4 lg:grid-cols-2">
           <Link
             href={firstDataset ? `/datasets/${firstDataset.id}` : "/datasets"}
-            className="group relative overflow-hidden rounded-2xl border border-[var(--line)]"
+            className="surface rounded-2xl p-5 transition-transform duration-300 hover:-translate-y-0.5"
           >
-            <div className="relative h-40">
-              <FieldArt src="/visuals/image3.png" />
-            </div>
-            <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/50 to-transparent p-5 text-white">
-              <div className="text-[13px] font-medium opacity-80">Evaluate</div>
-              <div className="mt-1 text-[16px] font-medium">Run a dataset</div>
-              <p className="mt-1 text-[13px] text-white/75">
-                {live.length
-                  ? `${live.length} run${live.length === 1 ? "" : "s"} in flight.`
-                  : latest
-                    ? `Latest: ${latest.name}`
-                    : "Watch which prompt is in flight. Then compare."}
-              </p>
-            </div>
+            <div className="text-[13px] font-medium text-[var(--muted)]">Evaluate</div>
+            <div className="mt-1 text-[16px] font-medium">Run a dataset</div>
+            <p className="mt-1 text-[13px] text-[var(--muted)]">
+              {live.length
+                ? `${live.length} run${live.length === 1 ? "" : "s"} in flight.`
+                : latest
+                  ? `Latest: ${latest.name}`
+                  : "Watch which prompt is in flight. Then compare."}
+            </p>
           </Link>
           <Link
             href="/evaluators"
-            className="group relative overflow-hidden rounded-2xl border border-[var(--line)]"
+            className="surface rounded-2xl p-5 transition-transform duration-300 hover:-translate-y-0.5"
           >
-            <div className="relative h-40">
-              <FieldArt src="/visuals/image8.png" />
-            </div>
-            <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/50 to-transparent p-5 text-white">
-              <div className="text-[13px] font-medium opacity-80">Judge</div>
-              <div className="mt-1 text-[16px] font-medium">Define an evaluator</div>
-              <p className="mt-1 text-[13px] text-white/75">
-                Map onto the AV, not the chat reply.
-              </p>
-            </div>
+            <div className="text-[13px] font-medium text-[var(--muted)]">Judge</div>
+            <div className="mt-1 text-[16px] font-medium">Define an evaluator</div>
+            <p className="mt-1 text-[13px] text-[var(--muted)]">
+              Map onto the AV, not the chat reply.
+            </p>
           </Link>
         </div>
       </div>

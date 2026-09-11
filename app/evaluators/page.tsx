@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { PageHeader, PageLoader } from "@/components/page-chrome";
+import { Button } from "@/components/ui/button";
 import { useStore } from "@/lib/store-client";
 
 export default function EvaluatorsPage() {
@@ -15,8 +16,7 @@ export default function EvaluatorsPage() {
         title="Evaluators"
         hint="LLM-as-judge on AVs. Same mapping language as the run table."
         action={
-          <button
-            className="btn btn-primary"
+          <Button
             type="button"
             onClick={() => {
               const id = crypto.randomUUID();
@@ -46,7 +46,7 @@ export default function EvaluatorsPage() {
             }}
           >
             + Evaluator
-          </button>
+          </Button>
         }
       />
       <div className="page-body">

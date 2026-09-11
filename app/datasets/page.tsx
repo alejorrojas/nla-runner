@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { PageHeader, PageLoader } from "@/components/page-chrome";
+import { Button } from "@/components/ui/button";
 import { useStore } from "@/lib/store-client";
 
 export default function DatasetsPage() {
@@ -15,8 +16,7 @@ export default function DatasetsPage() {
         title="Datasets"
         hint="Prompt lists. Open one to run experiments and watch the live panel."
         action={
-          <button
-            className="btn btn-primary"
+          <Button
             type="button"
             onClick={() => {
               const name = window.prompt("Dataset name");
@@ -35,7 +35,7 @@ export default function DatasetsPage() {
             }}
           >
             + Dataset
-          </button>
+          </Button>
         }
       />
       <div className="page-body">

@@ -10,9 +10,9 @@ import {
   Home,
   Settings,
 } from "lucide-react";
-import { FieldArt } from "@/components/field-art";
 import { Mark } from "@/components/mark";
 import { spring } from "@/components/motion";
+import { Button } from "@/components/ui/button";
 import { KeysProvider, useKeys } from "@/lib/keys";
 import { StoreProvider, useStore } from "@/lib/store-client";
 
@@ -59,20 +59,35 @@ function NavLink({
 function LandingBar() {
   return (
     <header className="relative z-30 mx-auto flex max-w-[1180px] items-center justify-between px-6 py-5 md:px-8">
-      <Link href="/" className="flex items-center gap-2 text-[var(--ink)]">
+      <Link href="/" className="flex items-center gap-2 text-white">
         <Mark className="h-8 w-8 rounded-[9px]" />
-        <span className="text-[15px] font-medium tracking-tight">NLA Eval</span>
+        <span className="text-[15px] font-medium tracking-tight">NLASmith</span>
       </Link>
       <nav className="flex items-center gap-5 text-[13px]">
-        <a href="#how-it-works" className="hidden text-[var(--muted)] hover:text-[var(--ink)] sm:inline">
-          How it works
+        <a
+          href="#motivation"
+          className="hidden text-white/70 hover:text-white sm:inline"
+        >
+          Why
         </a>
-        <Link href="/lab" className="text-[var(--muted)] hover:text-[var(--ink)]">
+        <a
+          href="#pipeline"
+          className="hidden text-white/70 hover:text-white md:inline"
+        >
+          Pipeline
+        </a>
+        <a
+          href="#product"
+          className="hidden text-white/70 hover:text-white lg:inline"
+        >
+          Prototype
+        </a>
+        <Link href="/lab" className="text-white/70 hover:text-white">
           Home
         </Link>
-        <Link href="/datasets" className="btn btn-primary">
-          Get started
-        </Link>
+        <Button asChild>
+          <Link href="/datasets">Get started</Link>
+        </Button>
       </nav>
     </header>
   );
@@ -87,10 +102,11 @@ function ShellInner({ children }: { children: ReactNode }) {
 
   if (path === "/") {
     return (
-      <div className="relative min-h-full overflow-hidden bg-[#eaf3fc]">
-        <FieldArt src="/visuals/image4.png" className="opacity-90" priority />
-        <LandingBar />
-        <div className="relative">{children}</div>
+      <div className="relative min-h-full">
+        <div className="absolute inset-x-0 top-0 z-30">
+          <LandingBar />
+        </div>
+        {children}
       </div>
     );
   }
