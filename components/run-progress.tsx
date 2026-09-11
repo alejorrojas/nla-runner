@@ -36,12 +36,12 @@ export function RunProgress({ tick }: { tick: RunTick | null }) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 8 }}
           transition={spring}
-          className="mt-4 overflow-hidden rounded-lg border border-[var(--copper)] bg-[#fffdf8]"
+          className="mt-4 overflow-hidden rounded-xl border border-[var(--ink)] bg-white"
         >
           <div className="flex items-center gap-2 border-b border-[var(--line)] px-4 py-2">
             <span className="relative flex h-2.5 w-2.5">
-              <span className="absolute inline-flex h-full w-2.5 animate-ping rounded-full bg-[var(--copper)] opacity-50" />
-              <span className="relative h-2.5 w-2.5 rounded-full bg-[var(--copper)]" />
+              <span className="absolute inline-flex h-full w-2.5 animate-ping rounded-full bg-[var(--ink)] opacity-40" />
+              <span className="relative h-2.5 w-2.5 rounded-full bg-[var(--ink)]" />
             </span>
             <span className="text-[13px] font-medium">Experiment running</span>
             <span className="ml-auto font-mono text-[12px] text-[var(--muted)]">
@@ -50,7 +50,7 @@ export function RunProgress({ tick }: { tick: RunTick | null }) {
           </div>
           <div className="h-1 bg-[var(--line)]">
             <motion.div
-              className="h-full bg-[var(--copper)]"
+              className="h-full bg-[var(--ink)]"
               initial={false}
               animate={{
                 width: `${Math.max(4, (tick.completed / tick.total) * 100)}%`,
@@ -59,7 +59,7 @@ export function RunProgress({ tick }: { tick: RunTick | null }) {
             />
           </div>
           <div className="px-4 py-3">
-            <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--copper)]">
+            <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--muted)]">
               {phaseLabel(tick.phase)}
             </div>
             <p className="mt-1 text-[14px] leading-snug">{tick.prompt}</p>

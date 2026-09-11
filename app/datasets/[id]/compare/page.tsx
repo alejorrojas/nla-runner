@@ -47,11 +47,10 @@ function CompareInner() {
       <PageHeader
         crumb={
           <>
-            <Link href="/datasets">Datasets</Link>
+            <Link href="/datasets">Personal / Datasets & Experiments</Link>
             <span> / </span>
             <Link href={`/datasets/${dataset.id}`}>{dataset.name}</Link>
-            <span> / </span>
-            <span className="text-[var(--ink)]">Compare</span>
+            <span> / Comparing</span>
           </>
         }
         title="Comparing"

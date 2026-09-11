@@ -10,21 +10,19 @@ export default function SettingsPage() {
   return (
     <div>
       <PageHeader
-        crumb="Keys"
-        title="Session keys"
+        crumb="Personal / Settings"
+        title="API keys"
         hint="OpenAI and Neuronpedia stay in this tab. Runs persist on the server."
       />
       <div className="mx-auto max-w-xl p-6">
-        <div className="surface rounded-lg p-5">
+        <div className="surface p-6">
           <p className="text-[13px] leading-relaxed text-[var(--muted)]">
             Sent as request headers to the Next.js proxy. Not written to disk,
             git, or Supabase. Datasets and experiment rows live in Postgres.
           </p>
           <div
             className={`mt-4 inline-flex rounded-full px-2 py-0.5 font-mono text-[11px] ${
-              ready
-                ? "bg-[#e7f3ef] text-[var(--residue)]"
-                : "bg-[#fff1e8] text-[var(--copper)]"
+              ready ? "bg-[var(--active)]" : "bg-[var(--hover)] text-[var(--muted)]"
             }`}
           >
             {ready ? "both keys set" : "missing a key"}

@@ -38,7 +38,7 @@ function Card({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-w-0 rounded-lg border border-[var(--line)] bg-[var(--card)] p-3">
+    <div className="min-w-0 rounded-xl border border-[var(--line)] bg-[var(--card)] p-4">
       <div className="mb-1 text-[13px] font-medium">{title}</div>
       {hint ? (
         <div className="mb-2 text-[11px] leading-snug text-[var(--muted)]">
@@ -83,7 +83,7 @@ export function CompareCharts({ experiments }: { experiments: Experiment[] }) {
         ) : (
           <ChartContainer config={config} className="h-[200px] w-full">
             <BarChart accessibilityLayer data={feedbackData} barGap={4}>
-              <CartesianGrid vertical={false} stroke="#eef0f4" />
+              <CartesianGrid vertical={false} stroke="#ececef" />
               <XAxis
                 dataKey="metric"
                 tickLine={false}
@@ -122,7 +122,7 @@ export function CompareCharts({ experiments }: { experiments: Experiment[] }) {
           className="h-[200px] w-full"
         >
           <BarChart accessibilityLayer data={mseData}>
-            <CartesianGrid vertical={false} stroke="#eef0f4" />
+            <CartesianGrid vertical={false} stroke="#ececef" />
             <XAxis dataKey="name" tickLine={false} axisLine={false} />
             <YAxis tickLine={false} axisLine={false} width={32} />
             <ChartTooltip content={<ChartTooltipContent />} />

@@ -2,24 +2,16 @@
 
 import type { ReactNode } from "react";
 import { motion } from "framer-motion";
-import { spring } from "@/components/motion";
 
-export function PageLoader({ label = "Loading the lab" }: { label?: string }) {
+export function PageLoader({ label = "Loading" }: { label?: string }) {
   return (
-    <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 p-10">
+    <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 p-10">
       <motion.div
-        className="h-10 w-10 rounded-full border-2 border-[var(--line-strong)] border-t-[var(--copper)]"
+        className="h-8 w-10 rounded-full border border-[var(--line-strong)] border-t-[var(--ink)]"
         animate={{ rotate: 360 }}
-        transition={{ duration: 0.9, repeat: Infinity, ease: "linear" }}
+        transition={{ duration: 1.1, repeat: Infinity, ease: "linear" }}
       />
-      <motion.p
-        className="text-[13px] text-[var(--muted)]"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={spring}
-      >
-        {label}
-      </motion.p>
+      <p className="text-[13px] text-[var(--muted)]">{label}</p>
     </div>
   );
 }
@@ -36,15 +28,13 @@ export function PageHeader({
   action?: ReactNode;
 }) {
   return (
-    <div className="border-b border-[var(--line)] bg-[var(--card)] px-6 py-4">
+    <div className="border-b border-[var(--line)] bg-[var(--card)] px-6 py-3">
       <div className="crumb">{crumb}</div>
-      <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-[28px] leading-none tracking-tight">
-            {title}
-          </h1>
+          <h1 className="text-[20px] font-medium tracking-tight">{title}</h1>
           {hint ? (
-            <p className="mt-2 max-w-xl text-[13px] text-[var(--muted)]">{hint}</p>
+            <p className="mt-1 max-w-2xl text-[13px] text-[var(--muted)]">{hint}</p>
           ) : null}
         </div>
         {action}

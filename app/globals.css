@@ -1,27 +1,25 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #efe6d4;
-  --sidebar: #1c1914;
-  --card: #f7f1e4;
-  --line: #d9cdb4;
-  --line-strong: #c9b896;
-  --ink: #1c1914;
-  --muted: #6d6254;
-  --hover: #e7dcc4;
-  --active: #ead7b8;
-  --copper: #c45c26;
-  --copper-ink: #9a3d12;
-  --residue: #0f6e62;
-  --a: #c45c26;
-  --b: #0f6e62;
-  --c: #3d5a80;
-  --d: #c9a227;
-  --warn: #b42318;
-  --ok: #0f6e62;
-  --score-down: #f6d6c8;
-  --score-up: #d7ebe4;
-  --grain: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  --bg: #f3f4f6;
+  --sidebar: #fafafa;
+  --card: #ffffff;
+  --line: #e8e8ec;
+  --line-strong: #d4d4d8;
+  --ink: #0a0a0a;
+  --muted: #6b7280;
+  --hover: #f4f4f5;
+  --active: #ececef;
+  --accent: #0a0a0a;
+  --star: #0a0a0a;
+  --a: #111111;
+  --b: #525252;
+  --c: #8a8a8a;
+  --d: #c4c4c4;
+  --warn: #3f3f46;
+  --ok: #0a0a0a;
+  --score-down: #f4f4f5;
+  --score-up: #e4e4e7;
 }
 
 @theme inline {
@@ -40,21 +38,12 @@ body {
 
 body {
   font-family: var(--font-ui), ui-sans-serif, system-ui, sans-serif;
-}
-
-body::before {
-  content: "";
-  pointer-events: none;
-  position: fixed;
-  inset: 0;
-  opacity: 0.045;
-  background-image: var(--grain);
-  mix-blend-mode: multiply;
-  z-index: 0;
+  letter-spacing: -0.011em;
 }
 
 .font-display {
   font-family: var(--font-display), ui-serif, Georgia, serif;
+  letter-spacing: -0.03em;
 }
 
 input,
@@ -67,31 +56,32 @@ button {
 input,
 textarea,
 select {
-  background: #fffdf8;
+  background: #fff;
   border: 1px solid var(--line-strong);
   color: var(--ink);
-  border-radius: 4px;
-  padding: 0.42rem 0.65rem;
+  border-radius: 8px;
+  padding: 0.45rem 0.7rem;
 }
 
 input:focus,
 textarea:focus,
 select:focus {
-  outline: 2px solid color-mix(in srgb, var(--copper) 35%, white);
-  border-color: var(--copper);
+  outline: 2px solid color-mix(in srgb, var(--ink) 18%, white);
+  border-color: var(--ink);
 }
 
 button.btn,
 a.btn {
   display: inline-flex;
   align-items: center;
-  background: #fffdf8;
+  justify-content: center;
+  background: #fff;
   border: 1px solid var(--line-strong);
   color: var(--ink);
-  border-radius: 4px;
-  padding: 0.42rem 0.85rem;
+  border-radius: 8px;
+  padding: 0.42rem 0.9rem;
   font-size: 13px;
-  letter-spacing: 0.01em;
+  font-weight: 500;
   text-decoration: none;
 }
 
@@ -102,25 +92,24 @@ a.btn:hover {
 
 button.btn-primary,
 a.btn-primary {
-  background: var(--copper);
-  border-color: var(--copper-ink);
-  color: #fffaf3;
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fafafa;
 }
 
 button.btn-primary:hover,
 a.btn-primary:hover {
-  background: var(--copper-ink);
+  background: #27272a;
 }
 
-button.btn-primary:disabled {
-  opacity: 0.45;
+button.btn-primary:disabled,
+button.btn:disabled {
+  opacity: 0.4;
 }
 
 .crumb {
   color: var(--muted);
   font-size: 12px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
 }
 
 .crumb a:hover {
@@ -132,7 +121,7 @@ button.btn-primary:disabled {
   align-items: center;
   gap: 6px;
   border-radius: 999px;
-  padding: 2px 8px 2px 4px;
+  padding: 2px 10px 2px 4px;
   font-size: 12px;
   background: var(--active);
   color: var(--ink);
@@ -153,5 +142,33 @@ button.btn-primary:disabled {
 .surface {
   background: var(--card);
   border: 1px solid var(--line);
-  box-shadow: 0 1px 0 rgba(28, 25, 20, 0.04);
+  border-radius: 12px;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+}
+
+.data-table th {
+  font-weight: 500;
+  color: var(--muted);
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.data-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.data-table tbody tr:hover {
+  background: var(--hover);
 }

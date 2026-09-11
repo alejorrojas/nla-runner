@@ -1,14 +1,15 @@
 import type { ReactNode } from "react";
-import { Figtree, Fraunces, IBM_Plex_Mono } from "next/font/google";
+import { IBM_Plex_Mono, Instrument_Sans, Instrument_Serif } from "next/font/google";
 import { AppShell } from "@/components/app-shell";
 import "./globals.css";
 
-const display = Fraunces({
+const display = Instrument_Serif({
   variable: "--font-display",
   subsets: ["latin"],
+  weight: "400",
 });
 
-const ui = Figtree({
+const ui = Instrument_Sans({
   variable: "--font-ui",
   subsets: ["latin"],
 });

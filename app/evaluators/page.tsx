@@ -11,7 +11,7 @@ export default function EvaluatorsPage() {
   return (
     <div>
       <PageHeader
-        crumb="Evaluators"
+        crumb="Personal / Evaluators"
         title="Evaluators"
         hint="LLM-as-judge on AVs. Same mapping language as the run table."
         action={
@@ -45,26 +45,37 @@ export default function EvaluatorsPage() {
               });
             }}
           >
-            New LLM judge
+            + Evaluator
           </button>
         }
       />
       <div className="p-6">
-        <ul className="surface overflow-hidden rounded-lg">
-          {store.evaluators.map((ev) => (
-            <li key={ev.id}>
-              <Link
-                href={`/evaluators/${ev.id}`}
-                className="flex items-center justify-between border-b border-[var(--line)] px-4 py-3 last:border-0 hover:bg-[var(--hover)]"
-              >
-                <span className="font-medium">{ev.name}</span>
-                <span className="font-mono text-[12px] text-[var(--muted)]">
-                  {ev.openaiModel} · {ev.feedback.map((f) => f.key).join(", ")}
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <div className="surface overflow-hidden">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Model</th>
+                <th>Feedback</th>
+              </tr>
+            </thead>
+            <tbody>
+              {store.evaluators.map((ev) => (
+                <tr key={ev.id}>
+                  <td>
+                    <Link href={`/evaluators/${ev.id}`} className="font-medium hover:underline">
+                      {ev.name}
+                    </Link>
+                  </td>
+                  <td className="font-mono">{ev.openaiModel}</td>
+                  <td className="text-[var(--muted)]">
+                    {ev.feedback.map((f) => f.key).join(", ")}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

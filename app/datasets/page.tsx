@@ -11,7 +11,7 @@ export default function DatasetsPage() {
   return (
     <div>
       <PageHeader
-        crumb="Datasets"
+        crumb="Personal / Datasets & Experiments"
         title="Datasets"
         hint="Prompt lists. Open one to run experiments and watch the live panel."
         action={
@@ -34,37 +34,51 @@ export default function DatasetsPage() {
               });
             }}
           >
-            New dataset
+            + Dataset
           </button>
         }
       />
       <div className="p-6">
-        <ul className="surface overflow-hidden rounded-lg">
-          {store.datasets.length === 0 ? (
-            <li className="px-4 py-8 text-[13px] text-[var(--muted)]">
-              No datasets yet.
-            </li>
-          ) : (
-            store.datasets.map((ds) => {
-              const runs = store.experiments.filter((e) => e.datasetId === ds.id);
-              const live = runs.some((e) => e.status === "running");
-              return (
-                <li key={ds.id}>
-                  <Link
-                    href={`/datasets/${ds.id}`}
-                    className="flex items-center justify-between border-b border-[var(--line)] px-4 py-3 last:border-0 hover:bg-[var(--hover)]"
-                  >
-                    <span className="font-medium">{ds.name}</span>
-                    <span className="font-mono text-[12px] text-[var(--muted)]">
-                      {ds.examples.length} prompts · {runs.length} runs
-                      {live ? " · live" : ""}
-                    </span>
-                  </Link>
-                </li>
-              );
-            })
-          )}
-        </ul>
+        <div className="surface overflow-hidden">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Prompts</th>
+                <th>Runs</th>
+                <th>Progress</th>
+              </tr>
+            </thead>
+            <tbody>
+              {store.datasets.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="text-[var(--muted)]">
+                    No datasets yet.
+                  </td>
+                </tr>
+              ) : (
+                store.datasets.map((ds) => {
+                  const runs = store.experiments.filter((e) => e.datasetId === ds.id);
+                  const live = runs.filter((e) => e.status === "running");
+                  return (
+                    <tr key={ds.id}>
+                      <td>
+                        <Link href={`/datasets/${ds.id}`} className="font-medium hover:underline">
+                          {ds.name}
+                        </Link>
+                      </td>
+                      <td className="font-mono">{ds.examples.length}</td>
+                      <td className="font-mono">{runs.length}</td>
+                      <td className="text-[var(--muted)]">
+                        {live.length ? `${live.length} live` : "idle"}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

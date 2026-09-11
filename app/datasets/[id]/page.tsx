@@ -49,7 +49,7 @@ export default function DatasetPage() {
     return (
       <div className="p-10">
         <p>Dataset not found.</p>
-        <Link href="/datasets" className="mt-3 inline-block text-[var(--copper)]">
+        <Link href="/datasets" className="mt-3 inline-block hover:underline">
           Back to datasets
         </Link>
       </div>
@@ -176,7 +176,7 @@ export default function DatasetPage() {
         }
         title={
           <input
-            className="max-w-xl border-0 bg-transparent px-0 font-display text-[28px] shadow-none"
+            className="max-w-xl border-0 bg-transparent px-0 text-[20px] font-medium shadow-none"
             value={dataset.name}
             onChange={(e) =>
               void save({
@@ -299,14 +299,14 @@ export default function DatasetPage() {
                   key={ex.id}
                   className={`rounded-lg border p-4 ${
                     live
-                      ? "border-[var(--copper)] bg-[#fff8f2]"
+                      ? "border-[var(--ink)] bg-[var(--hover)]"
                       : "border-[var(--line)] bg-[var(--card)]"
                   }`}
                 >
                   <div className="mb-1 flex items-center justify-between text-[11px] text-[var(--muted)]">
                     <span>#{i + 1} prompt</span>
                     {live ? (
-                      <span className="font-mono text-[var(--copper)]">
+                      <span className="font-mono text-[11px]">
                         in flight · {tick.phase}
                       </span>
                     ) : null}
@@ -399,21 +399,21 @@ function StatusBadge({ status }: { status: Experiment["status"] }) {
   switch (status) {
     case "running":
       return (
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#fff1e8] px-2 py-0.5 font-mono text-[11px] text-[var(--copper)]">
-          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--copper)]" />
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--active)] px-2 py-0.5 font-mono text-[11px]">
+          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--ink)]" />
           running
         </span>
       );
     case "error":
       return (
-        <span className="inline-flex rounded-full bg-[#fde8e6] px-2 py-0.5 font-mono text-[11px] text-[var(--warn)]">
+        <span className="inline-flex rounded-full bg-[var(--hover)] px-2 py-0.5 font-mono text-[11px] text-[var(--muted)]">
           error
         </span>
       );
     case "done":
     case "idle":
       return (
-        <span className="inline-flex rounded-full bg-[#e7f3ef] px-2 py-0.5 font-mono text-[11px] text-[var(--residue)]">
+        <span className="inline-flex rounded-full bg-[var(--active)] px-2 py-0.5 font-mono text-[11px]">
           {status}
         </span>
       );
