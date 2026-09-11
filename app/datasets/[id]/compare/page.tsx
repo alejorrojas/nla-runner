@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { Suspense, useMemo } from "react";
+import { PageHeader, PageLoader } from "@/components/page-chrome";
 import { CompareCharts } from "@/components/compare-charts";
 import { RunTable } from "@/components/run-table";
 import { expColor, expLetter } from "@/lib/exp-colors";
@@ -11,9 +12,7 @@ import { NLA_SOURCES, type Experiment } from "@/lib/types";
 
 export default function ComparePage() {
   return (
-    <Suspense
-      fallback={<p className="p-8 text-[13px] text-[var(--muted)]">Loading…</p>}
-    >
+    <Suspense fallback={<PageLoader label="Loading compare" />}>
       <CompareInner />
     </Suspense>
   );
@@ -34,7 +33,7 @@ function CompareInner() {
     [store, ids],
   );
 
-  if (!store) return <p className="p-8 text-[13px] text-[var(--muted)]">Loading…</p>;
+  if (!store) return <PageLoader label="Loading compare" />;
   if (!dataset) return <p className="p-8">Dataset not found.</p>;
 
   const sourceLabel = (ex: Experiment) =>
@@ -45,29 +44,33 @@ function CompareInner() {
 
   return (
     <div>
-      <div className="border-b border-[var(--line)] bg-[var(--card)] px-5 py-2">
-        <div className="crumb">
-          <Link href="/datasets">Datasets & Experiments</Link>
-          <span> / </span>
-          <Link href={`/datasets/${dataset.id}`}>{dataset.name}</Link>
-          <span> / </span>
-          <span className="text-[var(--ink)]">Comparing {experiments.length} Experiments</span>
-        </div>
-      </div>
-
-      <div className="flex flex-wrap items-center gap-2 border-b border-[var(--line)] bg-[var(--card)] px-5 py-3">
-        <h1 className="text-[18px] font-semibold tracking-tight">Comparing</h1>
-        {experiments.map((ex, i) => (
-          <span key={ex.id} className="pill">
-            <span className="letter" style={{ background: expColor(i) }}>
-              {expLetter(i)}
-            </span>
-            <span className="max-w-[220px] truncate font-mono text-[11px]">
-              {sourceLabel(ex)} · {ex.tokenPolicy}
-            </span>
-          </span>
-        ))}
-      </div>
+      <PageHeader
+        crumb={
+          <>
+            <Link href="/datasets">Datasets</Link>
+            <span> / </span>
+            <Link href={`/datasets/${dataset.id}`}>{dataset.name}</Link>
+            <span> / </span>
+            <span className="text-[var(--ink)]">Compare</span>
+          </>
+        }
+        title="Comparing"
+        hint="Judge hit rate and MSE on the same prompts. The table is the AVs."
+        action={
+          <div className="flex flex-wrap gap-2">
+            {experiments.map((ex, i) => (
+              <span key={ex.id} className="pill">
+                <span className="letter" style={{ background: expColor(i) }}>
+                  {expLetter(i)}
+                </span>
+                <span className="max-w-[220px] truncate font-mono text-[11px]">
+                  {sourceLabel(ex)} · {ex.tokenPolicy}
+                </span>
+              </span>
+            ))}
+          </div>
+        }
+      />
 
       <CompareCharts experiments={experiments} />
 

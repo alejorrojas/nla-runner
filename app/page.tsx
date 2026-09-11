@@ -1,113 +1,135 @@
 "use client";
 
 import Link from "next/link";
-import { useKeys } from "@/lib/keys";
-import { useStore } from "@/lib/store-client";
+import { motion } from "framer-motion";
+import { FadeIn } from "@/components/motion";
 
-const STEPS = [
-  {
-    n: "1",
-    title: "Paste API keys",
-    href: "/settings",
-    cta: "Open Settings",
-    body: "OpenAI runs the LLM judge. Neuronpedia runs completion + NLA explain. Keys stay in this tab only.",
-  },
-  {
-    n: "2",
-    title: "Write or pick a dataset",
-    href: "/datasets",
-    cta: "Open Datasets",
-    body: "A dataset is the list of prompts. Experiments average the judge over those rows. There is a seed set (Reddit prior) ready to run.",
-  },
-  {
-    n: "3",
-    title: "Define an LLM judge",
-    href: "/evaluators",
-    cta: "Open Evaluators",
-    body: "Mustache prompt + mapping onto the AV (nla, token, mse), not the chat reply. Feedback keys are the scores in the charts (boolean, 0–1, or categories).",
-  },
-  {
-    n: "4",
-    title: "Run an experiment",
-    href: "/datasets",
-    cta: "Pick a dataset",
-    body: "Choose NLA source (Llama / Gemma), which token to explain (last user, first assistant, or both), attach judges, then Run. Neuronpedia has an hourly explain cap.",
-  },
-  {
-    n: "5",
-    title: "Compare",
-    href: "/datasets",
-    cta: "See datasets",
-    body: "Check two or more runs on the same dataset and Compare. The Judge chart is hit rate. The MSE chart says whether the verbalization is readable. The table shows the AVs.",
-  },
-] as const;
+const FLOW = [
+  { k: "01", t: "Prompt", d: "A dataset row. Short enough to read." },
+  { k: "02", t: "Token", d: "Last user, first assistant, or both." },
+  { k: "03", t: "AV", d: "The NLA sentence on that residual." },
+  { k: "04", t: "Judge", d: "LLM scores the AV, not the chat reply." },
+];
 
-export default function HomePage() {
-  const { keys } = useKeys();
-  const { store } = useStore();
-  const keysOk = Boolean(keys.openai && keys.neuronpedia);
-  const firstDataset = store?.datasets[0];
-
+export default function LandingPage() {
   return (
-    <div>
-      <div className="border-b border-[var(--line)] bg-[var(--card)] px-5 py-2">
-        <div className="crumb">Home</div>
-      </div>
-      <div className="mx-auto max-w-3xl px-6 py-10">
-        <p className="text-[12px] font-medium uppercase tracking-wide text-[var(--muted)]">
-          NLA Eval
-        </p>
-        <h1 className="mt-1 text-[28px] font-semibold tracking-tight">
-          LangSmith for activation verbalizations
-        </h1>
-        <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-[var(--muted)]">
-          Neuronpedia is a microscope: one chat, one NLA. This app is the
-          experiment loop. You score AVs with an LLM judge and compare runs
-          the way LangSmith compares model outputs.
-        </p>
+    <div className="relative overflow-hidden">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -left-24 top-10 h-[420px] w-[420px] rounded-full bg-[radial-gradient(circle,rgba(196,92,38,0.22),transparent_62%)]"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-16 top-40 h-[380px] w-[380px] rounded-full bg-[radial-gradient(circle,rgba(15,110,98,0.18),transparent_64%)]"
+      />
 
-        <div className="mt-6 flex flex-wrap gap-2">
-          <Link href="/settings" className="btn btn-primary">
-            {keysOk ? "Keys are set" : "Add keys first"}
-          </Link>
-          {firstDataset ? (
-            <Link href={`/datasets/${firstDataset.id}`} className="btn">
-              Open {firstDataset.name}
+      <section className="relative mx-auto grid max-w-6xl items-center gap-10 px-6 py-16 lg:grid-cols-[1.15fr_0.85fr]">
+        <div>
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--copper)]">
+            Neuronpedia · LLM-as-judge
+          </p>
+          <h1 className="mt-4 max-w-[14ch] font-display text-[clamp(40px,7vw,76px)] leading-[0.92] tracking-tight text-[var(--ink)]">
+            Score the words the model doesn&apos;t say.
+          </h1>
+          <p className="mt-6 max-w-lg text-[17px] leading-relaxed text-[var(--muted)]">
+            NLA Eval is the experiment loop around activation verbalizations.
+            Datasets, judges, runs, and compare — one lab, not five orphan
+            screens.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link href="/datasets" className="btn btn-primary px-5 py-2.5 text-[14px]">
+              Open the lab
             </Link>
-          ) : (
-            <Link href="/datasets" className="btn">
-              Open datasets
+            <Link href="/lab" className="btn">
+              Five-step walkthrough
             </Link>
-          )}
+          </div>
         </div>
 
-        <ol className="mt-10 space-y-3">
-          {STEPS.map((step) => (
-            <li
-              key={step.n}
-              className="rounded-lg border border-[var(--line)] bg-[var(--card)] p-4"
-            >
-              <div className="flex items-start gap-3">
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[var(--active)] text-[13px] font-semibold text-[#1a4db3]">
-                  {step.n}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="text-[15px] font-medium">{step.title}</div>
-                  <p className="mt-1 text-[13px] leading-relaxed text-[var(--muted)]">
-                    {step.body}
-                  </p>
-                  <Link
-                    href={step.href}
-                    className="mt-2 inline-block text-[13px] text-[#1a4db3] hover:underline"
-                  >
-                    {step.cta} →
-                  </Link>
-                </div>
-              </div>
-            </li>
+        <FadeIn delay={0.12} className="relative">
+          <motion.svg
+            viewBox="0 0 420 280"
+            className="w-full"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            <path
+              d="M10 210 C 80 40, 160 250, 220 120 S 340 40, 410 160"
+              fill="none"
+              stroke="#c45c26"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+            />
+            <path
+              d="M10 180 C 90 80, 150 200, 230 90 S 330 220, 410 110"
+              fill="none"
+              stroke="#0f6e62"
+              strokeWidth="1.4"
+              opacity="0.7"
+            />
+            {[
+              [70, 118],
+              [220, 120],
+              [340, 78],
+            ].map(([x, y], i) => (
+              <motion.circle
+                key={x}
+                cx={x}
+                cy={y}
+                r="7"
+                fill="#1c1914"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.3 + i * 0.12, type: "spring" }}
+              />
+            ))}
+          </motion.svg>
+          <p className="mt-2 font-mono text-[11px] text-[var(--muted)]">
+            Residual stream → NLA sentence → judge score
+          </p>
+        </FadeIn>
+      </section>
+
+      <section className="border-t border-[var(--line)] bg-[var(--card)]">
+        <div className="mx-auto grid max-w-6xl gap-px bg-[var(--line)] sm:grid-cols-2 lg:grid-cols-4">
+          {FLOW.map((step) => (
+            <div key={step.k} className="bg-[var(--card)] p-6">
+              <div className="font-mono text-[11px] text-[var(--copper)]">{step.k}</div>
+              <div className="mt-2 font-display text-[26px]">{step.t}</div>
+              <p className="mt-2 text-[13px] text-[var(--muted)]">{step.d}</p>
+            </div>
           ))}
-        </ol>
-      </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-6 py-16">
+        <div className="grid gap-8 lg:grid-cols-2">
+          <div>
+            <h2 className="font-display text-[34px] leading-tight">
+              AVs are signals, not beliefs.
+            </h2>
+            <p className="mt-4 text-[15px] leading-relaxed text-[var(--muted)]">
+              The judge reads themes in the verbalization. You still need
+              behavior, or another test, before a hypothesis gets loud. The
+              product is built so you can run that loop without leaving the
+              dataset.
+            </p>
+          </div>
+          <div className="surface rounded-lg p-6">
+            <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--muted)]">
+              Same chrome everywhere
+            </p>
+            <ul className="mt-4 space-y-3 text-[14px] leading-relaxed">
+              <li>Live run panel: which prompt, which phase, n of N.</li>
+              <li>Datasets, judges, and compare share type, color, and motion.</li>
+              <li>Keys stay in the tab. Runs persist on the server.</li>
+            </ul>
+            <Link href="/datasets" className="mt-6 inline-block text-[13px] text-[var(--copper)]">
+              Start from a dataset →
+            </Link>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

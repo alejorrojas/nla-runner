@@ -71,9 +71,18 @@ export async function POST(req: Request) {
       const send = (event: unknown) => {
         controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`));
       };
-      send({ type: "start", experiment });
+      const total = dataset.examples.length;
+      send({ type: "start", experiment, total });
       try {
-        for (const example of dataset.examples) {
+        for (let i = 0; i < dataset.examples.length; i++) {
+          const example = dataset.examples[i];
+          send({
+            type: "progress",
+            index: i,
+            total,
+            prompt: example.prompt,
+            phase: "nla",
+          });
           let row: ExperimentRow = {
             exampleId: example.id,
             prompt: example.prompt,
@@ -91,6 +100,13 @@ export async function POST(req: Request) {
               tokenPolicy: body.tokenPolicy,
             });
             row = { ...row, ...nla };
+            send({
+              type: "progress",
+              index: i,
+              total,
+              prompt: example.prompt,
+              phase: "judge",
+            });
             for (const ev of evaluators) {
               const judged = await runJudge({
                 apiKey: openai,
@@ -106,7 +122,7 @@ export async function POST(req: Request) {
           }
           experiment.rows.push(row);
           await persistExperiment(experiment);
-          send({ type: "row", row });
+          send({ type: "row", row, index: i, total, experiment });
         }
         experiment.status = "done";
       } catch (err) {

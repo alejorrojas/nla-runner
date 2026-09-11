@@ -1,29 +1,33 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #f7f8fa;
-  --sidebar: #ffffff;
-  --card: #ffffff;
-  --line: #e6e8ee;
-  --line-strong: #d8dce4;
-  --ink: #1f232a;
-  --muted: #6b7380;
-  --hover: #f3f4f7;
-  --active: #e8f0fe;
-  --a: #2bbbad;
-  --b: #d14d9a;
-  --c: #4f8cff;
-  --d: #f0a202;
-  --warn: #c2410c;
-  --ok: #0f9d73;
-  --score-down: #fde8e8;
-  --score-up: #e8f8ef;
+  --bg: #efe6d4;
+  --sidebar: #1c1914;
+  --card: #f7f1e4;
+  --line: #d9cdb4;
+  --line-strong: #c9b896;
+  --ink: #1c1914;
+  --muted: #6d6254;
+  --hover: #e7dcc4;
+  --active: #ead7b8;
+  --copper: #c45c26;
+  --copper-ink: #9a3d12;
+  --residue: #0f6e62;
+  --a: #c45c26;
+  --b: #0f6e62;
+  --c: #3d5a80;
+  --d: #c9a227;
+  --warn: #b42318;
+  --ok: #0f6e62;
+  --score-down: #f6d6c8;
+  --score-up: #d7ebe4;
+  --grain: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
 }
 
 @theme inline {
   --color-background: var(--bg);
   --color-foreground: var(--ink);
-  --font-sans: var(--font-ibm);
+  --font-sans: var(--font-ui);
   --font-mono: var(--font-ibm-mono);
 }
 
@@ -35,7 +39,22 @@ body {
 }
 
 body {
-  font-family: var(--font-ibm), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-ui), ui-sans-serif, system-ui, sans-serif;
+}
+
+body::before {
+  content: "";
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  opacity: 0.045;
+  background-image: var(--grain);
+  mix-blend-mode: multiply;
+  z-index: 0;
+}
+
+.font-display {
+  font-family: var(--font-display), ui-serif, Georgia, serif;
 }
 
 input,
@@ -48,50 +67,60 @@ button {
 input,
 textarea,
 select {
-  background: #fff;
+  background: #fffdf8;
   border: 1px solid var(--line-strong);
   color: var(--ink);
-  border-radius: 6px;
+  border-radius: 4px;
   padding: 0.42rem 0.65rem;
 }
 
 input:focus,
 textarea:focus,
 select:focus {
-  outline: 2px solid #c5d4fb;
-  border-color: #8eaff0;
+  outline: 2px solid color-mix(in srgb, var(--copper) 35%, white);
+  border-color: var(--copper);
 }
 
-button.btn {
-  background: #fff;
+button.btn,
+a.btn {
+  display: inline-flex;
+  align-items: center;
+  background: #fffdf8;
   border: 1px solid var(--line-strong);
   color: var(--ink);
-  border-radius: 6px;
-  padding: 0.38rem 0.7rem;
+  border-radius: 4px;
+  padding: 0.42rem 0.85rem;
   font-size: 13px;
+  letter-spacing: 0.01em;
+  text-decoration: none;
 }
 
-button.btn:hover {
+button.btn:hover,
+a.btn:hover {
   background: var(--hover);
 }
 
-button.btn-primary {
-  background: #1f232a;
-  border-color: #1f232a;
-  color: #fff;
+button.btn-primary,
+a.btn-primary {
+  background: var(--copper);
+  border-color: var(--copper-ink);
+  color: #fffaf3;
 }
 
-button.btn-primary:hover {
-  background: #333941;
+button.btn-primary:hover,
+a.btn-primary:hover {
+  background: var(--copper-ink);
 }
 
 button.btn-primary:disabled {
-  opacity: 0.4;
+  opacity: 0.45;
 }
 
 .crumb {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .crumb a:hover {
@@ -105,7 +134,7 @@ button.btn-primary:disabled {
   border-radius: 999px;
   padding: 2px 8px 2px 4px;
   font-size: 12px;
-  background: #f3f4f6;
+  background: var(--active);
   color: var(--ink);
 }
 
@@ -119,4 +148,10 @@ button.btn-primary:disabled {
   font-size: 11px;
   font-weight: 600;
   color: #fff;
+}
+
+.surface {
+  background: var(--card);
+  border: 1px solid var(--line);
+  box-shadow: 0 1px 0 rgba(28, 25, 20, 0.04);
 }

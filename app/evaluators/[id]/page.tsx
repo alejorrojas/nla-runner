@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import { PageLoader } from "@/components/page-chrome";
 import { FeedbackConfig } from "@/components/feedback-config";
 import { mustacheVars } from "@/lib/mustache";
 import { useStore } from "@/lib/store-client";
@@ -18,7 +19,7 @@ export default function EvaluatorEditorPage() {
   const { store, save } = useStore();
   const ev = store?.evaluators.find((e) => e.id === id);
 
-  if (!store) return <p className="p-8 text-[var(--muted)]">Loading…</p>;
+  if (!store) return <PageLoader label="Loading evaluator" />;
   if (!ev) return <p className="p-8">Evaluator not found.</p>;
 
   return <Editor store={store} ev={ev} save={save} />;
@@ -49,7 +50,7 @@ function Editor({
         <div className="crumb">
           <Link href="/evaluators">Evaluators</Link>
           <span> / </span>
-          <span className="text-[var(--ink)]">Configure Evaluator</span>
+          <span className="text-[var(--ink)]">Configure evaluator</span>
         </div>
         <div className="flex items-center gap-2">
           <button
