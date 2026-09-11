@@ -117,7 +117,7 @@ function ShellInner({ children }: { children: ReactNode }) {
         <div className="px-4 pb-4 pt-5">
           <Link href="/" className="flex items-center gap-2">
             <Mark className="h-7 w-7 rounded-[8px]" />
-            <span className="text-[15px] font-medium tracking-tight">NLA Eval</span>
+            <span className="text-[15px] font-medium tracking-tight">NLASmith</span>
           </Link>
           <div className="mt-1 pl-9 text-[13px] text-[var(--muted)]">Personal</div>
         </div>

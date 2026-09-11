@@ -62,10 +62,6 @@ const PIECES = [
 export default function LandingPage() {
   return (
     <div>
-      <section className="relative isolate flex min-h-screen items-center justify-center overflow-hidden px-6">
-        <GradientBackground />
-        <div className="absolute inset-0 z-[1] bg-black/20" />
-        <div className="relative z-10 mx-auto max-w-3xl px-4 py-28 text-center">
           <p className="text-[13px] font-medium tracking-[0.14em] text-white/70 uppercase">
             NLASmith · CONAIISI 2026
           </p>

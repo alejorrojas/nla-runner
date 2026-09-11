@@ -1,4 +1,4 @@
-# NLA Eval
+# NLASmith
 
 LangSmith-shaped experiment UI for Neuronpedia NLAs. Paste OpenAI + Neuronpedia keys in **Settings** (browser `sessionStorage` only).
 
