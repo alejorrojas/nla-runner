@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useStore } from "@/lib/store-client";
 
 export default function EvaluatorsPage() {
-  const { store, save } = useStore();
+  const { store } = useStore();
   if (!store) return <PageLoader label="Loading judges" />;
 
   return (
@@ -16,36 +16,8 @@ export default function EvaluatorsPage() {
         title="Evaluators"
         hint="LLM-as-judge on AVs. Same mapping language as the run table."
         action={
-          <Button
-            type="button"
-            onClick={() => {
-              const id = crypto.randomUUID();
-              void save({
-                ...store,
-                evaluators: [
-                  {
-                    id,
-                    name: "new_judge",
-                    openaiModel: "gpt-4o-mini",
-                    prompt:
-                      "You grade an NLA verbalization.\n\nNLA:\n{{nla}}\n\nPrompt:\n{{prompt}}",
-                    mapping: { nla: "nla", prompt: "prompt" },
-                    feedback: [
-                      {
-                        key: "conciseness",
-                        description: "Is the output concise?",
-                        kind: "boolean",
-                        includeReasoning: true,
-                      },
-                    ],
-                    createdAt: new Date().toISOString(),
-                  },
-                  ...store.evaluators,
-                ],
-              });
-            }}
-          >
-            + Evaluator
+          <Button asChild>
+            <Link href="/evaluators/new">+ Evaluator</Link>
           </Button>
         }
       />
