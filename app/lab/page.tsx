@@ -7,6 +7,7 @@ import { ExampleWorkspaceNote } from "@/components/example-workspace-note";
 import { PageHeader, PageLoader } from "@/components/page-chrome";
 import { Button } from "@/components/ui/button";
 import { expColor, expLetter } from "@/lib/exp-colors";
+import { defaultCompareIds } from "@/lib/compare-ids";
 import { useKeys } from "@/lib/keys";
 import { useStore } from "@/lib/store-client";
 import { NLA_SOURCES } from "@/lib/types";
@@ -156,17 +157,17 @@ function LatestExperiments() {
   const { store } = useStore();
   if (!store) return null;
 
-  const latest = [...store.experiments]
-    .filter((e) => e.rows.length > 0)
-    .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
-    .slice(0, 2);
+  const withRows = store.experiments.filter((e) => e.rows.length > 0);
+  const latest = defaultCompareIds(withRows)
+    .map((id) => withRows.find((e) => e.id === id))
+    .filter((e): e is NonNullable<typeof e> => Boolean(e));
 
   if (latest.length === 0) {
     return (
       <section className="mb-2">
         <div className="mb-3 section-title">My latest experiments</div>
         <div className="surface px-4 py-6 text-[13px] text-[var(--muted)]">
-          Finished runs show up here. The Example run is copied in on first login.
+          Finished runs show up here. Two Example runs are copied in on first login.
         </div>
       </section>
     );

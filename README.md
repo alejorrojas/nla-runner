@@ -11,7 +11,7 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) for the landing. The lab (`/lab`, `/datasets`, …) requires a Supabase login. The first session copies an **Example** workspace: forum-prior prompts, example judges, and one finished **Example run · Llama 3.3 70B · last user**.
+Open [http://localhost:3000](http://localhost:3000) for the landing. The lab (`/lab`, `/datasets`, …) requires a Supabase login. The first session copies an **Example** workspace: forum-prior prompts, example judges, and two finished Example runs (**last user** vs **first assistant**).
 
 OpenAI + Neuronpedia keys stay in **Settings** (`sessionStorage`). They are only needed to launch new runs.
 
@@ -33,10 +33,11 @@ Point the Vercel project to both `nlasmith.com` and `app.nlasmith.com`. In Supab
 
 Tables live on project **nla-runner** (`vamfikbkcewmlzkqxtrs`). Rows are scoped by `owner_id`. Catalog rows (`is_catalog`) are copied into each new user.
 
-Seed / refresh the shared starter run (needs API keys):
+Seed / refresh a shared starter run (needs API keys). Default is **first assistant**; pass `last_user` to rebuild the original:
 
 ```bash
 npm run seed:forum
+npm run seed:forum -- last_user
 ```
 
 Without Supabase env vars, local `npm run dev` still falls back to `data/store.json`.

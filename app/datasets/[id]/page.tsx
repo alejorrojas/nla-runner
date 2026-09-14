@@ -19,6 +19,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useKeys } from "@/lib/keys";
+import { defaultCompareIds } from "@/lib/compare-ids";
 import { useStore } from "@/lib/store-client";
 import { NLA_SOURCES, type Experiment, type ExperimentRow, type TokenPolicy } from "@/lib/types";
 
@@ -43,7 +44,7 @@ export default function DatasetPage() {
   const [running, setRunning] = useState(false);
   const [log, setLog] = useState("");
   const [tick, setTick] = useState<RunTick | null>(null);
-  const [selected, setSelected] = useState<string[]>([]);
+  const [selected, setSelected] = useState<string[] | null>(null);
   const [tab, setTab] = useState<"experiments" | "examples">("experiments");
 
   const dataset = store?.datasets.find((d) => d.id === id);
@@ -51,6 +52,7 @@ export default function DatasetPage() {
     () => store?.experiments.filter((e) => e.datasetId === id) ?? [],
     [store, id],
   );
+  const chosen = selected ?? defaultCompareIds(experiments);
 
   useEffect(() => {
     if (!store || evaluatorIds.length > 0) return;
@@ -317,10 +319,10 @@ export default function DatasetPage() {
                 <Button
                   variant="outline"
                   type="button"
-                  disabled={selected.length < 1}
+                  disabled={chosen.length < 1}
                   onClick={() =>
                     router.push(
-                      `/datasets/${dataset.id}/compare?ids=${selected.join(",")}`,
+                      `/datasets/${dataset.id}/compare?ids=${chosen.join(",")}`,
                     )
                   }
                 >
@@ -352,20 +354,21 @@ export default function DatasetPage() {
                         <tr key={ex.id}>
                           <td>
                             <Checkbox
-                              checked={selected.includes(ex.id)}
+                              checked={chosen.includes(ex.id)}
                               onCheckedChange={(checked) =>
-                                setSelected((ids) =>
-                                  checked === true
-                                    ? [...ids, ex.id]
-                                    : ids.filter((x) => x !== ex.id),
-                                )
+                                setSelected((ids) => {
+                                  const current = ids ?? defaultCompareIds(experiments);
+                                  return checked === true
+                                    ? [...current, ex.id]
+                                    : current.filter((x) => x !== ex.id);
+                                })
                               }
                               aria-label={`Select ${ex.name}`}
                             />
                           </td>
                           <td>
                             <Link
-                              href={`/datasets/${dataset.id}/compare?ids=${ex.id}`}
+                              href={`/datasets/${dataset.id}/compare?ids=${defaultCompareIds(experiments).join(",")}`}
                               className="font-medium hover:underline"
                             >
                               {ex.name}

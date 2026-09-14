@@ -6,6 +6,7 @@ import { Suspense, useMemo } from "react";
 import { PageHeader, PageLoader } from "@/components/page-chrome";
 import { CompareCharts } from "@/components/compare-charts";
 import { RunTable } from "@/components/run-table";
+import { defaultCompareIds } from "@/lib/compare-ids";
 import { expColor, expLetter } from "@/lib/exp-colors";
 import { useStore } from "@/lib/store-client";
 import { NLA_SOURCES, type Experiment } from "@/lib/types";
@@ -22,9 +23,20 @@ function CompareInner() {
   const { id } = useParams<{ id: string }>();
   const search = useSearchParams();
   const { store } = useStore();
-  const ids = (search.get("ids") || "").split(",").filter(Boolean);
+  const requested = useMemo(
+    () => (search.get("ids") || "").split(",").filter(Boolean),
+    [search],
+  );
 
   const dataset = store?.datasets.find((d) => d.id === id);
+  const ids = useMemo(() => {
+    const onDataset =
+      store?.experiments.filter((e) => e.datasetId === id) ?? [];
+    if (requested.length >= 2) return requested;
+    const fallback = defaultCompareIds(onDataset);
+    if (requested.length === 1 && fallback.length >= 2) return fallback;
+    return requested.length ? requested : fallback;
+  }, [store, id, requested]);
   const experiments = useMemo(
     () =>
       (store?.experiments.filter((e) => ids.includes(e.id)) ?? []).sort(

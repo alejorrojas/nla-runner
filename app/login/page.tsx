@@ -88,8 +88,8 @@ function LoginForm() {
         </h1>
         <p className="mt-3 text-[15px] leading-relaxed text-[var(--muted)]">
           Datasets, evaluators, and runs stay attached to your account. We copy
-          in Example prompts, Example judges, and one finished Example run so
-          you can inspect aggregates before you design your own.
+          in Example prompts, Example judges, and two finished Example runs so
+          you can compare last-user vs first-assistant aggregates.
         </p>
         <form className="mt-8 space-y-4" onSubmit={onSubmit}>
           <div className="field">

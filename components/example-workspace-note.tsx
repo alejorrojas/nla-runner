@@ -4,7 +4,8 @@ export function ExampleWorkspaceNote({ href = "/datasets" }: { href?: string }) 
   return (
     <div className="mb-5 rounded-xl border border-[var(--line)] bg-[var(--active)] px-4 py-3 text-[13px] leading-relaxed text-[var(--ink)]">
       Everything labeled <span className="font-medium">Example</span> is a
-      preloaded walkthrough: a prompt list, a few judges, and one finished run.
+      preloaded walkthrough: a prompt list, a few judges, and two finished runs
+      on last-user vs first-assistant tokens.
       Rename them, delete them, or add your own.{" "}
       <Link href={href} className="font-medium text-[var(--accent)] hover:underline">
         Open the example dataset

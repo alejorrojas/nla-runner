@@ -1,6 +1,8 @@
 export const CATALOG_DATASET_ID = "ds-reddit-pilot";
 export const CATALOG_EVALUATOR_ID = "ev-reddit";
 export const CATALOG_EXPERIMENT_ID = "exp-forum-prior-llama-last-user";
+export const CATALOG_EXPERIMENT_ASSISTANT_ID =
+  "exp-forum-prior-llama-first-assistant";
 
 export function siteUrl(): string {
   return (
