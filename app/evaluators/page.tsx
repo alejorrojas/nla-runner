@@ -15,7 +15,7 @@ export default function EvaluatorsPage() {
       <PageHeader
         crumb="Personal / Evaluators"
         title="Evaluators"
-        hint="LLM-as-judge on AVs. Same mapping language as the run table. Your workspace includes the starter mentions_reddit judge."
+        hint="LLM-as-judge on AVs. New accounts include Example judges (forum theme, names Reddit, article framing). Duplicate or rewrite them."
         action={
           <Button asChild>
             <Link href="/evaluators/new">

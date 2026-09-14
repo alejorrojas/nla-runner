@@ -1,282 +1,120 @@
 "use client";
 
-import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-  type ChartConfig,
 } from "@/components/ui/chart";
 import { expColor, expLetter } from "@/lib/exp-colors";
-import { experimentKpis, exampleSeries } from "@/lib/compare-metrics";
+import { exampleSeries } from "@/lib/compare-metrics";
 import { meanScores } from "@/lib/feedback-display";
 import type { Experiment } from "@/lib/types";
 
-function expConfig(experiments: Experiment[]): ChartConfig {
-  return Object.fromEntries(
-    experiments.map((ex, i) => [
-      expLetter(i),
-      { label: `${expLetter(i)} · ${ex.tokenPolicy}`, color: expColor(i) },
-    ]),
-  ) as ChartConfig;
-}
-
-function Card({
-  title,
-  hint,
-  children,
-}: {
+type Panel = {
+  id: string;
   title: string;
-  hint?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="min-w-0 rounded-xl border border-[var(--line)] bg-[var(--card)] p-4">
-      <div className="mb-1 text-[13px] font-medium">{title}</div>
-      {hint ? (
-        <div className="mb-2 text-[11px] leading-snug text-[var(--muted)]">
-          {hint}
-        </div>
-      ) : null}
-      {children}
-    </div>
-  );
-}
+  dataKey: string;
+  yMax?: number;
+};
 
-function fmtPct(n: number | null): string {
-  if (n == null) return "—";
-  return `${(n * 100).toFixed(0)}%`;
-}
-
-function fmtNum(n: number | null, digits = 3): string {
-  if (n == null) return "—";
-  return n.toFixed(digits);
-}
-
-export function CompareCharts({ experiments }: { experiments: Experiment[] }) {
-  const config = expConfig(experiments);
-  const scoreKeys = [
+function panelsFor(experiments: Experiment[]): Panel[] {
+  const judgeKeys = [
     ...new Set(experiments.flatMap((e) => Object.keys(meanScores(e)))),
   ];
-  const kpis = experiments.map(experimentKpis);
-  const primary = kpis[0];
-
-  const rateRows = [
-    ...scoreKeys.map((metric) => {
-      const row: Record<string, string | number> = { metric };
-      experiments.forEach((ex, i) => {
-        row[expLetter(i)] = meanScores(ex)[metric] ?? 0;
-      });
-      return row;
-    }),
-    {
-      metric: "lexical_reddit",
-      ...Object.fromEntries(
-        experiments.map((_, i) => [expLetter(i), kpis[i].lexicalReddit]),
-      ),
-    },
-    {
-      metric: "lexical_forum",
-      ...Object.fromEntries(
-        experiments.map((_, i) => [expLetter(i), kpis[i].lexicalForum]),
-      ),
-    },
-    {
-      metric: "lexical_article",
-      ...Object.fromEntries(
-        experiments.map((_, i) => [expLetter(i), kpis[i].lexicalArticle]),
-      ),
-    },
+  const judges: Panel[] = judgeKeys.map((key) => ({
+    id: key,
+    title: key,
+    dataKey: key,
+    yMax: 1,
+  }));
+  return [
+    ...judges,
+    { id: "lexical_reddit", title: "lexical_reddit", dataKey: "lexical_reddit", yMax: 1 },
+    { id: "lexical_forum", title: "lexical_forum", dataKey: "lexical_forum", yMax: 1 },
+    { id: "lexical_article", title: "lexical_article", dataKey: "lexical_article", yMax: 1 },
+    { id: "mse", title: "MSE", dataKey: "mse" },
+    { id: "chars", title: "AV chars", dataKey: "chars" },
   ];
-
-  const mixData = experiments.flatMap((ex, i) => {
-    const k = kpis[i];
-    return [
-      { name: `${expLetter(i)} true`, n: k.forumTrue, fill: expColor(i) },
-      {
-        name: `${expLetter(i)} false`,
-        n: k.forumFalse,
-        fill: i === 0 ? "#c5bfb3" : "#d9d4c8",
-      },
-    ];
-  });
-
-  const series = exampleSeries(experiments);
-
-  return (
-    <div className="space-y-3 p-4">
-      {primary ? (
-        <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
-          <Kpi label="Rows" value={String(primary.n)} hint={`${primary.errors} errors`} />
-          <Kpi
-            label="LLM forum"
-            value={fmtPct(primary.llmHit)}
-            hint={`${primary.forumTrue}/${primary.n - primary.errors} true`}
-          />
-          <Kpi
-            label="Lexical Reddit"
-            value={fmtPct(primary.lexicalReddit)}
-            hint="r/, reddit, subreddit in the AV"
-          />
-          <Kpi
-            label="Lexical article"
-            value={fmtPct(primary.lexicalArticle)}
-            hint="encyclopedia / howto / news cues"
-          />
-          <Kpi
-            label="Mean MSE"
-            value={fmtNum(primary.meanMse)}
-            hint={`median ${fmtNum(primary.medianMse)}`}
-          />
-          <Kpi
-            label="Mean AV chars"
-            value={primary.meanChars != null ? Math.round(primary.meanChars).toString() : "—"}
-            hint="length of the verbalization"
-          />
-        </div>
-      ) : null}
-
-      <div className="grid gap-3 lg:grid-cols-2">
-        <Card
-          title="Rates"
-          hint="LLM judges (0–1) plus cheap lexical checks on the same AVs. Extra judges you attach to a run show up here as more bars."
-        >
-          <ChartContainer config={config} className="h-[220px] w-full">
-            <BarChart accessibilityLayer data={rateRows} barGap={3}>
-              <CartesianGrid vertical={false} stroke="#d1cfc5" />
-              <XAxis
-                dataKey="metric"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                tick={{ fontSize: 10 }}
-                interval={0}
-              />
-              <YAxis
-                domain={[0, 1]}
-                tickLine={false}
-                axisLine={false}
-                width={28}
-                tick={{ fontSize: 11 }}
-              />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              {experiments.map((_, i) => (
-                <Bar
-                  key={expLetter(i)}
-                  dataKey={expLetter(i)}
-                  fill={expColor(i)}
-                  radius={[4, 4, 0, 0]}
-                  maxBarSize={28}
-                />
-              ))}
-            </BarChart>
-          </ChartContainer>
-        </Card>
-
-        <Card
-          title="Forum true vs false"
-          hint="Counts from the mentions_reddit judge. Compare runs by selecting two experiments."
-        >
-          <ChartContainer
-            config={{ n: { label: "prompts", color: expColor(0) } }}
-            className="h-[220px] w-full"
-          >
-            <BarChart accessibilityLayer data={mixData}>
-              <CartesianGrid vertical={false} stroke="#d1cfc5" />
-              <XAxis dataKey="name" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
-              <YAxis allowDecimals={false} tickLine={false} axisLine={false} width={24} />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <Bar dataKey="n" radius={[4, 4, 0, 0]} maxBarSize={40}>
-                {mixData.map((d) => (
-                  <Cell key={d.name} fill={d.fill} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ChartContainer>
-        </Card>
-
-        <Card
-          title="MSE by example"
-          hint="Reconstruction error at the probed token. Near 0 = the sentence tracks the activation."
-        >
-          <ChartContainer
-            config={Object.fromEntries(
-              experiments.map((_, i) => [
-                `mse${expLetter(i)}`,
-                { label: `MSE ${expLetter(i)}`, color: expColor(i) },
-              ]),
-            )}
-            className="h-[220px] w-full"
-          >
-            <BarChart accessibilityLayer data={series} barGap={2}>
-              <CartesianGrid vertical={false} stroke="#d1cfc5" />
-              <XAxis dataKey="example" tickLine={false} axisLine={false} tick={{ fontSize: 10 }} />
-              <YAxis tickLine={false} axisLine={false} width={36} tick={{ fontSize: 11 }} />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              {experiments.map((_, i) => (
-                <Bar
-                  key={expLetter(i)}
-                  dataKey={`mse${expLetter(i)}`}
-                  fill={expColor(i)}
-                  radius={[3, 3, 0, 0]}
-                  maxBarSize={18}
-                />
-              ))}
-            </BarChart>
-          </ChartContainer>
-        </Card>
-
-        <Card
-          title="AV length by example"
-          hint="Character count of the verbalization. Long, rambling AVs often pair with forum-like framing."
-        >
-          <ChartContainer
-            config={Object.fromEntries(
-              experiments.map((_, i) => [
-                `chars${expLetter(i)}`,
-                { label: `chars ${expLetter(i)}`, color: expColor(i) },
-              ]),
-            )}
-            className="h-[220px] w-full"
-          >
-            <BarChart accessibilityLayer data={series} barGap={2}>
-              <CartesianGrid vertical={false} stroke="#d1cfc5" />
-              <XAxis dataKey="example" tickLine={false} axisLine={false} tick={{ fontSize: 10 }} />
-              <YAxis tickLine={false} axisLine={false} width={36} tick={{ fontSize: 11 }} />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              {experiments.map((_, i) => (
-                <Bar
-                  key={expLetter(i)}
-                  dataKey={`chars${expLetter(i)}`}
-                  fill={expColor(i)}
-                  radius={[3, 3, 0, 0]}
-                  maxBarSize={18}
-                />
-              ))}
-            </BarChart>
-          </ChartContainer>
-        </Card>
-      </div>
-    </div>
-  );
 }
 
-function Kpi({
-  label,
-  value,
-  hint,
+export function CompareCharts({
+  experiments,
+  compact = false,
 }: {
-  label: string;
-  hint: string;
-  value: string;
+  experiments: Experiment[];
+  compact?: boolean;
 }) {
+  const series = exampleSeries(experiments);
+  const panels = panelsFor(experiments);
+  const chartH = compact ? "h-[140px]" : "h-[160px]";
+  const trackPct = Math.max(100, (panels.length / 3) * 100);
+
   return (
-    <div className="rounded-xl border border-[var(--line)] bg-[var(--card)] px-3 py-3">
-      <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--muted)]">
-        {label}
+    <div
+      className={`chart-strip overflow-x-auto bg-[var(--card)] ${compact ? "" : "border-b border-[var(--line)]"}`}
+    >
+      <div className="flex" style={{ width: `${trackPct}%` }}>
+        {panels.map((panel) => (
+          <div
+            key={panel.id}
+            className="min-w-0 flex-1 border-r border-[var(--line)] px-3 py-3 last:border-r-0"
+          >
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <div className="text-[13px] font-medium">{panel.title}</div>
+              {experiments.length > 1 ? (
+                <div className="flex flex-wrap gap-2 text-[11px] text-[var(--muted)]">
+                  {experiments.map((_, i) => (
+                    <span key={expLetter(i)} className="inline-flex items-center gap-1">
+                      <span
+                        className="h-2 w-2 rounded-full"
+                        style={{ background: expColor(i) }}
+                      />
+                      {expLetter(i)}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+            <ChartContainer
+              config={Object.fromEntries(
+                experiments.map((_, i) => [
+                  `${panel.dataKey}${expLetter(i)}`,
+                  { label: `${panel.title} ${expLetter(i)}`, color: expColor(i) },
+                ]),
+              )}
+              className={`${chartH} w-full`}
+            >
+              <BarChart accessibilityLayer data={series} barGap={2}>
+                <CartesianGrid vertical={false} stroke="var(--line)" />
+                <XAxis
+                  dataKey="example"
+                  tickLine={false}
+                  axisLine={false}
+                  tick={{ fontSize: 10 }}
+                />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  width={32}
+                  tick={{ fontSize: 10 }}
+                  domain={panel.yMax != null ? [0, panel.yMax] : undefined}
+                />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                {experiments.map((_, i) => (
+                  <Bar
+                    key={expLetter(i)}
+                    dataKey={`${panel.dataKey}${expLetter(i)}`}
+                    fill={expColor(i)}
+                    radius={[3, 3, 0, 0]}
+                    maxBarSize={18}
+                  />
+                ))}
+              </BarChart>
+            </ChartContainer>
+          </div>
+        ))}
       </div>
-      <div className="font-display mt-1 text-[22px] leading-none tracking-tight">{value}</div>
-      <div className="mt-1 text-[11px] text-[var(--muted)]">{hint}</div>
     </div>
   );
 }

@@ -87,8 +87,9 @@ function LoginForm() {
           {mode === "signin" ? "Sign in to the lab" : "Create your workspace"}
         </h1>
         <p className="mt-3 text-[15px] leading-relaxed text-[var(--muted)]">
-          Datasets, evaluators, and runs stay attached to your account. A starter
-          forum-prior experiment is copied in so you can inspect aggregates immediately.
+          Datasets, evaluators, and runs stay attached to your account. We copy
+          in Example prompts, Example judges, and one finished Example run so
+          you can inspect aggregates before you design your own.
         </p>
         <form className="mt-8 space-y-4" onSubmit={onSubmit}>
           <div className="field">

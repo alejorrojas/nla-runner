@@ -15,7 +15,7 @@ export default function DatasetsPage() {
       <PageHeader
         crumb="Personal / Datasets & Experiments"
         title="Datasets"
-          hint="Prompt lists. Open one to run experiments and watch the live panel. A starter forum-prior run is copied into every new account."
+        hint="Prompt lists you own. New accounts start with an Example dataset and one finished Example run so you can inspect aggregates before you run anything."
         action={
           <Button
             type="button"

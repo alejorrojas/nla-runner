@@ -54,28 +54,28 @@ export function scoreCellStyle(
   value: unknown,
 ): { background: string; color: string } {
   if (value === undefined || value === null || value === "") {
-    return { background: "transparent", color: "#6b7280" };
+    return { background: "transparent", color: "var(--muted)" };
   }
   const kind = field?.kind ?? inferKind(value);
   switch (kind) {
     case "boolean": {
       const ok = numericScore(value) === 1;
       return ok
-        ? { background: "#2f6fed", color: "#ffffff" }
-        : { background: "#eef4fb", color: "#64748b" };
+        ? { background: "var(--clay)", color: "#faf9f5" }
+        : { background: "var(--paper)", color: "var(--muted)" };
     }
     case "continuous": {
       const n = numericScore(value);
-      if (n == null) return { background: "transparent", color: "#6b7280" };
+      if (n == null) return { background: "transparent", color: "var(--muted)" };
       const min = field?.min ?? 0;
       const max = field?.max ?? 1;
       const t = Math.min(1, Math.max(0, (n - min) / (max - min || 1)));
-      const background = `color-mix(in srgb, #eef4fb ${Math.round((1 - t) * 100)}%, #93c5fd ${Math.round(t * 100)}%)`;
-      const color = t >= 0.5 ? "#12203a" : "#64748b";
+      const background = `color-mix(in srgb, var(--paper) ${Math.round((1 - t) * 100)}%, var(--clay) ${Math.round(t * 100)}%)`;
+      const color = t >= 0.55 ? "#faf9f5" : "var(--ink)";
       return { background, color };
     }
     case "categorical":
-      return { background: "#eef4fb", color: "#12203a" };
+      return { background: "var(--paper)", color: "var(--ink)" };
     default: {
       const _never: never = kind;
       return _never;

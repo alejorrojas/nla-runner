@@ -2,10 +2,14 @@
 
 import Link from "next/link";
 import { Plus } from "lucide-react";
+import { CompareCharts } from "@/components/compare-charts";
+import { ExampleWorkspaceNote } from "@/components/example-workspace-note";
 import { PageHeader, PageLoader } from "@/components/page-chrome";
 import { Button } from "@/components/ui/button";
+import { expColor, expLetter } from "@/lib/exp-colors";
 import { useKeys } from "@/lib/keys";
 import { useStore } from "@/lib/store-client";
+import { NLA_SOURCES } from "@/lib/types";
 
 function relativeTime(iso?: string): string {
   if (!iso) return "—";
@@ -48,6 +52,11 @@ export default function LabPage() {
         }
       />
       <div className="page-body">
+        {store.experiments.some((e) => e.isStarter) ? (
+          <ExampleWorkspaceNote
+            href={firstDataset ? `/datasets/${firstDataset.id}` : "/datasets"}
+          />
+        ) : null}
         {keysOk ? null : (
           <div className="mb-5 rounded-xl border border-[var(--line)] bg-[var(--active)] px-4 py-3 text-[13px]">
             Add OpenAI and Neuronpedia keys in{" "}
@@ -58,7 +67,9 @@ export default function LabPage() {
           </div>
         )}
 
-        <div className="mb-3 flex items-center justify-between">
+        <LatestExperiments />
+
+        <div className="mb-3 mt-6 flex items-center justify-between">
           <div className="section-title">Datasets</div>
           <Link href="/datasets" className="text-[13px] text-[var(--accent)] hover:underline">
             View all →
@@ -138,5 +149,62 @@ export default function LabPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+function LatestExperiments() {
+  const { store } = useStore();
+  if (!store) return null;
+
+  const latest = [...store.experiments]
+    .filter((e) => e.rows.length > 0)
+    .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
+    .slice(0, 2);
+
+  if (latest.length === 0) {
+    return (
+      <section className="mb-2">
+        <div className="mb-3 section-title">My latest experiments</div>
+        <div className="surface px-4 py-6 text-[13px] text-[var(--muted)]">
+          Finished runs show up here. The Example run is copied in on first login.
+        </div>
+      </section>
+    );
+  }
+
+  const datasetId = latest[0].datasetId;
+  const compareHref = `/datasets/${datasetId}/compare?ids=${latest.map((e) => e.id).join(",")}`;
+
+  return (
+    <section>
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="section-title">My latest experiments</div>
+        <Link href={compareHref} className="text-[13px] text-[var(--accent)] hover:underline">
+          Open compare →
+        </Link>
+      </div>
+      <div className="surface">
+        <div className="flex flex-wrap gap-2 px-4 py-3">
+          {latest.map((ex, i) => {
+            const source =
+              NLA_SOURCES.find((s) => s.id === ex.sourceId)?.label ?? ex.sourceId;
+            return (
+              <span key={ex.id} className="pill">
+                <span className="letter" style={{ background: expColor(i) }}>
+                  {expLetter(i)}
+                </span>
+                <span className="max-w-[280px] truncate font-medium">
+                  {ex.name}
+                </span>
+                <span className="text-[11px] text-[var(--muted)]">
+                  {source} · {ex.tokenPolicy}
+                </span>
+              </span>
+            );
+          })}
+        </div>
+        <CompareCharts experiments={latest} compact />
+      </div>
+    </section>
   );
 }

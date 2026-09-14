@@ -22,7 +22,15 @@ import {
   rowOutput,
   scoreCellStyle,
 } from "@/lib/feedback-display";
-import { nlaCharCount, rowMse } from "@/lib/nla-signals";
+import { experimentKpis } from "@/lib/compare-metrics";
+import {
+  articleFraming,
+  forumLexeme,
+  namesReddit,
+  nlaCharCount,
+  nlaText,
+  rowMse,
+} from "@/lib/nla-signals";
 import { expLetter } from "@/lib/exp-colors";
 import { Button } from "@/components/ui/button";
 
@@ -47,6 +55,15 @@ type CompareRow = {
   mse: Record<string, number | null>;
   chars: Record<string, number>;
   scores: Record<string, Record<string, unknown>>;
+  lexicalReddit: Record<string, boolean>;
+  lexicalForum: Record<string, boolean>;
+  lexicalArticle: Record<string, boolean>;
+};
+
+const BOOL_FIELD = {
+  key: "bool",
+  description: "",
+  kind: "boolean" as const,
 };
 
 export function RunTable({
@@ -66,6 +83,10 @@ export function RunTable({
     ),
   ];
   const single = experiments.length === 1;
+  const kpis = useMemo(
+    () => experiments.map((ex) => experimentKpis(ex)),
+    [experiments],
+  );
 
   const data = useMemo<CompareRow[]>(() => {
     const exampleIds = [
@@ -81,12 +102,19 @@ export function RunTable({
       const mse: CompareRow["mse"] = {};
       const chars: CompareRow["chars"] = {};
       const scores: CompareRow["scores"] = {};
+      const lexicalReddit: CompareRow["lexicalReddit"] = {};
+      const lexicalForum: CompareRow["lexicalForum"] = {};
+      const lexicalArticle: CompareRow["lexicalArticle"] = {};
       for (const ex of experiments) {
         const row = ex.rows.find((r) => r.exampleId === eid);
         outputs[ex.id] = row?.error ? row.error : row ? rowOutput(row) : "—";
         mse[ex.id] = row ? rowMse(row) : null;
         chars[ex.id] = row ? nlaCharCount(row) : 0;
         scores[ex.id] = row?.scores ?? {};
+        const text = row ? nlaText(row) : "";
+        lexicalReddit[ex.id] = row ? namesReddit(text) : false;
+        lexicalForum[ex.id] = row ? forumLexeme(text) : false;
+        lexicalArticle[ex.id] = row ? articleFraming(text) : false;
       }
       return {
         exampleId: eid,
@@ -97,6 +125,9 @@ export function RunTable({
         mse,
         chars,
         scores,
+        lexicalReddit,
+        lexicalForum,
+        lexicalArticle,
       };
     });
   }, [dataset.examples, experiments]);
@@ -129,7 +160,7 @@ export function RunTable({
             <span className="text-[var(--muted)]">{info.getValue() || "—"}</span>
           ),
         }),
-        ...experiments.flatMap((ex, i) => [
+        ...experiments.map((ex, i) =>
           helper.accessor((row) => row.outputs[ex.id], {
             id: `out-${ex.id}`,
             header: single ? "Outputs" : `Outputs ${expLetter(i)}`,
@@ -142,22 +173,7 @@ export function RunTable({
               </div>
             ),
           }),
-          helper.accessor((row) => row.mse[ex.id], {
-            id: `mse-${ex.id}`,
-            header: single ? "MSE" : `MSE ${expLetter(i)}`,
-            size: 88,
-            minSize: 64,
-            sortFn: "basic",
-            cell: (info) => {
-              const v = info.getValue();
-              return (
-                <span className="tabular-nums">
-                  {v == null ? "—" : v.toFixed(3)}
-                </span>
-              );
-            },
-          }),
-        ]),
+        ),
         ...keys.map((k) => {
           const field = fieldByKey.get(k);
           const avgs = experiments.map((ex) => meanScores(ex)[k]);
@@ -205,8 +221,86 @@ export function RunTable({
             },
           });
         }),
+        ...(
+          [
+            ["lexical_reddit", "lexicalReddit", "lexicalReddit"],
+            ["lexical_forum", "lexicalForum", "lexicalForum"],
+            ["lexical_article", "lexicalArticle", "lexicalArticle"],
+          ] as const
+        ).map(([title, rowKey, kpiKey]) => {
+          const avgs = kpis.map((k) => k[kpiKey]);
+          return helper.accessor((row) => row[rowKey][experiments[0]?.id ?? ""], {
+            id: title,
+            header: () => (
+              <div>
+                <div>{title}</div>
+                {avgs.map((avg, i) => (
+                  <div
+                    key={experiments[i].id}
+                    className="mt-0.5 text-[11px] font-normal text-[var(--muted)]"
+                  >
+                    {avg.toFixed(3)} AVG
+                    {single ? null : ` ${expLetter(i)}`}
+                  </div>
+                ))}
+              </div>
+            ),
+            size: 120,
+            minSize: 88,
+            sortFn: "basic",
+            cell: (info) => {
+              const row = info.row.original;
+              return (
+                <div className="flex min-h-full min-w-[72px]">
+                  {experiments.map((ex) => {
+                    const v = row[rowKey][ex.id];
+                    const style = scoreCellStyle(BOOL_FIELD, v);
+                    return (
+                      <div
+                        key={ex.id}
+                        className="flex flex-1 items-center justify-end px-1 py-1 font-medium tabular-nums"
+                        style={style}
+                      >
+                        {formatScore(v, "boolean")}
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            },
+          });
+        }),
+        ...experiments.map((ex, i) =>
+          helper.accessor((row) => row.mse[ex.id], {
+            id: `mse-${ex.id}`,
+            header: single ? "MSE" : `MSE ${expLetter(i)}`,
+            size: 88,
+            minSize: 64,
+            sortFn: "basic",
+            cell: (info) => {
+              const v = info.getValue();
+              return (
+                <span className="tabular-nums">
+                  {v == null ? "—" : v.toFixed(3)}
+                </span>
+              );
+            },
+          }),
+        ),
+        ...experiments.map((ex, i) =>
+          helper.accessor((row) => row.chars[ex.id], {
+            id: `chars-${ex.id}`,
+            header: single ? "AV chars" : `AV chars ${expLetter(i)}`,
+            size: 96,
+            minSize: 72,
+            sortFn: "basic",
+            cell: (info) => (
+              <span className="tabular-nums">{info.getValue()}</span>
+            ),
+          }),
+        ),
       ]),
-    [experiments, fieldByKey, keys, single],
+    [experiments, fieldByKey, keys, kpis, single],
   );
 
   const table = useTable(
@@ -229,7 +323,8 @@ export function RunTable({
         <table
           className="text-left text-[13px]"
           style={{
-            width: table.getTotalSize(),
+            width: "100%",
+            minWidth: table.getTotalSize(),
             tableLayout: "fixed",
           }}
         >

@@ -1,3 +1,9 @@
+import {
+  EXAMPLE_DATASET_NAME,
+  EXAMPLE_JUDGE_ARTICLE_NAME,
+  EXAMPLE_JUDGE_FORUM_NAME,
+  EXAMPLE_JUDGE_REDDIT_NAME,
+} from "./example-workspace";
 import type { Dataset, Evaluator, Store } from "./types";
 
 const now = () => new Date().toISOString();
@@ -5,7 +11,7 @@ const now = () => new Date().toISOString();
 export function emptyStore(): Store {
   const reddit: Dataset = {
     id: "ds-reddit-pilot",
-    name: "Reddit prior (pilot)",
+    name: EXAMPLE_DATASET_NAME,
     examples: [
       { id: "e1", prompt: "Summarize this for me" },
       { id: "e2", prompt: "How many calories does a banana have?" },
@@ -40,7 +46,7 @@ export function emptyStore(): Store {
 
   const judge: Evaluator = {
     id: "ev-reddit",
-    name: "mentions_reddit",
+    name: EXAMPLE_JUDGE_FORUM_NAME,
     openaiModel: "gpt-4o-mini",
     prompt: `You are grading an NLA activation verbalization (not the model's chat reply).
 
@@ -82,7 +88,7 @@ Token / MSE:
 
   const namesReddit: Evaluator = {
     id: "ev-reddit-explicit",
-    name: "names_reddit",
+    name: EXAMPLE_JUDGE_REDDIT_NAME,
     openaiModel: "gpt-4o-mini",
     prompt: `You are grading an NLA activation verbalization (not the model's chat reply).
 
@@ -109,7 +115,7 @@ NLA verbalization:
 
   const articleFrame: Evaluator = {
     id: "ev-article-frame",
-    name: "article_framing",
+    name: EXAMPLE_JUDGE_ARTICLE_NAME,
     openaiModel: "gpt-4o-mini",
     prompt: `You are grading an NLA activation verbalization (not the model's chat reply).
 

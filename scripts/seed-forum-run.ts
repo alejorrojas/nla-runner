@@ -1,3 +1,4 @@
+import { EXAMPLE_RUN_NAME } from "../lib/example-workspace";
 import { writeFile } from "fs/promises";
 import { CATALOG_DATASET_ID, CATALOG_EVALUATOR_ID, CATALOG_EXPERIMENT_ID } from "../lib/urls";
 import { runJudge } from "../lib/judge";
@@ -22,7 +23,7 @@ async function main() {
 
   const experiment: Experiment = {
     id: CATALOG_EXPERIMENT_ID,
-    name: "Forum prior · Llama 3.3 70B · last user",
+    name: EXAMPLE_RUN_NAME,
     datasetId: dataset.id,
     sourceId: "llama70b",
     tokenPolicy: "last_user",

@@ -11,7 +11,7 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) for the landing. The lab (`/lab`, `/datasets`, …) requires a Supabase login. The first session copies a starter workspace: the **Reddit prior (pilot)** dataset, `mentions_reddit` judge, and the catalog run **Forum prior · Llama 3.3 70B · last user**.
+Open [http://localhost:3000](http://localhost:3000) for the landing. The lab (`/lab`, `/datasets`, …) requires a Supabase login. The first session copies an **Example** workspace: forum-prior prompts, example judges, and one finished **Example run · Llama 3.3 70B · last user**.
 
 OpenAI + Neuronpedia keys stay in **Settings** (`sessionStorage`). They are only needed to launch new runs.
 

@@ -61,8 +61,19 @@ export function exampleSeries(experiments: Experiment[]) {
     experiments.forEach((ex, ei) => {
       const r = ex.rows.find((x) => x.exampleId === exampleId);
       const letter = String.fromCharCode(65 + ei);
+      const text = r ? nlaText(r) : "";
       row[`mse${letter}`] = r ? rowMse(r) : null;
       row[`chars${letter}`] = r ? nlaCharCount(r) : null;
+      row[`mentions_reddit${letter}`] = r
+        ? (numericScore(r.scores.mentions_reddit) ?? null)
+        : null;
+      row[`lexical_reddit${letter}`] = r ? (namesReddit(text) ? 1 : 0) : null;
+      row[`lexical_forum${letter}`] = r ? (forumLexeme(text) ? 1 : 0) : null;
+      row[`lexical_article${letter}`] = r ? (articleFraming(text) ? 1 : 0) : null;
+      for (const [k, v] of Object.entries(r?.scores ?? {})) {
+        if (k === "mentions_reddit") continue;
+        row[`${k}${letter}`] = numericScore(v);
+      }
     });
     return row;
   });

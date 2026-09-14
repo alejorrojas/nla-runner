@@ -254,3 +254,17 @@ button.btn:disabled {
 .tt-resizer:hover {
   background: color-mix(in srgb, var(--clay) 55%, transparent);
 }
+
+.chart-strip {
+  scrollbar-color: var(--line-strong) transparent;
+  scrollbar-width: thin;
+}
+
+.chart-strip::-webkit-scrollbar {
+  height: 8px;
+}
+
+.chart-strip::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border-radius: 999px;
+}
