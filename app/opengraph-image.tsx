@@ -10,13 +10,16 @@ export const size = {
 };
 export const contentType = "image/png";
 
-const plexSemiBold = await readFile(
-  join(process.cwd(), "app/fonts/IBMPlexSans-SemiBold.ttf"),
+const jakartaBold = await readFile(
+  join(process.cwd(), "app/fonts/PlusJakartaSans-Bold.ttf"),
 );
-const plexRegular = await readFile(
-  join(process.cwd(), "app/fonts/IBMPlexSans-Regular.ttf"),
+const jakartaMedium = await readFile(
+  join(process.cwd(), "app/fonts/PlusJakartaSans-Medium.ttf"),
 );
-const logo = await readFile(join(process.cwd(), "public/brand/logo.png"));
+const logoSrc = `data:image/png;base64,${await readFile(
+  join(process.cwd(), "public/brand/mark-og.png"),
+  "base64",
+)}`;
 
 export default async function Image() {
   return new ImageResponse(
@@ -27,87 +30,103 @@ export default async function Image() {
           height: "100%",
           display: "flex",
           position: "relative",
-          backgroundColor: "#000000",
+          backgroundColor: "#2a211c",
           overflow: "hidden",
-          fontFamily: "IBM Plex Sans",
+          fontFamily: "Plus Jakarta Sans",
         }}
       >
         <div
           style={{
             position: "absolute",
-            left: -180,
-            bottom: -200,
-            width: 980,
+            left: -280,
+            top: -320,
+            width: 920,
             height: 780,
-            borderRadius: 980,
+            borderRadius: 920,
             background:
-              "radial-gradient(circle at 42% 38%, #5cd3e8 0%, #00bfff 32%, rgba(0,0,0,0) 70%)",
+              "radial-gradient(circle at 42% 40%, #d97757 0%, rgba(217,119,87,0) 62%)",
+            opacity: 0.95,
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            right: -260,
+            top: -280,
+            width: 860,
+            height: 720,
+            borderRadius: 860,
+            background:
+              "radial-gradient(circle at 58% 42%, #e3dacc 0%, rgba(227,218,204,0) 58%)",
+            opacity: 0.78,
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            right: 40,
+            bottom: -280,
+            width: 780,
+            height: 680,
+            borderRadius: 780,
+            background:
+              "radial-gradient(circle at 50% 40%, #c4785a 0%, rgba(196,120,90,0) 64%)",
             opacity: 0.88,
           }}
         />
         <div
           style={{
             position: "absolute",
-            right: -220,
-            top: -160,
-            width: 920,
-            height: 720,
-            borderRadius: 920,
-            background:
-              "radial-gradient(circle at 58% 48%, #a8ecff 0%, #5cd3e8 26%, rgba(0,0,0,0) 68%)",
-            opacity: 0.8,
+            inset: 0,
+            backgroundColor: "rgba(20,20,19,0.15)",
           }}
         />
         <div
           style={{
             position: "absolute",
-            left: 420,
-            top: 80,
-            width: 520,
-            height: 420,
-            borderRadius: 520,
-            background:
-              "radial-gradient(circle at 50% 50%, rgba(0,191,255,0.35) 0%, rgba(0,0,0,0) 70%)",
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: "rgba(0,0,0,0.2)",
+            height: 180,
+            background:
+              "linear-gradient(to top, #faf9f5 0%, rgba(250,249,245,0) 100%)",
           }}
         />
+
         <div
           style={{
             position: "absolute",
-            top: 44,
+            top: 40,
             left: 52,
             display: "flex",
             alignItems: "center",
             gap: 12,
           }}
         >
-          <img
-            src={`data:image/png;base64,${logo.toString("base64")}`}
-            width={40}
-            height={40}
-            style={{ borderRadius: 10 }}
-          />
           <div
             style={{
               display: "flex",
-              fontSize: 22,
-              fontWeight: 600,
+              width: 40,
+              height: 40,
+              borderRadius: 10,
+              overflow: "hidden",
+            }}
+          >
+            <img src={logoSrc} width={40} height={40} />
+          </div>
+          <div
+            style={{
+              display: "flex",
+              fontSize: 16,
+              fontWeight: 500,
               color: "#ffffff",
-              letterSpacing: -0.4,
+              letterSpacing: -0.3,
             }}
           >
             NLASmith
           </div>
         </div>
+
         <div
           style={{
             width: "100%",
@@ -116,16 +135,15 @@ export default async function Image() {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            padding: "0 80px",
-            textAlign: "center",
+            padding: "0 96px",
           }}
         >
           <div
             style={{
               display: "flex",
-              fontSize: 16,
+              fontSize: 15,
               fontWeight: 500,
-              letterSpacing: 3.2,
+              letterSpacing: 2.8,
               color: "rgba(255,255,255,0.7)",
               textTransform: "uppercase",
             }}
@@ -136,12 +154,14 @@ export default async function Image() {
             style={{
               display: "flex",
               flexDirection: "column",
+              alignItems: "center",
               marginTop: 22,
-              fontSize: 64,
-              fontWeight: 600,
-              lineHeight: 0.95,
+              fontSize: 68,
+              fontWeight: 700,
+              lineHeight: 0.94,
               color: "#ffffff",
-              letterSpacing: -1.8,
+              letterSpacing: -2.4,
+              textAlign: "center",
             }}
           >
             <div style={{ display: "flex" }}>From one activation</div>
@@ -150,16 +170,59 @@ export default async function Image() {
           <div
             style={{
               display: "flex",
-              marginTop: 28,
-              maxWidth: 820,
-              fontSize: 22,
-              fontWeight: 400,
+              marginTop: 26,
+              maxWidth: 780,
+              fontSize: 20,
+              fontWeight: 500,
               lineHeight: 1.4,
-              color: "rgba(255,255,255,0.75)",
+              color: "rgba(255,255,255,0.8)",
+              textAlign: "center",
             }}
           >
-            Datasets, token policies, Neuronpedia NLA, and LLM-as-judge —
-            systematic evaluation of Natural Language Activations.
+            Datasets, token policies, configurable judges, and aggregated
+            metrics — so hypotheses about internal representations can be run
+            and compared.
+          </div>
+          <div
+            style={{
+              display: "flex",
+              marginTop: 36,
+              gap: 12,
+              alignItems: "center",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                height: 44,
+                padding: "0 24px",
+                borderRadius: 999,
+                backgroundColor: "#faf9f5",
+                color: "#141413",
+                fontSize: 16,
+                fontWeight: 500,
+              }}
+            >
+              Open the prototype
+            </div>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                height: 44,
+                padding: "0 24px",
+                borderRadius: 999,
+                border: "1px solid rgba(255,255,255,0.4)",
+                color: "#ffffff",
+                fontSize: 16,
+                fontWeight: 500,
+              }}
+            >
+              See the pipeline
+            </div>
           </div>
         </div>
       </div>
@@ -168,16 +231,16 @@ export default async function Image() {
       ...size,
       fonts: [
         {
-          name: "IBM Plex Sans",
-          data: plexRegular,
+          name: "Plus Jakarta Sans",
+          data: jakartaMedium,
           style: "normal",
-          weight: 400,
+          weight: 500,
         },
         {
-          name: "IBM Plex Sans",
-          data: plexSemiBold,
+          name: "Plus Jakarta Sans",
+          data: jakartaBold,
           style: "normal",
-          weight: 600,
+          weight: 700,
         },
       ],
     },

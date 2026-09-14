@@ -335,8 +335,19 @@ export async function writeCatalogStore(store: Store): Promise<void> {
   await writeOwnedStore(sb, null, store, { catalog: true });
 }
 
+async function workspaceClient() {
+  const secret = createSecretClient();
+  if (secret) return secret;
+  try {
+    const { createServerSupabase } = await import("./supabase/server");
+    return await createServerSupabase();
+  } catch {
+    return null;
+  }
+}
+
 export async function readUserStore(userId: string): Promise<Store> {
-  const sb = createSecretClient();
+  const sb = await workspaceClient();
   if (!sb) {
     return readFileStore();
   }
@@ -345,7 +356,7 @@ export async function readUserStore(userId: string): Promise<Store> {
 }
 
 export async function writeUserStore(userId: string, store: Store): Promise<void> {
-  const sb = createSecretClient();
+  const sb = await workspaceClient();
   if (!sb) {
     await writeFileStore(store);
     return;
