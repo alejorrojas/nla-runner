@@ -36,7 +36,7 @@ export function RunProgress({ tick }: { tick: RunTick | null }) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 8 }}
           transition={spring}
-          className="mt-4 overflow-hidden rounded-xl border border-[var(--accent)] bg-white"
+          className="mt-4 overflow-hidden rounded-xl border border-[var(--accent)] bg-[var(--card)]"
         >
           <div className="flex items-center gap-2 border-b border-[var(--line)] px-4 py-2">
             <span className="relative flex h-2.5 w-2.5">

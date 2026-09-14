@@ -89,7 +89,7 @@ export function RunTable({
               <tr key={eid} className="border-t border-[var(--line)] align-top">
                 <td className="px-3 py-3 text-[var(--muted)]">{rowIndex + 1}</td>
                 <td className="max-w-[240px] px-3 py-3">
-                  <div className="whitespace-pre-wrap text-[13px] leading-relaxed text-[#1f232a]">
+                  <div className="whitespace-pre-wrap text-[13px] leading-relaxed text-[var(--ink)]">
                     {prompt}
                   </div>
                 </td>
@@ -103,7 +103,7 @@ export function RunTable({
                       {row?.error ? (
                         <span className="text-[var(--warn)]">{row.error}</span>
                       ) : (
-                        <div className="max-h-40 overflow-auto whitespace-pre-wrap leading-relaxed text-[#374151]">
+                        <div className="max-h-40 overflow-auto whitespace-pre-wrap leading-relaxed text-[var(--muted)]">
                           {row ? rowOutput(row) : "—"}
                         </div>
                       )}

@@ -2,26 +2,32 @@
 @import "tw-animate-css";
 
 :root {
-  --bg: #f3f7fb;
-  --sidebar: #f7fafc;
-  --card: #ffffff;
-  --line: #e3ebf3;
-  --line-strong: #c9d6e5;
-  --ink: #12203a;
-  --muted: #64748b;
-  --hover: #eef4fb;
-  --active: #e3eef9;
-  --accent: #2f6fed;
-  --accent-hover: #245dd4;
-  --star: #4d8ef5;
-  --a: #1d4ed8;
-  --b: #3b82f6;
-  --c: #60a5fa;
-  --d: #93c5fd;
+  --bg: #faf9f5;
+  --sidebar: #f0eee6;
+  --card: #faf9f5;
+  --line: #d1cfc5;
+  --line-strong: #c4c0b4;
+  --ink: #141413;
+  --body: #3d3d3a;
+  --muted: #5e5d59;
+  --hover: #e3dacc;
+  --active: #e3dacc;
+  --accent: #d97757;
+  --accent-hover: #c45f42;
+  --star: #d97757;
+  --a: #d97757;
+  --b: #b08968;
+  --c: #8a8f6a;
+  --d: #6a9bcc;
   --warn: #b45309;
-  --ok: #1d4ed8;
-  --score-down: #eef4fb;
-  --score-up: #dbeafe;
+  --ok: #6a7f4a;
+  --score-down: #f0eee6;
+  --score-up: #e3dacc;
+  --clay: #d97757;
+  --paper: #f0eee6;
+  --sand: #e3dacc;
+  --terracotta: #c4785a;
+  --blush: #e4c4b4;
 }
 
 @theme inline {
@@ -29,25 +35,26 @@
   --color-foreground: var(--ink);
   --color-card: var(--card);
   --color-card-foreground: var(--ink);
-  --color-popover: #ffffff;
+  --color-popover: #faf9f5;
   --color-popover-foreground: var(--ink);
-  --color-primary: var(--accent);
-  --color-primary-foreground: #ffffff;
+  --color-primary: #141413;
+  --color-primary-foreground: #faf9f5;
   --color-secondary: var(--hover);
   --color-secondary-foreground: var(--ink);
   --color-muted: var(--hover);
   --color-muted-foreground: var(--muted);
   --color-accent: var(--hover);
   --color-accent-foreground: var(--ink);
-  --color-destructive: #b91c1c;
+  --color-destructive: #9b3a2a;
   --color-border: var(--line);
   --color-input: var(--line-strong);
-  --color-ring: var(--accent);
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 10px;
-  --radius-xl: 12px;
+  --color-ring: var(--ink);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
   --font-sans: var(--font-ui);
+  --font-serif: var(--font-editorial);
   --font-mono: var(--font-ibm-mono);
 }
 
@@ -60,13 +67,25 @@ body {
 
 body {
   font-family: var(--font-ui), ui-sans-serif, system-ui, sans-serif;
-  letter-spacing: -0.011em;
+  letter-spacing: -0.012em;
+}
+
+button,
+a {
+  letter-spacing: -0.01em;
 }
 
 .font-display {
   font-family: var(--font-ui), ui-sans-serif, system-ui, sans-serif;
-  font-weight: 600;
-  letter-spacing: -0.03em;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+.font-editorial {
+  font-family: var(--font-editorial), ui-serif, Georgia, serif;
+  font-weight: 400;
+  letter-spacing: 0;
+  font-feature-settings: "onum";
 }
 
 input,
@@ -124,13 +143,15 @@ a.btn {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  background: #fff;
+  background: #faf9f5;
   border: 1px solid var(--line-strong);
   color: var(--ink);
-  border-radius: 8px;
+  border-radius: 999px;
   padding: 0.42rem 0.9rem;
   font-size: 13px;
   font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0;
   text-decoration: none;
 }
 
@@ -141,14 +162,14 @@ a.btn:hover {
 
 button.btn-primary,
 a.btn-primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #faf9f5;
 }
 
 button.btn-primary:hover,
 a.btn-primary:hover {
-  background: var(--accent-hover);
+  background: #000;
 }
 
 button.btn-primary:disabled,
@@ -185,13 +206,13 @@ button.btn:disabled {
   border-radius: 4px;
   font-size: 11px;
   font-weight: 600;
-  color: #fff;
+  color: #faf9f5;
 }
 
 .surface {
   background: var(--card);
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: 16px;
 }
 
 .data-table {
@@ -217,4 +238,3 @@ button.btn:disabled {
 .data-table tbody tr:last-child td {
   border-bottom: 0;
 }
-

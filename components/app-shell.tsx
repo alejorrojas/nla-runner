@@ -60,7 +60,7 @@ function LandingBar() {
   return (
     <header className="relative z-30 mx-auto flex max-w-[1180px] items-center justify-between px-6 py-5 md:px-8">
       <Link href="/" className="flex items-center gap-2 text-white">
-        <Mark className="h-8 w-8 rounded-[9px]" />
+        <Mark className="h-8 w-8" />
         <span className="text-[15px] font-medium tracking-tight">NLASmith</span>
       </Link>
       <nav className="flex items-center gap-5 text-[13px]">
@@ -85,7 +85,10 @@ function LandingBar() {
         <Link href="/lab" className="text-white/70 hover:text-white">
           Home
         </Link>
-        <Button asChild>
+        <Button
+          asChild
+          className="bg-[#faf9f5] text-[#141413] hover:bg-white"
+        >
           <Link href="/datasets">Get started</Link>
         </Button>
       </nav>
@@ -115,11 +118,17 @@ function ShellInner({ children }: { children: ReactNode }) {
     <div className="flex min-h-full">
       <aside className="relative flex w-[248px] shrink-0 flex-col border-r border-[var(--line)] bg-[var(--sidebar)]">
         <div className="px-4 pb-4 pt-5">
-          <Link href="/" className="flex items-center gap-2">
-            <Mark className="h-7 w-7 rounded-[8px]" />
-            <span className="text-[15px] font-medium tracking-tight">NLASmith</span>
+          <Link href="/" className="flex items-center gap-2.5">
+            <Mark className="h-8 w-8 shrink-0" />
+            <span className="flex min-w-0 flex-col justify-center leading-tight">
+              <span className="text-[15px] font-medium tracking-tight">
+                NLASmith
+              </span>
+              <span className="mt-0.5 text-[13px] text-[var(--muted)]">
+                Personal
+              </span>
+            </span>
           </Link>
-          <div className="mt-1 pl-9 text-[13px] text-[var(--muted)]">Personal</div>
         </div>
         <div className="px-3 pb-1 text-[13px] font-medium text-[var(--muted)]">
           Application

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Plus } from "lucide-react";
 import { PageHeader, PageLoader } from "@/components/page-chrome";
 import { Button } from "@/components/ui/button";
 import { useKeys } from "@/lib/keys";
@@ -34,7 +35,10 @@ export default function LabPage() {
         action={
           firstDataset ? (
             <Button asChild>
-              <Link href={`/datasets/${firstDataset.id}`}>+ Experiment</Link>
+              <Link href={`/datasets/${firstDataset.id}`}>
+                <Plus />
+                Experiment
+              </Link>
             </Button>
           ) : (
             <Button asChild>

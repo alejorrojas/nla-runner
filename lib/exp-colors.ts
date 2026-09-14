@@ -1,4 +1,4 @@
-export const EXP_COLORS = ["#1d4ed8", "#3b82f6", "#60a5fa", "#93c5fd"] as const;
+export const EXP_COLORS = ["#d97757", "#c4785a", "#b08968", "#8a8f6a"] as const;
 
 export function expLetter(i: number): string {
   return String.fromCharCode(65 + (i % 26));

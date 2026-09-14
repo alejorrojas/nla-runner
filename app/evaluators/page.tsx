@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Plus } from "lucide-react";
 import { PageHeader, PageLoader } from "@/components/page-chrome";
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/lib/store-client";
@@ -17,7 +18,10 @@ export default function EvaluatorsPage() {
         hint="LLM-as-judge on AVs. Same mapping language as the run table."
         action={
           <Button asChild>
-            <Link href="/evaluators/new">+ Evaluator</Link>
+            <Link href="/evaluators/new">
+              <Plus />
+              Evaluator
+            </Link>
           </Button>
         }
       />

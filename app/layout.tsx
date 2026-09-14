@@ -1,20 +1,27 @@
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
+import { IBM_Plex_Mono, Plus_Jakarta_Sans, Source_Serif_4 } from "next/font/google";
 import { AppShell } from "@/components/app-shell";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 
-const ui = IBM_Plex_Sans({
+const ui = Plus_Jakarta_Sans({
   variable: "--font-ui",
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  display: "swap",
+});
+
+const serif = Source_Serif_4({
+  variable: "--font-editorial",
+  subsets: ["latin"],
+  display: "swap",
 });
 
 const ibmMono = IBM_Plex_Mono({
   variable: "--font-ibm-mono",
   subsets: ["latin"],
   weight: ["400", "500"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -49,7 +56,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${ui.variable} ${ibmMono.variable} h-full antialiased`}
+      className={`${ui.variable} ${serif.variable} ${ibmMono.variable} h-full antialiased`}
     >
       <body className="min-h-full">
         <TooltipProvider>
