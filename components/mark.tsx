@@ -7,7 +7,8 @@ export function Mark({ className }: { className?: string }) {
       alt=""
       width={32}
       height={32}
-      className={`rounded-[25%] ${className ?? ""}`}
+      className={className}
+      unoptimized
       aria-hidden
     />
   );

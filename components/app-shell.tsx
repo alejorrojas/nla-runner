@@ -64,31 +64,32 @@ function LandingBar() {
         <Mark className="h-8 w-8" />
         <span className="text-[15px] font-medium tracking-tight">NLASmith</span>
       </Link>
-      <nav className="flex items-center gap-5 text-[13px]">
+      <nav className="flex items-center gap-5 text-[13px] font-medium text-[#faf9f5] [text-shadow:0_1px_2px_rgba(20,20,19,0.55),0_0_18px_rgba(20,20,19,0.45)]">
         <a
           href="#motivation"
-          className="hidden text-white/70 hover:text-white sm:inline"
+          className="hidden hover:text-white sm:inline"
         >
           Why
         </a>
         <a
           href="#pipeline"
-          className="hidden text-white/70 hover:text-white md:inline"
+          className="hidden hover:text-white md:inline"
         >
           Pipeline
         </a>
         <a
           href="#product"
-          className="hidden text-white/70 hover:text-white lg:inline"
+          className="hidden hover:text-white lg:inline"
         >
           Prototype
         </a>
-        <Link href={toAppPath("/login")} className="text-white/70 hover:text-white">
+        <Link href={toAppPath("/login")} className="hover:text-white">
           Home
         </Link>
         <Button
           asChild
-          className="bg-[#faf9f5] text-[#141413] hover:bg-white"
+          size="lg"
+          className="h-11 bg-[#faf9f5] px-6 text-[#141413] [text-shadow:none] hover:bg-white"
         >
           <Link href={toAppPath("/login")}>Get started</Link>
         </Button>
@@ -111,7 +112,7 @@ function ShellInner({ children }: { children: ReactNode }) {
   if (path === "/") {
     return (
       <div className="relative min-h-full">
-        <div className="absolute inset-x-0 top-0 z-30">
+        <div className="absolute inset-x-0 top-0 z-30 bg-gradient-to-b from-[#141413]/50 via-[#141413]/20 to-transparent">
           <LandingBar />
         </div>
         {children}

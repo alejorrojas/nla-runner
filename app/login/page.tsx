@@ -2,6 +2,7 @@
 
 import { FormEvent, Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { GradientBackground } from "@/components/gradient-background";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -56,29 +57,13 @@ function LoginForm() {
     }
   }
 
-  async function sendMagicLink() {
-    setBusy(true);
-    setMessage("");
-    const supabase = createBrowserSupabase();
-    try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: `${appUrl()}/auth/callback?next=${encodeURIComponent(next)}`,
-        },
-      });
-      if (error) throw error;
-      setMessage("Magic link sent. Check your email.");
-    } catch (err) {
-      setMessage(err instanceof Error ? err.message : String(err));
-    } finally {
-      setBusy(false);
-    }
-  }
-
   return (
-    <div className="flex min-h-full items-center justify-center bg-[#faf9f5] px-6">
-      <div className="w-full max-w-md">
+    <div className="relative isolate min-h-dvh overflow-hidden">
+      <div className="absolute inset-0">
+        <GradientBackground tone="light" />
+      </div>
+      <div className="relative z-10 flex min-h-dvh items-center justify-center px-6 py-16">
+        <div className="w-full max-w-md rounded-2xl bg-[#faf9f5]/72 px-7 py-8 ring-1 ring-[#d1cfc5]/70 backdrop-blur-sm">
         <a href={siteUrl()} className="mb-10 flex items-center gap-2.5">
           <Mark className="h-8 w-8" />
           <span className="text-[15px] font-medium tracking-tight">NLASmith</span>
@@ -86,11 +71,6 @@ function LoginForm() {
         <h1 className="font-display text-[clamp(28px,4vw,36px)] leading-[1.05]">
           {mode === "signin" ? "Sign in to the lab" : "Create your workspace"}
         </h1>
-        <p className="mt-3 text-[15px] leading-relaxed text-[var(--muted)]">
-          Datasets, evaluators, and runs stay attached to your account. We copy
-          in Example prompts, Example judges, and two finished Example runs so
-          you can compare last-user vs first-assistant aggregates.
-        </p>
         <form className="mt-8 space-y-4" onSubmit={onSubmit}>
           <div className="field">
             <Label htmlFor="email">Email</Label>
@@ -130,14 +110,7 @@ function LoginForm() {
           >
             {mode === "signin" ? "Need an account?" : "Already have an account?"}
           </button>
-          <button
-            type="button"
-            className="text-[var(--muted)] hover:text-[var(--ink)]"
-            onClick={() => void sendMagicLink()}
-            disabled={busy || !email}
-          >
-            Email me a magic link
-          </button>
+        </div>
         </div>
       </div>
     </div>
@@ -146,7 +119,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-full bg-[#faf9f5]" />}>
+    <Suspense fallback={<div className="min-h-dvh bg-[#faf9f5]" />}>
       <LoginForm />
     </Suspense>
   );

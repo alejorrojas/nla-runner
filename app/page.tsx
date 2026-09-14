@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { MotionConfig } from "framer-motion";
 import { GradientBackground } from "@/components/gradient-background";
 import { LineArt } from "@/components/line-art";
 import { Mark } from "@/components/mark";
+import { FadeIn, Reveal, RevealGroup, RevealItem } from "@/components/motion";
 import { Button } from "@/components/ui/button";
 import { toAppPath } from "@/lib/urls";
 
@@ -107,27 +109,34 @@ const LIMITS = [
 
 export default function LandingPage() {
   return (
-    <div className="bg-[#faf9f5]">
+    <MotionConfig reducedMotion="user">
+      <div className="bg-[#faf9f5]">
       <section className="relative isolate flex min-h-screen items-center justify-center overflow-hidden px-6">
         <GradientBackground />
         <div className="absolute inset-0 z-[1] bg-[#141413]/15" />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] h-44 bg-gradient-to-t from-[#faf9f5] to-transparent" />
         <div className="relative z-10 mx-auto max-w-3xl px-4 py-28 text-center">
-          <p className="text-[13px] font-medium tracking-[0.14em] text-white/70 uppercase">
-            NLASmith · CONAIISI 2026
-          </p>
-          <h1 className="mt-5 font-display text-[clamp(40px,6.4vw,72px)] leading-[0.95] text-white">
-            From one activation
-            <br />
-            to a systematic experiment.
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-[16px] leading-relaxed text-white/80">
-            Neuronpedia makes Natural Language Activations easy to inspect one at a
-            time. NLASmith is the missing loop: datasets, token policies,
-            configurable judges, and aggregated metrics — so hypotheses about
-            internal representations can be run, reproduced, and compared.
-          </p>
-          <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
+          <FadeIn>
+            <p className="text-[13px] font-medium tracking-[0.14em] text-white/70 uppercase">
+              NLASmith · CONAIISI 2026
+            </p>
+          </FadeIn>
+          <FadeIn delay={0.06}>
+            <h1 className="mt-5 font-display text-[clamp(40px,6.4vw,72px)] leading-[0.95] text-white">
+              From one activation
+              <br />
+              to a systematic experiment.
+            </h1>
+          </FadeIn>
+          <FadeIn delay={0.12}>
+            <p className="mx-auto mt-6 max-w-2xl text-[16px] leading-relaxed text-white/80">
+              Neuronpedia makes Natural Language Activations easy to inspect one at a
+              time. NLASmith is the missing loop: datasets, token policies,
+              configurable judges, and aggregated metrics — so hypotheses about
+              internal representations can be run, reproduced, and compared.
+            </p>
+          </FadeIn>
+          <FadeIn delay={0.18} className="mt-9 flex flex-wrap items-center justify-center gap-3">
             <Button
               asChild
               size="lg"
@@ -143,14 +152,14 @@ export default function LandingPage() {
             >
               <a href="#pipeline">See the pipeline</a>
             </Button>
-          </div>
+          </FadeIn>
         </div>
       </section>
 
       <section id="motivation" className="-mt-16 px-6 pb-8 md:px-8">
         <div className="relative z-10 mx-auto max-w-[1180px]">
-          <div className="grid gap-4 lg:grid-cols-12">
-            <article className="overflow-hidden rounded-2xl bg-[#c4785a] lg:col-span-7">
+          <RevealGroup className="grid gap-4 lg:grid-cols-12">
+            <RevealItem as="article" className="overflow-hidden rounded-2xl bg-[#c4785a] lg:col-span-7">
               <div className="flex min-h-[220px] items-center justify-center px-8 pt-8">
                 <LineArt
                   kind="constellation"
@@ -172,9 +181,9 @@ export default function LandingPage() {
                   infallible readout of the model’s state.
                 </p>
               </div>
-            </article>
+            </RevealItem>
 
-            <article className="flex min-h-[320px] flex-col rounded-2xl bg-[#f0eee6] p-7 lg:col-span-5">
+            <RevealItem as="article" className="flex min-h-[320px] flex-col rounded-2xl bg-[#f0eee6] p-7 lg:col-span-5">
               <p className="text-[12px] font-medium tracking-[0.12em] text-[var(--muted)] uppercase">
                 02
               </p>
@@ -190,9 +199,9 @@ export default function LandingPage() {
                 The artifact under test is not only the visible reply. It is the NLA
                 at positions fixed before the run begins.
               </p>
-            </article>
+            </RevealItem>
 
-            <article className="overflow-hidden rounded-2xl bg-[#e3dacc] lg:col-span-5">
+            <RevealItem as="article" className="overflow-hidden rounded-2xl bg-[#e3dacc] lg:col-span-5">
               <div className="flex h-44 items-center justify-center">
                 <LineArt kind="scribble" className="h-full w-full max-w-[280px]" />
               </div>
@@ -209,9 +218,9 @@ export default function LandingPage() {
                   fixed by the experiment — not only the visible reply.
                 </p>
               </div>
-            </article>
+            </RevealItem>
 
-            <article className="flex flex-col rounded-2xl bg-[#f0eee6] p-7 lg:col-span-7">
+            <RevealItem as="article" className="flex flex-col rounded-2xl bg-[#f0eee6] p-7 lg:col-span-7">
               <p className="text-[12px] font-medium tracking-[0.12em] text-[var(--muted)] uppercase">
                 04 · Scope
               </p>
@@ -245,27 +254,30 @@ export default function LandingPage() {
                   </dd>
                 </div>
               </dl>
-            </article>
-          </div>
+            </RevealItem>
+          </RevealGroup>
         </div>
       </section>
 
       <section id="pipeline" className="bg-[#faf9f5] px-6 py-20 md:px-8">
         <div className="mx-auto max-w-[1180px]">
-          <p className="text-[13px] font-medium tracking-[0.12em] text-[var(--muted)] uppercase">
-            Conceptual pipeline
-          </p>
-          <h2 className="mt-4 max-w-2xl font-display text-[clamp(32px,4vw,48px)] leading-[1.05]">
-            Dataset, token policy, NLA, evaluator, results.
-          </h2>
-          <p className="font-editorial mt-5 max-w-2xl text-[22px] leading-snug text-[#3d3d3a]">
-            Each dataset example runs under a fixed configuration. Selected
-            positions go to the NLA service. Verbalizations are scored with
-            criteria defined up front.
-          </p>
-          <div className="mt-12 grid gap-4 lg:grid-cols-5">
+          <Reveal>
+            <p className="text-[13px] font-medium tracking-[0.12em] text-[var(--muted)] uppercase">
+              Conceptual pipeline
+            </p>
+            <h2 className="mt-4 max-w-2xl font-display text-[clamp(32px,4vw,48px)] leading-[1.05]">
+              Dataset, token policy, NLA, evaluator, results.
+            </h2>
+            <p className="font-editorial mt-5 max-w-2xl text-[22px] leading-snug text-[#3d3d3a]">
+              Each dataset example runs under a fixed configuration. Selected
+              positions go to the NLA service. Verbalizations are scored with
+              criteria defined up front.
+            </p>
+          </Reveal>
+          <RevealGroup className="mt-12 grid gap-4 lg:grid-cols-5">
             {PIPELINE.map((step) => (
-              <article
+              <RevealItem
+                as="article"
                 key={step.k}
                 className="flex flex-col rounded-2xl bg-[#f0eee6] p-6"
               >
@@ -297,33 +309,30 @@ export default function LandingPage() {
                     </dd>
                   </div>
                 </dl>
-                <Button asChild className="mt-5 h-10 w-fit px-5">
-                  <Link href={toAppPath("/lab")}>
-                    Open prototype
-                    <span aria-hidden>→</span>
-                  </Link>
-                </Button>
-              </article>
+              </RevealItem>
             ))}
-          </div>
+          </RevealGroup>
         </div>
       </section>
 
       <section id="product" className="bg-[#faf9f5] px-6 pb-8 md:px-8">
         <div className="mx-auto max-w-[1180px]">
-          <p className="text-[13px] font-medium tracking-[0.12em] text-[var(--muted)] uppercase">
-            Prototype
-          </p>
-          <h2 className="mt-4 max-w-2xl font-display text-[clamp(32px,4vw,48px)] leading-[1.05]">
-            A working loop for configuration, execution, and comparison.
-          </h2>
-          <p className="font-editorial mt-5 max-w-2xl text-[22px] leading-snug text-[#3d3d3a]">
-            The first version keeps only what turns a manual inspection into a
-            reproducible process.
-          </p>
-          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <Reveal>
+            <p className="text-[13px] font-medium tracking-[0.12em] text-[var(--muted)] uppercase">
+              Prototype
+            </p>
+            <h2 className="mt-4 max-w-2xl font-display text-[clamp(32px,4vw,48px)] leading-[1.05]">
+              A working loop for configuration, execution, and comparison.
+            </h2>
+            <p className="font-editorial mt-5 max-w-2xl text-[22px] leading-snug text-[#3d3d3a]">
+              The first version keeps only what turns a manual inspection into a
+              reproducible process.
+            </p>
+          </Reveal>
+          <RevealGroup className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {PIECES.map((item) => (
-              <article
+              <RevealItem
+                as="article"
                 key={item.t}
                 className="overflow-hidden rounded-2xl bg-[#faf9f5] ring-1 ring-[#d1cfc5]"
               >
@@ -345,14 +354,14 @@ export default function LandingPage() {
                     {item.d}
                   </p>
                 </div>
-              </article>
+              </RevealItem>
             ))}
-          </div>
+          </RevealGroup>
         </div>
       </section>
 
       <section id="use-case" className="px-6 py-16 md:px-8">
-        <div className="mx-auto grid max-w-[1180px] overflow-hidden rounded-2xl lg:grid-cols-2">
+        <Reveal className="mx-auto grid max-w-[1180px] overflow-hidden rounded-2xl lg:grid-cols-2">
           <div className="flex min-h-[360px] items-center justify-center bg-[#f0eee6] p-10">
             <LineArt kind="constellation" className="h-64 w-full max-w-[420px]" />
           </div>
@@ -374,20 +383,22 @@ export default function LandingPage() {
               metrics.
             </p>
           </div>
-        </div>
+        </Reveal>
       </section>
 
       <section id="limits" className="bg-[#faf9f5] px-6 py-24 md:px-8">
         <div className="mx-auto max-w-[1180px]">
-          <p className="text-[13px] font-medium tracking-[0.12em] text-[var(--muted)] uppercase">
-            How to read the numbers
-          </p>
-          <h2 className="mt-4 max-w-2xl font-display text-[clamp(32px,4vw,48px)] leading-[1.05]">
-            Automatic scores are measurements, not a verdict on the residual.
-          </h2>
-          <div className="mt-12 divide-y divide-[#d1cfc5] border-y border-[#d1cfc5]">
+          <Reveal>
+            <p className="text-[13px] font-medium tracking-[0.12em] text-[var(--muted)] uppercase">
+              How to read the numbers
+            </p>
+            <h2 className="mt-4 max-w-2xl font-display text-[clamp(32px,4vw,48px)] leading-[1.05]">
+              Automatic scores are measurements, not a verdict on the residual.
+            </h2>
+          </Reveal>
+          <RevealGroup className="mt-12 divide-y divide-[#d1cfc5] border-y border-[#d1cfc5]">
             {LIMITS.map((item) => (
-              <div
+              <RevealItem
                 key={item.t}
                 className="grid gap-4 py-8 md:grid-cols-[0.8fr_1.2fr] md:items-baseline"
               >
@@ -395,14 +406,14 @@ export default function LandingPage() {
                 <p className="text-[16px] leading-relaxed text-[var(--muted)]">
                   {item.d}
                 </p>
-              </div>
+              </RevealItem>
             ))}
-          </div>
+          </RevealGroup>
         </div>
       </section>
 
       <section className="px-6 pb-24 md:px-8">
-        <div className="mx-auto max-w-[1180px] rounded-2xl bg-[#141413] px-8 py-20 text-center text-[#faf9f5] md:px-16">
+        <Reveal className="mx-auto max-w-[1180px] rounded-2xl bg-[#141413] px-8 py-20 text-center text-[#faf9f5] md:px-16">
           <div className="mb-8 flex justify-center">
             <Mark className="h-12 w-12" />
           </div>
@@ -431,7 +442,7 @@ export default function LandingPage() {
               <Link href={toAppPath("/datasets")}>Datasets & Experiments</Link>
             </Button>
           </div>
-        </div>
+        </Reveal>
       </section>
 
       <footer className="bg-[#141413] text-[#cccccc]">
@@ -459,7 +470,8 @@ export default function LandingPage() {
             </Link>
           </div>
         </div>
-      </footer>
-    </div>
+        </footer>
+      </div>
+    </MotionConfig>
   );
 }
