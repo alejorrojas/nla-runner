@@ -1,25 +1,42 @@
 # NLASmith
 
-LangSmith-shaped experiment UI for Neuronpedia NLAs. Paste OpenAI + Neuronpedia keys in **Settings** (browser `sessionStorage` only).
+LangSmith-shaped experiment UI for Neuronpedia NLAs.
+
+- Marketing: [nlasmith.com](https://nlasmith.com)
+- App: [app.nlasmith.com](https://app.nlasmith.com) (login required)
 
 ```bash
 npm install
+cp .env.example .env.local
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Seed dataset is the Reddit prior prompts; seed judge is `mentions_reddit`.
+Open [http://localhost:3000](http://localhost:3000) for the landing. The lab (`/lab`, `/datasets`, …) requires a Supabase login. The first session copies a starter workspace: the **Reddit prior (pilot)** dataset, `mentions_reddit` judge, and the catalog run **Forum prior · Llama 3.3 70B · last user**.
 
-Run an experiment on a dataset, pick NLA source + token policy + evaluators, then Compare two runs (or click a run name for its charts).
+OpenAI + Neuronpedia keys stay in **Settings** (`sessionStorage`). They are only needed to launch new runs.
 
 ## Persistence
 
 On Vercel set:
 
+- `NEXT_PUBLIC_SITE_URL=https://nlasmith.com`
+- `NEXT_PUBLIC_APP_URL=https://app.nlasmith.com`
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (`sb_publishable_...`)
-- `SUPABASE_URL` (same project URL; server-only)
+- `SUPABASE_URL`
 - `SUPABASE_SECRET_KEY` (`sb_secret_...`)
 
-Do not use the legacy `anon` / `service_role` JWTs. The lab store is Postgres on **nla-runner** (`vamfikbkcewmlzkqxtrs`): `datasets`, `dataset_examples`, `evaluators`, `experiments`, `experiment_rows`. RLS is on with no anon policies. Server routes use the secret key (bypasses RLS). The publishable key is the public client credential.
+Point the Vercel project to both `nlasmith.com` and `app.nlasmith.com`. In Supabase Auth, set the site URL to `https://app.nlasmith.com` and allow redirects:
 
-Without those env vars, local `npm run dev` still uses `data/store.json`.
+- `https://app.nlasmith.com/auth/callback`
+- `http://localhost:3000/auth/callback`
+
+Tables live on project **nla-runner** (`vamfikbkcewmlzkqxtrs`). Rows are scoped by `owner_id`. Catalog rows (`is_catalog`) are copied into each new user.
+
+Seed / refresh the shared starter run (needs API keys):
+
+```bash
+npm run seed:forum
+```
+
+Without Supabase env vars, local `npm run dev` still falls back to `data/store.json`.

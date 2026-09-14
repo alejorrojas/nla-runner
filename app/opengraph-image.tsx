@@ -94,6 +94,7 @@ export default async function Image() {
             src={`data:image/png;base64,${logo.toString("base64")}`}
             width={40}
             height={40}
+            style={{ borderRadius: 10 }}
           />
           <div
             style={{

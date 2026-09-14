@@ -15,6 +15,7 @@ import { spring } from "@/components/motion";
 import { Button } from "@/components/ui/button";
 import { KeysProvider, useKeys } from "@/lib/keys";
 import { StoreProvider, useStore } from "@/lib/store-client";
+import { toAppPath } from "@/lib/urls";
 
 function NavLink({
   href,
@@ -82,14 +83,14 @@ function LandingBar() {
         >
           Prototype
         </a>
-        <Link href="/lab" className="text-white/70 hover:text-white">
+        <Link href={toAppPath("/login")} className="text-white/70 hover:text-white">
           Home
         </Link>
         <Button
           asChild
           className="bg-[#faf9f5] text-[#141413] hover:bg-white"
         >
-          <Link href="/datasets">Get started</Link>
+          <Link href={toAppPath("/login")}>Get started</Link>
         </Button>
       </nav>
     </header>
@@ -102,6 +103,10 @@ function ShellInner({ children }: { children: ReactNode }) {
   const { store } = useStore();
   const missing = !keys.openai || !keys.neuronpedia;
   const running = store?.experiments.filter((e) => e.status === "running") ?? [];
+
+  if (path === "/login") {
+    return <>{children}</>;
+  }
 
   if (path === "/") {
     return (
@@ -184,6 +189,19 @@ function ShellInner({ children }: { children: ReactNode }) {
             <div className="text-[13px] text-[var(--muted)]">Keys in this session</div>
           )}
           <div className="pt-1 text-[13px] text-[var(--muted)]">Personal workspace</div>
+          <button
+            type="button"
+            className="text-[13px] text-[var(--muted)] hover:text-[var(--ink)]"
+            onClick={() => {
+              void (async () => {
+                const { createBrowserSupabase } = await import("@/lib/supabase/browser");
+                await createBrowserSupabase().auth.signOut();
+                window.location.href = "/login";
+              })();
+            }}
+          >
+            Sign out
+          </button>
         </div>
       </aside>
       <main className="min-w-0 flex-1 overflow-auto bg-[var(--bg)]">{children}</main>

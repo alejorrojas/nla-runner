@@ -1,7 +1,8 @@
 import { NLA_SOURCES } from "@/lib/types";
 import { runJudge } from "@/lib/judge";
 import { runNlaExample } from "@/lib/neuronpedia";
-import { patchStore, readStore } from "@/lib/store";
+import { patchUserStore, readUserStore } from "@/lib/store";
+import { requireUser } from "@/lib/supabase/server";
 import type { Experiment, ExperimentRow, TokenPolicy } from "@/lib/types";
 
 export const maxDuration = 300;
@@ -10,8 +11,8 @@ function headerKey(req: Request, name: string): string {
   return req.headers.get(name)?.trim() || "";
 }
 
-async function persistExperiment(experiment: Experiment): Promise<void> {
-  await patchStore((s) => ({
+async function persistExperiment(userId: string, experiment: Experiment): Promise<void> {
+  await patchUserStore(userId, (s) => ({
     ...s,
     experiments: s.experiments.some((e) => e.id === experiment.id)
       ? s.experiments.map((e) => (e.id === experiment.id ? experiment : e))
@@ -20,6 +21,10 @@ async function persistExperiment(experiment: Experiment): Promise<void> {
 }
 
 export async function POST(req: Request) {
+  const user = await requireUser();
+  if (!user) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
   const neuronpedia = headerKey(req, "x-neuronpedia-key");
   const openai = headerKey(req, "x-openai-key");
   const body = (await req.json()) as {
@@ -37,7 +42,7 @@ export async function POST(req: Request) {
     return Response.json({ error: "Missing OpenAI API key" }, { status: 400 });
   }
 
-  const store = await readStore();
+  const store = await readUserStore(user.id);
   const dataset = store.datasets.find((d) => d.id === body.datasetId);
   const source = NLA_SOURCES.find((s) => s.id === body.sourceId);
   if (!dataset || !source) {
@@ -63,7 +68,7 @@ export async function POST(req: Request) {
     status: "running",
     createdAt: new Date().toISOString(),
   };
-  await persistExperiment(experiment);
+  await persistExperiment(user.id, experiment);
 
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
@@ -121,7 +126,7 @@ export async function POST(req: Request) {
             row.error = err instanceof Error ? err.message : String(err);
           }
           experiment.rows.push(row);
-          await persistExperiment(experiment);
+          await persistExperiment(user.id, experiment);
           send({ type: "row", row, index: i, total, experiment });
         }
         experiment.status = "done";
@@ -129,7 +134,7 @@ export async function POST(req: Request) {
         experiment.status = "error";
         experiment.error = err instanceof Error ? err.message : String(err);
       }
-      await persistExperiment(experiment);
+      await persistExperiment(user.id, experiment);
       send({ type: "done", experiment });
       controller.close();
     },

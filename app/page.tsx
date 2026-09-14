@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { GradientBackground } from "@/components/gradient-background";
 import { LineArt } from "@/components/line-art";
+import { Mark } from "@/components/mark";
 import { Button } from "@/components/ui/button";
+import { toAppPath } from "@/lib/urls";
 
 const PIPELINE = [
   {
@@ -131,7 +133,7 @@ export default function LandingPage() {
               size="lg"
               className="h-11 bg-[#faf9f5] px-6 text-[#141413] hover:bg-white"
             >
-              <Link href="/lab">Open the prototype</Link>
+              <Link href={toAppPath("/lab")}>Open the prototype</Link>
             </Button>
             <Button
               asChild
@@ -296,7 +298,7 @@ export default function LandingPage() {
                   </div>
                 </dl>
                 <Button asChild className="mt-5 h-10 w-fit px-5">
-                  <Link href="/lab">
+                  <Link href={toAppPath("/lab")}>
                     Open prototype
                     <span aria-hidden>→</span>
                   </Link>
@@ -355,9 +357,12 @@ export default function LandingPage() {
             <LineArt kind="constellation" className="h-64 w-full max-w-[420px]" />
           </div>
           <div className="flex flex-col justify-center bg-[#d4a08a] px-10 py-16 text-[#141413]">
-            <p className="text-[13px] font-medium tracking-[0.18em] uppercase">
-              NLASMITH
-            </p>
+            <div className="flex items-center gap-3">
+              <Mark className="h-9 w-9" />
+              <p className="text-[13px] font-medium tracking-[0.18em] uppercase">
+                NLASMITH
+              </p>
+            </div>
             <h2 className="mt-5 font-display text-[clamp(28px,3.2vw,42px)] leading-[1.08]">
               Forum-like associations that never appear in the reply.
             </h2>
@@ -398,6 +403,9 @@ export default function LandingPage() {
 
       <section className="px-6 pb-24 md:px-8">
         <div className="mx-auto max-w-[1180px] rounded-2xl bg-[#141413] px-8 py-20 text-center text-[#faf9f5] md:px-16">
+          <div className="mb-8 flex justify-center">
+            <Mark className="h-12 w-12" />
+          </div>
           <h2 className="font-display text-[clamp(32px,4vw,48px)] leading-[1.05]">
             Configure once. Run the dataset. Keep the trail.
           </h2>
@@ -412,7 +420,7 @@ export default function LandingPage() {
               size="lg"
               className="h-11 bg-[#faf9f5] px-6 text-[#141413] hover:bg-white"
             >
-              <Link href="/lab">Open Home</Link>
+              <Link href={toAppPath("/lab")}>Open Home</Link>
             </Button>
             <Button
               asChild
@@ -420,7 +428,7 @@ export default function LandingPage() {
               size="lg"
               className="h-11 border-white/25 bg-transparent px-6 text-[#faf9f5] hover:bg-white/10 hover:text-white"
             >
-              <Link href="/datasets">Datasets & Experiments</Link>
+              <Link href={toAppPath("/datasets")}>Datasets & Experiments</Link>
             </Button>
           </div>
         </div>
@@ -428,11 +436,14 @@ export default function LandingPage() {
 
       <footer className="bg-[#141413] text-[#cccccc]">
         <div className="mx-auto flex max-w-[1180px] flex-col gap-8 px-6 py-12 md:flex-row md:items-start md:justify-between md:px-8">
-          <p className="max-w-xl text-[14px] leading-relaxed">
-            NLASmith is a research prototype from Universidad Tecnológica Nacional,
-            Facultad Regional Resistencia. Built on Neuronpedia NLA and the
-            Natural Language Autoencoders line of work.
-          </p>
+          <div className="flex max-w-xl items-start gap-3">
+            <Mark className="mt-0.5 h-8 w-8 shrink-0" />
+            <p className="text-[14px] leading-relaxed">
+              NLASmith is a research prototype from Universidad Tecnológica Nacional,
+              Facultad Regional Resistencia. Built on Neuronpedia NLA and the
+              Natural Language Autoencoders line of work.
+            </p>
+          </div>
           <div className="flex flex-wrap gap-x-8 gap-y-2 text-[13px]">
             <a href="#motivation" className="hover:text-[#faf9f5]">
               Why
@@ -440,10 +451,10 @@ export default function LandingPage() {
             <a href="#pipeline" className="hover:text-[#faf9f5]">
               Pipeline
             </a>
-            <Link href="/lab" className="hover:text-[#faf9f5]">
+            <Link href={toAppPath("/lab")} className="hover:text-[#faf9f5]">
               Home
             </Link>
-            <Link href="/datasets" className="hover:text-[#faf9f5]">
+            <Link href={toAppPath("/datasets")} className="hover:text-[#faf9f5]">
               Datasets
             </Link>
           </div>

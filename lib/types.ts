@@ -103,6 +103,7 @@ export type Experiment = {
   status: "idle" | "running" | "done" | "error";
   error?: string;
   createdAt: string;
+  isStarter?: boolean;
 };
 
 export type Store = {

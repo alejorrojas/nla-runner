@@ -26,9 +26,10 @@ const ibmMono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.VERCEL_PROJECT_PRODUCTION_URL
-      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-      : "http://localhost:3000",
+    process.env.NEXT_PUBLIC_SITE_URL ||
+      (process.env.VERCEL_ENV === "production"
+        ? "https://nlasmith.com"
+        : "http://localhost:3000"),
   ),
   title: "NLASmith",
   description:
@@ -45,6 +46,13 @@ export const metadata: Metadata = {
     title: "NLASmith",
     description:
       "From one activation to a systematic experiment. Datasets, token policies, Neuronpedia NLA, and LLM-as-judge.",
+  },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.png", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
   },
 };
 

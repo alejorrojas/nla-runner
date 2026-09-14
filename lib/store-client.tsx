@@ -21,6 +21,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const reload = useCallback(async () => {
     const res = await fetch("/api/store");
+    if (!res.ok) {
+      setStore({ datasets: [], evaluators: [], experiments: [] });
+      return;
+    }
     setStore((await res.json()) as Store);
   }, []);
 
