@@ -49,32 +49,21 @@ export function experimentKpis(ex: Experiment) {
   };
 }
 
-export function exampleSeries(experiments: Experiment[]) {
-  const ids = [
-    ...new Set(experiments.flatMap((e) => e.rows.map((r) => r.exampleId))),
-  ];
-  return ids.map((exampleId, i) => {
+export function aggregateSeries(experiments: Experiment[]) {
+  return experiments.map((ex, i) => {
+    const kpis = experimentKpis(ex);
+    const scores = meanScores(ex);
     const row: Record<string, string | number | null> = {
-      example: exampleId,
-      index: i + 1,
+      run: String.fromCharCode(65 + i),
+      mse: kpis.meanMse,
+      chars: kpis.meanChars,
+      lexical_reddit: kpis.lexicalReddit,
+      lexical_forum: kpis.lexicalForum,
+      lexical_article: kpis.lexicalArticle,
     };
-    experiments.forEach((ex, ei) => {
-      const r = ex.rows.find((x) => x.exampleId === exampleId);
-      const letter = String.fromCharCode(65 + ei);
-      const text = r ? nlaText(r) : "";
-      row[`mse${letter}`] = r ? rowMse(r) : null;
-      row[`chars${letter}`] = r ? nlaCharCount(r) : null;
-      row[`mentions_reddit${letter}`] = r
-        ? (numericScore(r.scores.mentions_reddit) ?? null)
-        : null;
-      row[`lexical_reddit${letter}`] = r ? (namesReddit(text) ? 1 : 0) : null;
-      row[`lexical_forum${letter}`] = r ? (forumLexeme(text) ? 1 : 0) : null;
-      row[`lexical_article${letter}`] = r ? (articleFraming(text) ? 1 : 0) : null;
-      for (const [k, v] of Object.entries(r?.scores ?? {})) {
-        if (k === "mentions_reddit") continue;
-        row[`${k}${letter}`] = numericScore(v);
-      }
-    });
+    for (const [k, v] of Object.entries(scores)) {
+      row[k] = v;
+    }
     return row;
   });
 }

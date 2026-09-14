@@ -1,13 +1,13 @@
 "use client";
 
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from "recharts";
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { expColor, expLetter } from "@/lib/exp-colors";
-import { exampleSeries } from "@/lib/compare-metrics";
+import { aggregateSeries } from "@/lib/compare-metrics";
 import { meanScores } from "@/lib/feedback-display";
 import type { Experiment } from "@/lib/types";
 
@@ -45,7 +45,7 @@ export function CompareCharts({
   experiments: Experiment[];
   compact?: boolean;
 }) {
-  const series = exampleSeries(experiments);
+  const series = aggregateSeries(experiments);
   const panels = panelsFor(experiments);
   const chartH = compact ? "h-[140px]" : "h-[160px]";
   const trackPct = Math.max(100, (panels.length / 3) * 100);
@@ -60,35 +60,20 @@ export function CompareCharts({
             key={panel.id}
             className="min-w-0 flex-1 border-r border-[var(--line)] px-3 py-3 last:border-r-0"
           >
-            <div className="mb-2 flex items-center justify-between gap-2">
-              <div className="text-[13px] font-medium">{panel.title}</div>
-              {experiments.length > 1 ? (
-                <div className="flex flex-wrap gap-2 text-[11px] text-[var(--muted)]">
-                  {experiments.map((_, i) => (
-                    <span key={expLetter(i)} className="inline-flex items-center gap-1">
-                      <span
-                        className="h-2 w-2 rounded-full"
-                        style={{ background: expColor(i) }}
-                      />
-                      {expLetter(i)}
-                    </span>
-                  ))}
-                </div>
-              ) : null}
-            </div>
+            <div className="mb-2 text-[13px] font-medium">{panel.title}</div>
             <ChartContainer
-              config={Object.fromEntries(
-                experiments.map((_, i) => [
-                  `${panel.dataKey}${expLetter(i)}`,
-                  { label: `${panel.title} ${expLetter(i)}`, color: expColor(i) },
-                ]),
-              )}
+              config={{
+                [panel.dataKey]: {
+                  label: panel.title,
+                  color: expColor(0),
+                },
+              }}
               className={`${chartH} w-full`}
             >
-              <BarChart accessibilityLayer data={series} barGap={2}>
+              <BarChart accessibilityLayer data={series} barGap={4}>
                 <CartesianGrid vertical={false} stroke="var(--line)" />
                 <XAxis
-                  dataKey="example"
+                  dataKey="run"
                   tickLine={false}
                   axisLine={false}
                   tick={{ fontSize: 10 }}
@@ -101,15 +86,11 @@ export function CompareCharts({
                   domain={panel.yMax != null ? [0, panel.yMax] : undefined}
                 />
                 <ChartTooltip content={<ChartTooltipContent />} />
-                {experiments.map((_, i) => (
-                  <Bar
-                    key={expLetter(i)}
-                    dataKey={`${panel.dataKey}${expLetter(i)}`}
-                    fill={expColor(i)}
-                    radius={[3, 3, 0, 0]}
-                    maxBarSize={18}
-                  />
-                ))}
+                <Bar dataKey={panel.dataKey} radius={[3, 3, 0, 0]} maxBarSize={28}>
+                  {experiments.map((_, i) => (
+                    <Cell key={expLetter(i)} fill={expColor(i)} />
+                  ))}
+                </Bar>
               </BarChart>
             </ChartContainer>
           </div>
