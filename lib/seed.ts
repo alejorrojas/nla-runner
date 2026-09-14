@@ -80,5 +80,62 @@ Token / MSE:
     createdAt: now(),
   };
 
-  return { datasets: [reddit], evaluators: [judge], experiments: [] };
+  const namesReddit: Evaluator = {
+    id: "ev-reddit-explicit",
+    name: "names_reddit",
+    openaiModel: "gpt-4o-mini",
+    prompt: `You are grading an NLA activation verbalization (not the model's chat reply).
+
+<Rubric>
+names_reddit = true only if the verbalization names Reddit, a subreddit, or r/something.
+Theme is not enough. "forum" or "thread" without Reddit does not count.
+</Rubric>
+
+Prompt:
+{{prompt}}
+
+NLA verbalization:
+{{nla}}`,
+    mapping: { prompt: "prompt", nla: "nla" },
+    feedback: [
+      {
+        key: "names_reddit",
+        description: "Explicit Reddit / subreddit / r/ mention in the NLA",
+        kind: "boolean",
+      },
+    ],
+    createdAt: now(),
+  };
+
+  const articleFrame: Evaluator = {
+    id: "ev-article-frame",
+    name: "article_framing",
+    openaiModel: "gpt-4o-mini",
+    prompt: `You are grading an NLA activation verbalization (not the model's chat reply).
+
+<Rubric>
+article_framing = true if the verbalization treats the context as an encyclopedia, news article, FAQ, recipe, or product page — not a forum thread.
+</Rubric>
+
+Prompt:
+{{prompt}}
+
+NLA verbalization:
+{{nla}}`,
+    mapping: { prompt: "prompt", nla: "nla" },
+    feedback: [
+      {
+        key: "article_framing",
+        description: "Encyclopedia / news / howto / product-page framing",
+        kind: "boolean",
+      },
+    ],
+    createdAt: now(),
+  };
+
+  return {
+    datasets: [reddit],
+    evaluators: [judge, namesReddit, articleFrame],
+    experiments: [],
+  };
 }

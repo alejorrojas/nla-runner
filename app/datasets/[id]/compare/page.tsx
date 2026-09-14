@@ -54,7 +54,7 @@ function CompareInner() {
           </>
         }
         title="Comparing"
-        hint="Judge hit rate and MSE on the same prompts. The table is the AVs."
+        hint="LLM judges, lexical checks on the same AVs, MSE and length per prompt. Attach more evaluators on the next run to fill extra score bars."
         action={
           <div className="flex flex-wrap gap-2">
             {experiments.map((ex, i) => (

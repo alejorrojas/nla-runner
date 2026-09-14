@@ -14,6 +14,7 @@
     "@paper-design/shaders-react": "^0.0.80",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.116.0",
+    "@tanstack/react-table": "^9.2.4",
     "ai": "^7.0.97",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

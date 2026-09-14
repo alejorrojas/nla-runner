@@ -1,5 +1,19 @@
 "use client";
 
+import { useMemo } from "react";
+import {
+  columnResizingFeature,
+  columnSizingFeature,
+  createColumnHelper,
+  createPaginatedRowModel,
+  createSortedRowModel,
+  rowPaginationFeature,
+  rowSortingFeature,
+  sortFn_alphanumeric,
+  sortFn_basic,
+  tableFeatures,
+  useTable,
+} from "@tanstack/react-table";
 import type { Dataset, Evaluator, Experiment } from "@/lib/types";
 import {
   formatScore,
@@ -8,7 +22,32 @@ import {
   rowOutput,
   scoreCellStyle,
 } from "@/lib/feedback-display";
-import { expColor, expLetter } from "@/lib/exp-colors";
+import { nlaCharCount, rowMse } from "@/lib/nla-signals";
+import { expLetter } from "@/lib/exp-colors";
+import { Button } from "@/components/ui/button";
+
+const features = tableFeatures({
+  columnResizingFeature,
+  columnSizingFeature,
+  rowPaginationFeature,
+  rowSortingFeature,
+  sortedRowModel: createSortedRowModel(),
+  paginatedRowModel: createPaginatedRowModel(),
+  sortFns: { alphanumeric: sortFn_alphanumeric, basic: sortFn_basic },
+});
+
+const helper = createColumnHelper<typeof features, CompareRow>();
+
+type CompareRow = {
+  exampleId: string;
+  index: number;
+  prompt: string;
+  reference: string;
+  outputs: Record<string, string>;
+  mse: Record<string, number | null>;
+  chars: Record<string, number>;
+  scores: Record<string, Record<string, unknown>>;
+};
 
 export function RunTable({
   dataset,
@@ -26,119 +65,251 @@ export function RunTable({
       experiments.flatMap((e) => e.rows.flatMap((r) => Object.keys(r.scores))),
     ),
   ];
-  const exampleIds = [
-    ...new Set(experiments.flatMap((e) => e.rows.map((r) => r.exampleId))),
-  ];
   const single = experiments.length === 1;
 
-  return (
-    <div className="overflow-x-auto border-t border-[var(--line)] bg-[var(--card)]">
-      <table className="w-full min-w-[920px] text-left text-[13px]">
-        <thead>
-          <tr className="border-b border-[var(--line)] text-[var(--ink)]">
-            <th className="w-10 px-3 py-2 font-medium text-[var(--muted)]">#</th>
-            <th className="px-3 py-2 font-medium">Inputs</th>
-            <th className="px-3 py-2 font-medium">Reference Outputs</th>
-            {experiments.map((ex, i) => (
-              <th key={ex.id} className="px-3 py-2 font-medium">
-                {single ? (
-                  "Outputs"
-                ) : (
-                  <span className="inline-flex items-center gap-1.5">
-                    Outputs
-                    <span className="letter" style={{ background: expColor(i) }}>
-                      {expLetter(i)}
-                    </span>
-                  </span>
-                )}
-              </th>
-            ))}
-            {keys.map((k) => {
-              const avgs = experiments.map((ex) => meanScores(ex)[k]);
-              const field = fieldByKey.get(k);
+  const data = useMemo<CompareRow[]>(() => {
+    const exampleIds = [
+      ...new Set(experiments.flatMap((e) => e.rows.map((r) => r.exampleId))),
+    ];
+    return exampleIds.map((eid, rowIndex) => {
+      const prompt =
+        experiments.flatMap((e) => e.rows).find((r) => r.exampleId === eid)
+          ?.prompt ?? "";
+      const reference =
+        dataset.examples.find((ex) => ex.id === eid)?.reference ?? "";
+      const outputs: CompareRow["outputs"] = {};
+      const mse: CompareRow["mse"] = {};
+      const chars: CompareRow["chars"] = {};
+      const scores: CompareRow["scores"] = {};
+      for (const ex of experiments) {
+        const row = ex.rows.find((r) => r.exampleId === eid);
+        outputs[ex.id] = row?.error ? row.error : row ? rowOutput(row) : "—";
+        mse[ex.id] = row ? rowMse(row) : null;
+        chars[ex.id] = row ? nlaCharCount(row) : 0;
+        scores[ex.id] = row?.scores ?? {};
+      }
+      return {
+        exampleId: eid,
+        index: rowIndex + 1,
+        prompt,
+        reference,
+        outputs,
+        mse,
+        chars,
+        scores,
+      };
+    });
+  }, [dataset.examples, experiments]);
+
+  const columns = useMemo(
+    () =>
+      helper.columns([
+        helper.accessor("index", {
+          header: "#",
+          size: 56,
+          minSize: 44,
+          enableSorting: true,
+          sortFn: "basic",
+        }),
+        helper.accessor("prompt", {
+          header: "Inputs",
+          size: 220,
+          minSize: 120,
+          sortFn: "alphanumeric",
+          cell: (info) => (
+            <div className="whitespace-pre-wrap leading-relaxed">{info.getValue()}</div>
+          ),
+        }),
+        helper.accessor("reference", {
+          header: "Reference",
+          size: 140,
+          minSize: 80,
+          sortFn: "alphanumeric",
+          cell: (info) => (
+            <span className="text-[var(--muted)]">{info.getValue() || "—"}</span>
+          ),
+        }),
+        ...experiments.flatMap((ex, i) => [
+          helper.accessor((row) => row.outputs[ex.id], {
+            id: `out-${ex.id}`,
+            header: single ? "Outputs" : `Outputs ${expLetter(i)}`,
+            size: 280,
+            minSize: 140,
+            sortFn: "alphanumeric",
+            cell: (info) => (
+              <div className="max-h-36 overflow-auto whitespace-pre-wrap leading-relaxed text-[var(--muted)]">
+                {info.getValue()}
+              </div>
+            ),
+          }),
+          helper.accessor((row) => row.mse[ex.id], {
+            id: `mse-${ex.id}`,
+            header: single ? "MSE" : `MSE ${expLetter(i)}`,
+            size: 88,
+            minSize: 64,
+            sortFn: "basic",
+            cell: (info) => {
+              const v = info.getValue();
               return (
-                <th key={k} className="px-3 py-2 font-medium">
-                  <div>{k}</div>
-                  {avgs.map((avg, i) =>
-                    avg == null || field?.kind === "categorical" ? null : (
-                      <div
-                        key={experiments[i].id}
-                        className="mt-0.5 text-[11px] font-normal text-[var(--muted)]"
-                      >
-                        {avg.toFixed(3)} AVG
-                        {single ? null : (
-                          <span className="ml-1">{expLetter(i)}</span>
-                        )}
-                      </div>
-                    ),
-                  )}
-                </th>
+                <span className="tabular-nums">
+                  {v == null ? "—" : v.toFixed(3)}
+                </span>
               );
-            })}
-          </tr>
-        </thead>
-        <tbody>
-          {exampleIds.map((eid, rowIndex) => {
-            const prompt =
-              experiments
-                .flatMap((e) => e.rows)
-                .find((r) => r.exampleId === eid)?.prompt ?? "";
-            const reference =
-              dataset.examples.find((ex) => ex.id === eid)?.reference ?? "";
-            return (
-              <tr key={eid} className="border-t border-[var(--line)] align-top">
-                <td className="px-3 py-3 text-[var(--muted)]">{rowIndex + 1}</td>
-                <td className="max-w-[240px] px-3 py-3">
-                  <div className="whitespace-pre-wrap text-[13px] leading-relaxed text-[var(--ink)]">
-                    {prompt}
-                  </div>
-                </td>
-                <td className="max-w-[240px] px-3 py-3 text-[13px] leading-relaxed text-[var(--muted)]">
-                  {reference || "—"}
-                </td>
-                {experiments.map((ex) => {
-                  const row = ex.rows.find((r) => r.exampleId === eid);
-                  return (
-                    <td key={ex.id} className="max-w-[280px] px-3 py-3">
-                      {row?.error ? (
-                        <span className="text-[var(--warn)]">{row.error}</span>
-                      ) : (
-                        <div className="max-h-40 overflow-auto whitespace-pre-wrap leading-relaxed text-[var(--muted)]">
-                          {row ? rowOutput(row) : "—"}
-                        </div>
-                      )}
-                    </td>
-                  );
-                })}
-                {keys.map((k) => {
-                  const field = fieldByKey.get(k);
-                  return (
-                    <td key={k} className="px-0 py-0">
-                      <div className="flex min-h-full min-w-[88px]">
-                        {experiments.map((ex) => {
-                          const row = ex.rows.find((r) => r.exampleId === eid);
-                          const v = row?.scores[k];
-                          const kind = field?.kind ?? inferKind(v);
-                          const style = scoreCellStyle(field, v);
-                          return (
-                            <div
-                              key={ex.id}
-                              className="flex flex-1 items-center justify-end px-3 py-3 font-medium tabular-nums"
-                              style={style}
-                            >
-                              {v === undefined ? "—" : formatScore(v, kind)}
-                            </div>
-                          );
-                        })}
+            },
+          }),
+        ]),
+        ...keys.map((k) => {
+          const field = fieldByKey.get(k);
+          const avgs = experiments.map((ex) => meanScores(ex)[k]);
+          return helper.accessor((row) => row.scores[experiments[0]?.id ?? ""]?.[k], {
+            id: `score-${k}`,
+            header: () => (
+              <div>
+                <div>{k}</div>
+                {avgs.map((avg, i) =>
+                  avg == null || field?.kind === "categorical" ? null : (
+                    <div
+                      key={experiments[i].id}
+                      className="mt-0.5 text-[11px] font-normal text-[var(--muted)]"
+                    >
+                      {avg.toFixed(3)} AVG
+                      {single ? null : ` ${expLetter(i)}`}
+                    </div>
+                  ),
+                )}
+              </div>
+            ),
+            size: 110,
+            minSize: 80,
+            sortFn: "basic",
+            cell: (info) => {
+              const row = info.row.original;
+              return (
+                <div className="flex min-h-full min-w-[72px]">
+                  {experiments.map((ex) => {
+                    const v = row.scores[ex.id]?.[k];
+                    const kind = field?.kind ?? inferKind(v);
+                    const style = scoreCellStyle(field, v);
+                    return (
+                      <div
+                        key={ex.id}
+                        className="flex flex-1 items-center justify-end px-1 py-1 font-medium tabular-nums"
+                        style={style}
+                      >
+                        {v === undefined ? "—" : formatScore(v, kind)}
                       </div>
-                    </td>
-                  );
-                })}
+                    );
+                  })}
+                </div>
+              );
+            },
+          });
+        }),
+      ]),
+    [experiments, fieldByKey, keys, single],
+  );
+
+  const table = useTable(
+    {
+      features,
+      columns,
+      data,
+      columnResizeMode: "onChange",
+      initialState: {
+        pagination: { pageIndex: 0, pageSize: 10 },
+        sorting: [{ id: "index", desc: false }],
+      },
+    },
+    (state) => state,
+  );
+
+  return (
+    <div className="border-t border-[var(--line)] bg-[var(--card)]">
+      <div className="overflow-x-auto">
+        <table
+          className="text-left text-[13px]"
+          style={{
+            width: table.getTotalSize(),
+            tableLayout: "fixed",
+          }}
+        >
+          <thead>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id} className="border-b border-[var(--line)]">
+                {headerGroup.headers.map((header) => (
+                  <th
+                    key={header.id}
+                    colSpan={header.colSpan}
+                    className="relative px-3 py-2 font-medium text-[var(--ink)]"
+                    style={{ width: header.getSize() }}
+                  >
+                    {header.isPlaceholder ? null : (
+                      <button
+                        type="button"
+                        className="inline-flex max-w-full items-center gap-1 text-left"
+                        onClick={header.column.getToggleSortingHandler()}
+                      >
+                        <table.FlexRender header={header} />
+                        {{
+                          asc: " ↑",
+                          desc: " ↓",
+                        }[header.column.getIsSorted() as string] ?? null}
+                      </button>
+                    )}
+                    <div
+                      onDoubleClick={() => header.column.resetSize()}
+                      onMouseDown={header.getResizeHandler()}
+                      onTouchStart={header.getResizeHandler()}
+                      className={`tt-resizer ${header.column.getIsResizing() ? "isResizing" : ""}`}
+                    />
+                  </th>
+                ))}
               </tr>
-            );
-          })}
-        </tbody>
-      </table>
+            ))}
+          </thead>
+          <tbody>
+            {table.getRowModel().rows.map((row) => (
+              <tr key={row.id} className="border-t border-[var(--line)] align-top">
+                {row.getAllCells().map((cell) => (
+                  <td
+                    key={cell.id}
+                    className="px-3 py-3"
+                    style={{ width: cell.column.getSize() }}
+                  >
+                    <table.FlexRender cell={cell} />
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--line)] px-3 py-2 text-[12px] text-[var(--muted)]">
+        <span>
+          {table.getRowCount()} rows · page {table.state.pagination.pageIndex + 1} of{" "}
+          {table.getPageCount() || 1}
+        </span>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="xs"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            Prev
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="xs"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

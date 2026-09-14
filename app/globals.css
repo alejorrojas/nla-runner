@@ -238,3 +238,19 @@ button.btn:disabled {
 .data-table tbody tr:last-child td {
   border-bottom: 0;
 }
+
+.tt-resizer {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 8px;
+  cursor: col-resize;
+  user-select: none;
+  touch-action: none;
+}
+
+.tt-resizer.isResizing,
+.tt-resizer:hover {
+  background: color-mix(in srgb, var(--clay) 55%, transparent);
+}
