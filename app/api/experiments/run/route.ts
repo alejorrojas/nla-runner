@@ -3,13 +3,10 @@ import { runJudge } from "@/lib/judge";
 import { runNlaExample } from "@/lib/neuronpedia";
 import { patchUserStore, readUserStore } from "@/lib/store";
 import { requireUser } from "@/lib/supabase/server";
+import { readUserKeys } from "@/lib/user-keys";
 import type { Experiment, ExperimentRow, TokenPolicy } from "@/lib/types";
 
 export const maxDuration = 300;
-
-function headerKey(req: Request, name: string): string {
-  return req.headers.get(name)?.trim() || "";
-}
 
 async function persistExperiment(userId: string, experiment: Experiment): Promise<void> {
   await patchUserStore(userId, (s) => ({
@@ -25,8 +22,9 @@ export async function POST(req: Request) {
   if (!user) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const neuronpedia = headerKey(req, "x-neuronpedia-key");
-  const openai = headerKey(req, "x-openai-key");
+  const stored = await readUserKeys(user.id);
+  const neuronpedia = stored?.neuronpedia ?? "";
+  const openai = stored?.openai ?? "";
   const body = (await req.json()) as {
     datasetId: string;
     sourceId: string;

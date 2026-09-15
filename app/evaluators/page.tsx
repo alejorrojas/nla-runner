@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import { PageHeader, PageLoader } from "@/components/page-chrome";
+import { PageHeader } from "@/components/page-chrome";
 import { Button } from "@/components/ui/button";
+import { TableRowsSkeleton } from "@/components/ui/skeleton";
 import { useStore } from "@/lib/store-client";
 
 export default function EvaluatorsPage() {
   const { store } = useStore();
-  if (!store) return <PageLoader label="Loading judges" />;
 
   return (
     <div>
@@ -36,7 +36,13 @@ export default function EvaluatorsPage() {
               </tr>
             </thead>
             <tbody>
-              {store.evaluators.map((ev) => (
+              {!store ? (
+                <TableRowsSkeleton
+                  rows={4}
+                  columns={["w-36", "w-24", "w-48"]}
+                />
+              ) : (
+                store.evaluators.map((ev) => (
                 <tr key={ev.id}>
                   <td>
                     <Link href={`/evaluators/${ev.id}`} className="font-medium hover:underline">
@@ -48,7 +54,8 @@ export default function EvaluatorsPage() {
                     {ev.feedback.map((f) => f.key).join(", ")}
                   </td>
                 </tr>
-              ))}
+              ))
+              )}
             </tbody>
           </table>
         </div>

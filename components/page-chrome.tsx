@@ -1,20 +1,6 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { motion } from "framer-motion";
-
-export function PageLoader({ label = "Loading" }: { label?: string }) {
-  return (
-    <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 p-10">
-      <motion.div
-        className="h-8 w-10 rounded-full border border-[var(--line-strong)] border-t-[var(--accent)]"
-        animate={{ rotate: 360 }}
-        transition={{ duration: 1.1, repeat: Infinity, ease: "linear" }}
-      />
-      <p className="text-[13px] text-[var(--muted)]">{label}</p>
-    </div>
-  );
-}
 
 export function PageHeader({
   crumb,

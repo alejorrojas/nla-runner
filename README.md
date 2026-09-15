@@ -13,7 +13,7 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) for the landing. The lab (`/lab`, `/datasets`, …) requires a Supabase login. The first session copies an **Example** workspace: forum-prior prompts, example judges, and two finished Example runs (**last user** vs **first assistant**).
 
-OpenAI + Neuronpedia keys stay in **Settings** (`sessionStorage`). They are only needed to launch new runs.
+OpenAI + Neuronpedia keys are saved in **Settings**, encrypted in Supabase Vault. After save, only a short prefix is shown. They are only needed to launch new runs.
 
 ## Persistence
 

@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { PageHeader, PageLoader } from "@/components/page-chrome";
+import { PageHeader } from "@/components/page-chrome";
 import { RunProgress, type RunPhase, type RunTick } from "@/components/run-progress";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton, TableRowsSkeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -37,7 +38,7 @@ export default function DatasetPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { store, save, reload, upsertExperiment } = useStore();
-  const { keys, headers } = useKeys();
+  const { hints } = useKeys();
   const [sourceId, setSourceId] = useState<string>(NLA_SOURCES[0].id);
   const [tokenPolicy, setTokenPolicy] = useState<TokenPolicy>("last_user");
   const [evaluatorIds, setEvaluatorIds] = useState<string[]>([]);
@@ -60,7 +61,120 @@ export default function DatasetPage() {
     if (first) setEvaluatorIds([first.id]);
   }, [store, evaluatorIds.length]);
 
-  if (!store) return <PageLoader label="Loading dataset" />;
+  if (!store) {
+    return (
+      <div>
+        <PageHeader
+          crumb={
+            <>
+              <Link href="/datasets">Datasets</Link>
+              <span> / </span>
+              <Skeleton className="inline-block h-3.5 w-28 align-middle" />
+            </>
+          }
+          title={<Skeleton className="h-6 w-56" />}
+          tabs={
+            <Tabs value="experiments" onValueChange={() => {}}>
+              <TabsList variant="line" className="h-auto p-0">
+                <TabsTrigger value="experiments">Experiments</TabsTrigger>
+                <TabsTrigger value="examples" disabled>
+                  Examples
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          }
+        />
+        <div className="page-body">
+          <section className="surface p-6">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <h2 className="section-title">Run experiment</h2>
+                <p className="hint mt-2">
+                  You will see which prompt is in flight and whether we are on
+                  NLA or the judge.
+                </p>
+              </div>
+              <Button type="button" disabled>
+                Run experiment
+              </Button>
+            </div>
+            <div className="mt-5 grid gap-5 md:grid-cols-3">
+              <div className="field">
+                <Label>NLA source</Label>
+                <Select value={sourceId} onValueChange={setSourceId}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {NLA_SOURCES.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="field">
+                <Label>Token policy</Label>
+                <Select
+                  value={tokenPolicy}
+                  onValueChange={(value) =>
+                    setTokenPolicy(value as TokenPolicy)
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="last_user">Last user token</SelectItem>
+                    <SelectItem value="first_assistant">
+                      First assistant token
+                    </SelectItem>
+                    <SelectItem value="both">Both</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="field">
+                <Label>Evaluators</Label>
+                <div className="flex flex-col gap-2">
+                  <Skeleton className="h-4 w-40" />
+                  <Skeleton className="h-4 w-36" />
+                  <Skeleton className="h-4 w-44" />
+                </div>
+              </div>
+            </div>
+          </section>
+          <section className="mt-6">
+            <div className="mb-3 flex items-center justify-end">
+              <Button variant="outline" type="button" disabled>
+                Compare selected
+              </Button>
+            </div>
+            <div className="surface overflow-hidden">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th className="w-10"></th>
+                    <th>Name</th>
+                    <th>Source</th>
+                    <th>Token</th>
+                    <th>Rows</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <TableRowsSkeleton
+                    rows={3}
+                    columns={["w-4", "w-40", "w-24", "w-16", "w-8", "w-12"]}
+                  />
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </div>
+    );
+  }
   if (!dataset) {
     return (
       <div className="p-10">
@@ -92,7 +206,7 @@ export default function DatasetPage() {
   };
 
   async function run() {
-    if (!keys.openai || !keys.neuronpedia) {
+    if (!hints.openaiHint || !hints.neuronpediaHint) {
       router.push("/settings");
       return;
     }
@@ -111,7 +225,7 @@ export default function DatasetPage() {
     });
     const res = await fetch("/api/experiments/run", {
       method: "POST",
-      headers: { "Content-Type": "application/json", ...headers },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         datasetId: dataset!.id,
         sourceId,

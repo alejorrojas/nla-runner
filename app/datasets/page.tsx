@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import { PageHeader, PageLoader } from "@/components/page-chrome";
+import { PageHeader } from "@/components/page-chrome";
 import { Button } from "@/components/ui/button";
+import { TableRowsSkeleton } from "@/components/ui/skeleton";
 import { useStore } from "@/lib/store-client";
 
 export default function DatasetsPage() {
   const { store, save } = useStore();
-  if (!store) return <PageLoader label="Loading datasets" />;
 
   return (
     <div>
@@ -19,7 +19,9 @@ export default function DatasetsPage() {
         action={
           <Button
             type="button"
+            disabled={!store}
             onClick={() => {
+              if (!store) return;
               const name = window.prompt("Dataset name");
               if (!name) return;
               void save({
@@ -52,7 +54,12 @@ export default function DatasetsPage() {
               </tr>
             </thead>
             <tbody>
-              {store.datasets.length === 0 ? (
+              {!store ? (
+                <TableRowsSkeleton
+                  rows={4}
+                  columns={["w-40", "w-8", "w-8", "w-10"]}
+                />
+              ) : store.datasets.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="text-[var(--muted)]">
                     No datasets yet.

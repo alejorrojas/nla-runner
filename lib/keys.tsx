@@ -9,44 +9,69 @@ import {
   useState,
 } from "react";
 
-type Keys = { openai: string; neuronpedia: string };
+export const KEY_HINT_LENGTH = 8;
+
+export type KeyHints = {
+  openaiHint: string | null;
+  neuronpediaHint: string | null;
+};
+
+export function maskStoredKey(hint: string): string {
+  return `${hint}${"•".repeat(20)}`;
+}
+
+const EMPTY: KeyHints = { openaiHint: null, neuronpediaHint: null };
 
 const Ctx = createContext<{
-  keys: Keys;
-  setKeys: (k: Keys) => void;
-  headers: Record<string, string>;
+  hints: KeyHints;
+  hydrated: boolean;
+  saveKeys: (patch: { openai?: string; neuronpedia?: string }) => Promise<void>;
 } | null>(null);
 
-const STORAGE = "nla-eval-keys";
-
 export function KeysProvider({ children }: { children: React.ReactNode }) {
-  const [keys, setKeysState] = useState<Keys>({ openai: "", neuronpedia: "" });
+  const [hints, setHints] = useState<KeyHints>(EMPTY);
+  const [hydrated, setHydrated] = useState(false);
+
+  const reload = useCallback(async () => {
+    const res = await fetch("/api/keys");
+    if (!res.ok) {
+      setHints(EMPTY);
+      return;
+    }
+    const data = (await res.json()) as KeyHints;
+    setHints({
+      openaiHint: data.openaiHint || null,
+      neuronpediaHint: data.neuronpediaHint || null,
+    });
+  }, []);
 
   useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem(STORAGE);
-      if (raw) setKeysState(JSON.parse(raw) as Keys);
-    } catch {
-      /* ignore */
-    }
-  }, []);
+    void reload().finally(() => setHydrated(true));
+  }, [reload]);
 
-  const setKeys = useCallback((k: Keys) => {
-    setKeysState(k);
-    sessionStorage.setItem(STORAGE, JSON.stringify(k));
-  }, []);
-
-  const headers = useMemo(
-    () => ({
-      "x-openai-key": keys.openai,
-      "x-neuronpedia-key": keys.neuronpedia,
-    }),
-    [keys],
+  const saveKeys = useCallback(
+    async (patch: { openai?: string; neuronpedia?: string }) => {
+      const res = await fetch("/api/keys", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(patch),
+      });
+      const data = (await res.json()) as KeyHints & { error?: string };
+      if (!res.ok) throw new Error(data.error || "Could not save keys");
+      setHints({
+        openaiHint: data.openaiHint || null,
+        neuronpediaHint: data.neuronpediaHint || null,
+      });
+    },
+    [],
   );
 
-  return (
-    <Ctx.Provider value={{ keys, setKeys, headers }}>{children}</Ctx.Provider>
+  const value = useMemo(
+    () => ({ hints, hydrated, saveKeys }),
+    [hints, hydrated, saveKeys],
   );
+
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
 export function useKeys() {

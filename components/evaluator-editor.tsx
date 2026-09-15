@@ -23,11 +23,13 @@ export function EvaluatorEditor({
   onSave,
   onDiscard,
   discardLabel,
+  saveDisabled = false,
 }: {
   initial: Evaluator;
   onSave: (ev: Evaluator) => void;
   onDiscard: () => void;
   discardLabel: string;
+  saveDisabled?: boolean;
 }) {
   const [ev, setEv] = useState<Evaluator>(initial);
   const placeholders = mustacheVars(ev.prompt);
@@ -58,7 +60,7 @@ export function EvaluatorEditor({
             <Button variant="outline" type="button" onClick={onDiscard}>
               {discardLabel}
             </Button>
-            <Button type="button" onClick={() => onSave(ev)}>
+            <Button type="button" disabled={saveDisabled} onClick={() => onSave(ev)}>
               Save
             </Button>
           </div>

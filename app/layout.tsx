@@ -31,7 +31,10 @@ export const metadata: Metadata = {
         ? "https://nlasmith.com"
         : "http://localhost:3000"),
   ),
-  title: "NLASmith",
+  title: {
+    default: "NLASmith",
+    template: "%s - NLASmith",
+  },
   description:
     "A framework for systematic evaluation of Natural Language Activations: datasets, token policies, Neuronpedia NLA, and LLM-as-judge.",
   openGraph: {

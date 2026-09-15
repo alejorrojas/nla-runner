@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { spring } from "@/components/motion";
+import { spring, useLimitedMotion } from "@/components/motion";
 
 export type RunPhase = "nla" | "judge";
 
@@ -27,20 +27,23 @@ function phaseLabel(phase: RunPhase): string {
 }
 
 export function RunProgress({ tick }: { tick: RunTick | null }) {
+  const limited = useLimitedMotion();
   return (
     <AnimatePresence>
       {tick ? (
         <motion.div
           key="run"
-          initial={{ opacity: 0, y: 10 }}
+          initial={limited ? false : { opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 8 }}
+          exit={limited ? undefined : { opacity: 0, y: 8 }}
           transition={spring}
           className="mt-4 overflow-hidden rounded-xl border border-[var(--accent)] bg-[var(--card)]"
         >
           <div className="flex items-center gap-2 border-b border-[var(--line)] px-4 py-2">
             <span className="relative flex h-2.5 w-2.5">
-              <span className="absolute inline-flex h-full w-2.5 animate-ping rounded-full bg-[var(--accent)] opacity-40" />
+              {limited ? null : (
+                <span className="absolute inline-flex h-full w-2.5 animate-ping rounded-full bg-[var(--accent)] opacity-40" />
+              )}
               <span className="relative h-2.5 w-2.5 rounded-full bg-[var(--accent)]" />
             </span>
             <span className="text-[13px] font-medium">Experiment running</span>
@@ -55,7 +58,7 @@ export function RunProgress({ tick }: { tick: RunTick | null }) {
               animate={{
                 width: `${Math.max(4, (tick.completed / tick.total) * 100)}%`,
               }}
-              transition={spring}
+              transition={limited ? { duration: 0 } : spring}
             />
           </div>
           <div className="px-4 py-3">

@@ -15,6 +15,7 @@ function LoginForm() {
   const search = useSearchParams();
   const next = search.get("next") || "/lab";
   const [email, setEmail] = useState("");
+  const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [message, setMessage] = useState("");
@@ -31,16 +32,26 @@ function LoginForm() {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: redirectTo },
+          options: {
+            emailRedirectTo: redirectTo,
+            data: { full_name: fullName.trim() },
+          },
         });
         if (error) throw error;
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+        const { data: signedIn, error: signInError } =
+          await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
         if (signInError) {
           setMessage("Check your email to confirm the account, then sign in.");
           return;
+        }
+        if (signedIn.user && fullName.trim()) {
+          await supabase
+            .from("profiles")
+            .update({ full_name: fullName.trim() })
+            .eq("id", signedIn.user.id);
         }
         router.replace(next);
         router.refresh();
@@ -72,6 +83,19 @@ function LoginForm() {
           {mode === "signin" ? "Sign in to the lab" : "Create your workspace"}
         </h1>
         <form className="mt-8 space-y-4" onSubmit={onSubmit}>
+          {mode === "signup" ? (
+            <div className="field">
+              <Label htmlFor="full-name">Full name</Label>
+              <Input
+                id="full-name"
+                type="text"
+                autoComplete="name"
+                required
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+              />
+            </div>
+          ) : null}
           <div className="field">
             <Label htmlFor="email">Email</Label>
             <Input

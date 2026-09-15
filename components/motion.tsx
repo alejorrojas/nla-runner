@@ -38,6 +38,27 @@ export function useSkipHeavyEffects(): boolean {
   return skip;
 }
 
+export function PageFade({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  const limited = useLimitedMotion();
+  if (limited) return <div className={className}>{children}</div>;
+  return (
+    <motion.div
+      className={className}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={spring}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
 export function FadeIn({
   children,
   className,

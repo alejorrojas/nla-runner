@@ -1,100 +1,192 @@
 "use client";
 
 import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
 import { PageHeader } from "@/components/page-chrome";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useKeys } from "@/lib/keys";
+import { Skeleton } from "@/components/ui/skeleton";
+import { KEY_HINT_LENGTH, maskStoredKey, useKeys } from "@/lib/keys";
 
 function KeyField({
   id,
   label,
-  value,
-  onChange,
+  hint,
   placeholder,
+  draft,
+  replacing,
+  onDraft,
+  onReplace,
 }: {
   id: string;
   label: string;
-  value: string;
-  onChange: (value: string) => void;
+  hint: string | null;
   placeholder: string;
+  draft: string;
+  replacing: boolean;
+  onDraft: (value: string) => void;
+  onReplace: () => void;
 }) {
-  const [hidden, setHidden] = useState(true);
-
+  const locked = Boolean(hint) && !replacing;
   return (
     <div className="field">
-      <Label htmlFor={id}>{label}</Label>
-      <div className="relative">
-        <Input
-          id={id}
-          className={`pr-10 font-mono ${hidden ? "key-masked" : ""}`}
-          type="text"
-          inputMode="text"
-          autoComplete="off"
-          autoCorrect="off"
-          autoCapitalize="off"
-          spellCheck={false}
-          data-1p-ignore=""
-          data-lpignore="true"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-        />
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-xs"
-          className="absolute top-1/2 right-2 -translate-y-1/2 text-[var(--muted)]"
-          aria-label={hidden ? "Show key" : "Hide key"}
-          onClick={() => setHidden((v) => !v)}
-        >
-          {hidden ? <Eye /> : <EyeOff />}
-        </Button>
+      <div className="flex items-center justify-between gap-3">
+        <Label htmlFor={id}>{label}</Label>
+        {locked ? (
+          <button
+            type="button"
+            className="text-[13px] text-[var(--accent)] hover:underline"
+            onClick={onReplace}
+          >
+            Replace key
+          </button>
+        ) : null}
       </div>
+      <Input
+        id={id}
+        className="font-mono"
+        type="text"
+        inputMode="text"
+        autoComplete="off"
+        autoCorrect="off"
+        autoCapitalize="off"
+        spellCheck={false}
+        data-1p-ignore=""
+        data-lpignore="true"
+        readOnly={locked}
+        value={locked ? maskStoredKey(hint!) : draft}
+        onChange={(e) => {
+          if (!locked) onDraft(e.target.value);
+        }}
+        placeholder={placeholder}
+      />
     </div>
   );
 }
 
 export default function SettingsPage() {
-  const { keys, setKeys } = useKeys();
-  const ready = Boolean(keys.openai && keys.neuronpedia);
+  const { hints, saveKeys, hydrated } = useKeys();
+  const ready = Boolean(hints.openaiHint && hints.neuronpediaHint);
+  const [openaiDraft, setOpenaiDraft] = useState("");
+  const [neuronpediaDraft, setNeuronpediaDraft] = useState("");
+  const [replaceOpenai, setReplaceOpenai] = useState(false);
+  const [replaceNeuronpedia, setReplaceNeuronpedia] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const canSave =
+    (replaceOpenai || !hints.openaiHint ? openaiDraft.trim() : "") !== "" ||
+    (replaceNeuronpedia || !hints.neuronpediaHint ? neuronpediaDraft.trim() : "") !==
+      "";
+
+  async function onSave() {
+    setBusy(true);
+    setMessage("");
+    try {
+      await saveKeys({
+        openai:
+          replaceOpenai || !hints.openaiHint
+            ? openaiDraft.trim() || undefined
+            : undefined,
+        neuronpedia:
+          replaceNeuronpedia || !hints.neuronpediaHint
+            ? neuronpediaDraft.trim() || undefined
+            : undefined,
+      });
+      setOpenaiDraft("");
+      setNeuronpediaDraft("");
+      setReplaceOpenai(false);
+      setReplaceNeuronpedia(false);
+      setMessage("Saved to Vault.");
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : String(err));
+    } finally {
+      setBusy(false);
+    }
+  }
 
   return (
     <div>
       <PageHeader
         crumb="Personal / Settings"
         title="API keys"
-        hint="OpenAI and Neuronpedia stay in this tab. Runs persist on the server."
+        hint="Encrypted in Vault for your account. Needed only when you launch a new run."
       />
       <div className="mx-auto max-w-xl page-body">
         <div className="surface stack p-6">
           <p className="hint">
-            Sent as request headers to the Next.js proxy. Not written to disk,
-            git, or Supabase. Datasets and experiment rows live in Postgres.
+            We will never read your keys. They are stored encrypted in Supabase
+            Vault and used only by the server to call OpenAI and Neuronpedia on
+            your behalf. After you save, we keep the first {KEY_HINT_LENGTH}{" "}
+            characters so you can recognize the key — the rest cannot be shown
+            again.
           </p>
           <div
             className={`inline-flex w-fit rounded-full px-3 py-1 text-[13px] ${
-              ready ? "bg-[var(--active)]" : "bg-[var(--hover)] text-[var(--muted)]"
+              !hydrated
+                ? "bg-[var(--hover)] text-[var(--muted)]"
+                : ready
+                  ? "bg-[var(--active)]"
+                  : "bg-[var(--hover)] text-[var(--muted)]"
             }`}
           >
-            {ready ? "both keys set" : "missing a key"}
+            {!hydrated ? (
+              <Skeleton className="h-3 w-24" />
+            ) : ready ? (
+              "both keys set"
+            ) : (
+              "missing a key"
+            )}
           </div>
-          <KeyField
-            id="openai-key"
-            label="OpenAI"
-            value={keys.openai}
-            onChange={(openai) => setKeys({ ...keys, openai })}
-            placeholder="sk-..."
-          />
-          <KeyField
-            id="neuronpedia-key"
-            label="Neuronpedia"
-            value={keys.neuronpedia}
-            onChange={(neuronpedia) => setKeys({ ...keys, neuronpedia })}
-            placeholder="x-api-key from neuronpedia.org"
-          />
+          {hydrated ? (
+            <>
+              <KeyField
+                id="openai-key"
+                label="OpenAI"
+                hint={hints.openaiHint}
+                placeholder="sk-..."
+                draft={openaiDraft}
+                replacing={replaceOpenai}
+                onDraft={setOpenaiDraft}
+                onReplace={() => {
+                  setReplaceOpenai(true);
+                  setOpenaiDraft("");
+                }}
+              />
+              <KeyField
+                id="neuronpedia-key"
+                label="Neuronpedia"
+                hint={hints.neuronpediaHint}
+                placeholder="x-api-key from neuronpedia.org"
+                draft={neuronpediaDraft}
+                replacing={replaceNeuronpedia}
+                onDraft={setNeuronpediaDraft}
+                onReplace={() => {
+                  setReplaceNeuronpedia(true);
+                  setNeuronpediaDraft("");
+                }}
+              />
+              <div className="flex items-center gap-3">
+                <Button type="button" disabled={busy || !canSave} onClick={() => void onSave()}>
+                  {busy ? "Saving…" : "Save keys"}
+                </Button>
+                {message ? (
+                  <p className="text-[13px] text-[var(--muted)]">{message}</p>
+                ) : null}
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="field">
+                <Label>OpenAI</Label>
+                <Skeleton className="h-8 w-full" />
+              </div>
+              <div className="field">
+                <Label>Neuronpedia</Label>
+                <Skeleton className="h-8 w-full" />
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
