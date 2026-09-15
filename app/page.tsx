@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { MotionConfig } from "framer-motion";
 import { GradientBackground } from "@/components/gradient-background";
-import { LineArt } from "@/components/line-art";
 import { Mark } from "@/components/mark";
+import { FooterWordmark } from "@/components/footer-wordmark";
 import { FadeIn, Reveal, RevealGroup, RevealItem } from "@/components/motion";
 import { Button } from "@/components/ui/button";
 import { toAppPath } from "@/lib/urls";
@@ -51,44 +52,32 @@ const PIECES = [
   {
     t: "Datasets",
     d: "Create a prompt list, identify each example, and optionally attach a reference. The dataset is what makes two runs comparable.",
-    art: "scribble" as const,
-    tone: "bg-[#e8d9c4]",
-    onWarm: false,
+    image: "/dataset.png",
   },
   {
     t: "Token policy",
     d: "Keep the position rule constant so last-user vs first-assistant is an experimental factor, not an afterthought.",
-    art: "path" as const,
-    tone: "bg-[#cfc8b8]",
-    onWarm: false,
+    image: "/tokenpolicy.png",
   },
   {
     t: "NLA source",
     d: "Neuronpedia hosts the language model and the NLA. The lab wraps completion and explain into one internal schema.",
-    art: "nodes" as const,
-    tone: "bg-[#c4785a]",
-    onWarm: true,
+    image: "/nlasource.png",
   },
   {
     t: "Evaluators",
     d: "Natural-language rubric, judge model, and feedback keys. The same loop can detect a theme, score a criterion, or classify verbalizations.",
-    art: "hands" as const,
-    tone: "bg-[#e3dacc]",
-    onWarm: false,
+    image: "/evaluators.png",
   },
   {
     t: "Live runs",
     d: "The orchestrator walks the dataset, records progress per example, and separates API failures from negative judgments.",
-    art: "globe" as const,
-    tone: "bg-[#d4a08a]",
-    onWarm: true,
+    image: "/liveruns.png",
   },
   {
     t: "Compare",
     d: "Tables and charts on the same prompts. Inspect a single verbalization without losing the global view of the experiment.",
-    art: "puzzle" as const,
-    tone: "bg-[#f0eee6]",
-    onWarm: false,
+    image: "/metrics.png",
   },
 ];
 
@@ -154,14 +143,16 @@ export default function LandingPage() {
       </section>
 
       <section id="motivation" className="-mt-24 px-6 pb-8 md:px-8">
-        <div className="relative z-10 mx-auto max-w-[1180px]">
+        <div className="relative z-10 mx-auto flex max-w-[1180px] flex-col gap-4">
           <RevealGroup className="grid gap-4 lg:grid-cols-12">
             <RevealItem as="article" className="overflow-hidden rounded-2xl bg-[#c4785a] lg:col-span-7">
-              <div className="flex min-h-[220px] items-center justify-center px-8 pt-8">
-                <LineArt
-                  kind="constellation"
-                  onWarm
-                  className="h-48 w-full max-w-[420px]"
+              <div className="relative aspect-[3/1] min-h-[180px] w-full">
+                <Image
+                  src="/thegap.png"
+                  alt="A prompt connecting into a cluster of activations"
+                  fill
+                  sizes="(min-width: 1024px) 680px, 100vw"
+                  className="object-cover"
                 />
               </div>
               <div className="bg-[#faf9f5] p-7">
@@ -197,10 +188,17 @@ export default function LandingPage() {
                 at positions fixed before the run begins.
               </p>
             </RevealItem>
-
+          </RevealGroup>
+          <RevealGroup className="grid gap-4 lg:grid-cols-12">
             <RevealItem as="article" className="overflow-hidden rounded-2xl bg-[#e3dacc] lg:col-span-5">
-              <div className="flex h-44 items-center justify-center">
-                <LineArt kind="scribble" className="h-full w-full max-w-[280px]" />
+              <div className="relative aspect-[5/3] w-full">
+                <Image
+                  src="/method.png"
+                  alt="LangSmith’s loop applied to NLA"
+                  fill
+                  sizes="(min-width: 1024px) 480px, 100vw"
+                  className="object-cover"
+                />
               </div>
               <div className="bg-[#faf9f5] p-7">
                 <p className="text-[12px] font-medium tracking-[0.12em] text-[var(--muted)] uppercase">
@@ -333,11 +331,13 @@ export default function LandingPage() {
                 key={item.t}
                 className="overflow-hidden rounded-2xl bg-[#faf9f5] ring-1 ring-[#d1cfc5]"
               >
-                <div className={`flex h-44 items-center justify-center ${item.tone}`}>
-                  <LineArt
-                    kind={item.art}
-                    onWarm={item.onWarm}
-                    className="h-full w-full max-w-[240px]"
+                <div className="relative h-44">
+                  <Image
+                    src={item.image}
+                    alt={item.t}
+                    fill
+                    sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 100vw"
+                    className="object-cover"
                   />
                 </div>
                 <div className="p-6">
@@ -359,14 +359,20 @@ export default function LandingPage() {
 
       <section id="use-case" className="px-6 py-16 md:px-8">
         <Reveal className="mx-auto grid max-w-[1180px] overflow-hidden rounded-2xl lg:grid-cols-2">
-          <div className="flex min-h-[360px] items-center justify-center bg-[#f0eee6] p-10">
-            <LineArt kind="constellation" className="h-64 w-full max-w-[420px]" />
+          <div className="relative min-h-[280px] bg-[#faf9f5] lg:min-h-[360px]">
+            <Image
+              src="/experiment.png"
+              alt="A question passing through Reddit-like discourse before the visible reply"
+              fill
+              sizes="(min-width: 1024px) 590px, 100vw"
+              className="object-contain p-6"
+            />
           </div>
           <div className="flex flex-col justify-center bg-[#d4a08a] px-10 py-16 text-[#141413]">
             <div className="flex items-center gap-2">
               <Mark className="h-9 w-9" />
               <p className="text-[13px] font-semibold tracking-[0.18em] uppercase">
-                NLASMITH
+                An experiment
               </p>
             </div>
             <h2 className="mt-5 font-display text-[clamp(28px,3.2vw,42px)] leading-[1.08]">
@@ -375,7 +381,7 @@ export default function LandingPage() {
             <p className="mt-6 max-w-md text-[16px] leading-relaxed">
               In some open-ended questions, verbalizations seemed tied to Reddit
               or forum-like discourse even when the generated answer never named
-              that source. A qualitative hunch becomes a measurable setup:
+              that source. We ran that hunch as an experiment in the prototype:
               dataset, token position, NLA source, rubric, and aggregated
               metrics.
             </p>
@@ -433,16 +439,13 @@ export default function LandingPage() {
         </Reveal>
       </section>
 
-      <footer className="bg-[#141413] text-[#cccccc]">
-        <div className="mx-auto flex max-w-[1180px] flex-col gap-8 px-6 py-12 md:flex-row md:items-start md:justify-between md:px-8">
-          <div className="flex max-w-xl items-start gap-3">
-            <Mark className="mt-0.5 h-8 w-8 shrink-0" />
-            <p className="text-[14px] leading-relaxed">
-              NLASmith is a research prototype from Universidad Tecnológica Nacional,
-              Facultad Regional Resistencia. Built on Neuronpedia NLA and the
-              Natural Language Autoencoders line of work.
-            </p>
-          </div>
+      <footer className="overflow-hidden bg-[#141413] text-[#cccccc]">
+        <div className="flex flex-col gap-8 px-4 pt-12 md:flex-row md:items-start md:justify-between md:px-5">
+          <p className="max-w-xl text-[14px] leading-relaxed">
+            NLASmith is a research prototype from Universidad Tecnológica Nacional,
+            Facultad Regional Resistencia. Built on Neuronpedia NLA and the
+            Natural Language Autoencoders line of work.
+          </p>
           <div className="flex flex-wrap gap-x-8 gap-y-2 text-[13px]">
             <a href="#motivation" className="hover:text-[#faf9f5]">
               Why
@@ -458,7 +461,16 @@ export default function LandingPage() {
             </Link>
           </div>
         </div>
-        </footer>
+        <div
+          className="@container pointer-events-none w-full select-none px-1 pt-12 pb-10 md:pt-16 md:pb-14"
+          aria-hidden
+        >
+          <div className="flex w-full items-end justify-center gap-[0.8cqw]">
+            <Mark className="mb-[0.08em] h-[16.4cqw] w-[16.4cqw] shrink-0" />
+            <FooterWordmark />
+          </div>
+        </div>
+      </footer>
       </div>
     </MotionConfig>
   );

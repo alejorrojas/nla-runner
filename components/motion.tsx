@@ -86,13 +86,17 @@ export const listVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.08, delayChildren: 0.04 },
+    transition: { staggerChildren: 0.12, delayChildren: 0.06 },
   },
 };
 
 export const itemVariants = {
-  hidden: { opacity: 0, y: 16 },
-  visible: { opacity: 1, y: 0, transition: spring },
+  hidden: { opacity: 0, y: 36 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring" as const, stiffness: 240, damping: 26 },
+  },
 };
 
 export function Reveal({
@@ -134,7 +138,7 @@ export function RevealGroup({
       variants={listVariants}
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, margin: "-60px" }}
+      viewport={{ once: true, amount: 0.28, margin: "0px 0px -8% 0px" }}
     >
       {children}
     </motion.div>
