@@ -189,14 +189,14 @@ export function MotivationIllustration({
         alt={alt}
         fill
         sizes={sizes}
-        className={kind === "gap" ? "object-contain md:object-cover" : "object-cover"}
+        className="object-cover object-center"
       />
       {reduce ? null : (
         <svg
           aria-hidden
           className="pointer-events-none absolute inset-0 h-full w-full"
           viewBox={viewBox}
-          preserveAspectRatio={kind === "gap" ? "xMidYMid meet" : "xMidYMid slice"}
+          preserveAspectRatio="xMidYMid slice"
         >
           {kind === "gap" ? <GapMotion hovered={hovered} /> : null}
           {kind === "method" ? <MethodMotion hovered={hovered} /> : null}

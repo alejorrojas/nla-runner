@@ -10,8 +10,10 @@ import {
   Home,
   KeyRound,
   LogOut,
+  Menu,
   PanelLeft,
   Settings,
+  X,
 } from "lucide-react";
 import { Mark } from "@/components/mark";
 import { PageFade, useLimitedMotion } from "@/components/motion";
@@ -229,16 +231,18 @@ function AccountMenu({
 }
 
 function LandingBar() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <header className="relative z-30 mx-auto flex max-w-[1180px] items-center justify-between px-6 py-5 md:px-8">
       <Link href="/" className="flex items-center gap-2 text-white">
         <Mark className="h-8 w-8" />
         <span className="text-[15px] font-semibold tracking-tight">NLASmith</span>
       </Link>
-      <nav className="flex items-center gap-5 text-[13px] font-medium text-[#faf9f5] [text-shadow:0_1px_2px_rgba(20,20,19,0.55),0_0_18px_rgba(20,20,19,0.45)]">
+      <nav className="hidden items-center gap-5 text-[13px] font-medium text-[#faf9f5] [text-shadow:0_1px_2px_rgba(20,20,19,0.55),0_0_18px_rgba(20,20,19,0.45)] sm:flex">
         <a
           href="#motivation"
-          className="hidden hover:text-white sm:inline"
+          className="hover:text-white"
         >
           Why
         </a>
@@ -261,6 +265,59 @@ function LandingBar() {
           <Link href={toAppPath("/login")}>Get started</Link>
         </Button>
       </nav>
+      <button
+        type="button"
+        aria-label={menuOpen ? "Close menu" : "Open menu"}
+        aria-expanded={menuOpen}
+        aria-controls="landing-mobile-menu"
+        onClick={() => setMenuOpen((open) => !open)}
+        className="flex size-10 items-center justify-center rounded-full border border-white/35 bg-black/10 text-white backdrop-blur-sm sm:hidden"
+      >
+        {menuOpen ? <X size={18} /> : <Menu size={18} />}
+      </button>
+      {menuOpen ? (
+        <nav
+          id="landing-mobile-menu"
+          className="absolute inset-x-6 top-[calc(100%-4px)] rounded-2xl border border-white/15 bg-[#141413]/95 p-3 text-[14px] font-medium text-[#faf9f5] shadow-2xl backdrop-blur-xl sm:hidden"
+        >
+          <a
+            href="#motivation"
+            onClick={() => setMenuOpen(false)}
+            className="block rounded-xl px-4 py-3 hover:bg-white/10"
+          >
+            Why
+          </a>
+          <a
+            href="#pipeline"
+            onClick={() => setMenuOpen(false)}
+            className="block rounded-xl px-4 py-3 hover:bg-white/10"
+          >
+            Pipeline
+          </a>
+          <a
+            href="#product"
+            onClick={() => setMenuOpen(false)}
+            className="block rounded-xl px-4 py-3 hover:bg-white/10"
+          >
+            Product
+          </a>
+          <Link
+            href="/paper"
+            onClick={() => setMenuOpen(false)}
+            className="block rounded-xl px-4 py-3 hover:bg-white/10"
+          >
+            Paper
+          </Link>
+          <Button asChild size="lg" className="mt-2 w-full">
+            <Link
+              href={toAppPath("/login")}
+              onClick={() => setMenuOpen(false)}
+            >
+              Get started
+            </Link>
+          </Button>
+        </nav>
+      ) : null}
     </header>
   );
 }
