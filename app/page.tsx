@@ -360,23 +360,20 @@ export default function LandingPage() {
       </section>
 
       <section id="use-case" className="px-6 py-16 md:px-8">
-        <Reveal className="mx-auto grid max-w-[1180px] overflow-hidden rounded-2xl lg:grid-cols-2">
-          <div className="relative min-h-[280px] bg-[#faf9f5] lg:min-h-[360px]">
+        <Reveal className="mx-auto grid max-w-[1180px] overflow-hidden rounded-2xl bg-[#FAF8F4] lg:grid-cols-2">
+          <div className="relative min-h-[240px] bg-[#FAF8F4] lg:min-h-full">
             <Image
               src="/experiment.png"
               alt="A question passing through Reddit-like discourse before the visible reply"
               fill
               sizes="(min-width: 1024px) 590px, 100vw"
-              className="object-contain p-6"
+              className="object-contain object-center"
             />
           </div>
           <div className="flex flex-col justify-center bg-[#d4a08a] px-10 py-16 text-[#141413]">
-            <div className="flex items-center gap-2">
-              <Mark className="h-9 w-9" />
-              <p className="text-[13px] font-semibold tracking-[0.18em] uppercase">
-                An experiment
-              </p>
-            </div>
+            <p className="text-[13px] font-semibold tracking-[0.18em] uppercase">
+              An experiment
+            </p>
             <h2 className="mt-5 font-display text-[clamp(28px,3.2vw,42px)] leading-[1.08]">
               Forum-like associations that never appear in the reply.
             </h2>
