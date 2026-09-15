@@ -6,7 +6,10 @@ import { Mark } from "@/components/mark";
 import { PaperToc } from "@/components/paper-toc";
 
 export const metadata: Metadata = {
-  title: "Paper",
+  title: {
+    absolute:
+      "NLASmith: Un Framework para la Experimentación con Natural Language Autoencoders",
+  },
   description:
     "NLASmith: Un Framework para la Experimentación con Natural Language Autoencoders.",
 };
