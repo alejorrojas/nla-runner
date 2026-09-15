@@ -1,3 +1,4 @@
+import { nextRunNumber } from "@/lib/run-numbers";
 import { NLA_SOURCES } from "@/lib/types";
 import { runJudge } from "@/lib/judge";
 import { runNlaExample } from "@/lib/neuronpedia";
@@ -65,6 +66,7 @@ export async function POST(req: Request) {
     rows: [],
     status: "running",
     createdAt: new Date().toISOString(),
+    runNumber: nextRunNumber(store.experiments, dataset.id),
   };
   await persistExperiment(user.id, experiment);
 

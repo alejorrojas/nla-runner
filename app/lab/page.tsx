@@ -8,9 +8,10 @@ import { useLimitedMotion } from "@/components/motion";
 import { PageHeader } from "@/components/page-chrome";
 import { Button } from "@/components/ui/button";
 import { Skeleton, TableRowsSkeleton } from "@/components/ui/skeleton";
-import { expColor, expLetter } from "@/lib/exp-colors";
+import { expColor } from "@/lib/exp-colors";
 import { defaultCompareIds } from "@/lib/compare-ids";
 import { useKeys } from "@/lib/keys";
+import { runNumberMap, runTag } from "@/lib/run-numbers";
 import { useStore } from "@/lib/store-client";
 import { NLA_SOURCES } from "@/lib/types";
 
@@ -177,6 +178,7 @@ function LatestExperiments() {
         .map((id) => withRows.find((e) => e.id === id))
         .filter((e): e is NonNullable<typeof e> => Boolean(e))
     : [];
+  const numbers = store ? runNumberMap(store.experiments) : new Map<string, number>();
 
   return (
     <section className={store && latest.length === 0 ? "mb-2" : undefined}>
@@ -221,8 +223,8 @@ function LatestExperiments() {
               return (
                 <span key={ex.id} className="pill">
                   <span className="letter" style={{ background: expColor(i) }}>
-                    {expLetter(i)}
-                  </span>
+                  {runTag(numbers.get(ex.id) ?? i + 1)}
+                </span>
                   <span className="max-w-[280px] truncate font-medium">
                     {ex.name}
                   </span>
@@ -233,7 +235,7 @@ function LatestExperiments() {
               );
             })}
           </div>
-          <CompareCharts experiments={latest} compact />
+          <CompareCharts experiments={latest} numbers={numbers} compact />
         </div>
       )}
     </section>

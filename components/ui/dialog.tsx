@@ -67,7 +67,7 @@ function DialogContent({
           <Button
             type="button"
             variant="ghost"
-            size="icon-xs"
+            size="icon"
             className="absolute top-4 right-4 text-[var(--muted)]"
             aria-label="Close"
           >

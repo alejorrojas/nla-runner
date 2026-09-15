@@ -145,7 +145,7 @@ function FormatFields({
                 />
                 <Button
                   variant="ghost"
-                  size="icon-sm"
+                  size="icon"
                   type="button"
                   aria-label="Remove category"
                   disabled={cats.length <= 1}
@@ -269,7 +269,6 @@ export function FeedbackConfig({
         <div className="flex h-8 items-center gap-2">
           <Switch
             id="include-reasoning"
-            size="sm"
             checked={field.includeReasoning !== false}
             onCheckedChange={(checked) =>
               setField({ ...field, includeReasoning: checked })
@@ -283,7 +282,7 @@ export function FeedbackConfig({
               <Button
                 type="button"
                 variant="ghost"
-                size="icon-xs"
+                size="icon"
                 className="text-[var(--muted)]"
                 aria-label="About include reasoning"
               >

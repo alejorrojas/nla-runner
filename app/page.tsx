@@ -137,19 +137,10 @@ export default function LandingPage() {
             </p>
           </FadeIn>
           <FadeIn delay={0.18} className="mt-9 flex flex-wrap items-center justify-center gap-3">
-            <Button
-              asChild
-              size="lg"
-              className="h-11 bg-[#faf9f5] px-6 text-[#141413] hover:bg-white"
-            >
+            <Button asChild size="lg">
               <Link href={toAppPath("/lab")}>Open the prototype</Link>
             </Button>
-            <Button
-              asChild
-              variant="outline"
-              size="lg"
-              className="h-11 border-white/40 bg-transparent px-6 text-white hover:bg-white/10 hover:text-white"
-            >
+            <Button asChild variant="inverseOutline" size="lg">
               <a href="#pipeline">See the pipeline</a>
             </Button>
           </FadeIn>
@@ -426,19 +417,10 @@ export default function LandingPage() {
             inspection into a configuration you can repeat.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-            <Button
-              asChild
-              size="lg"
-              className="h-11 bg-[#faf9f5] px-6 text-[#141413] hover:bg-white"
-            >
+            <Button asChild size="lg">
               <Link href={toAppPath("/lab")}>Open Home</Link>
             </Button>
-            <Button
-              asChild
-              variant="outline"
-              size="lg"
-              className="h-11 border-white/25 bg-transparent px-6 text-[#faf9f5] hover:bg-white/10 hover:text-white"
-            >
+            <Button asChild variant="inverseOutline" size="lg">
               <Link href={toAppPath("/datasets")}>Datasets & Experiments</Link>
             </Button>
           </div>

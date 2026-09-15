@@ -339,9 +339,11 @@ export function RunTable({
                     style={{ width: header.getSize() }}
                   >
                     {header.isPlaceholder ? null : (
-                      <button
+                      <Button
                         type="button"
-                        className="inline-flex max-w-full items-center gap-1 text-left"
+                        variant="ghost"
+                        aria-label="Sort column"
+                        className="h-auto max-w-full justify-start rounded-none px-0 py-0 font-medium"
                         onClick={header.column.getToggleSortingHandler()}
                       >
                         <table.FlexRender header={header} />
@@ -349,7 +351,7 @@ export function RunTable({
                           asc: " ↑",
                           desc: " ↓",
                         }[header.column.getIsSorted() as string] ?? null}
-                      </button>
+                      </Button>
                     )}
                     <div
                       onDoubleClick={() => header.column.resetSize()}
@@ -388,7 +390,6 @@ export function RunTable({
           <Button
             type="button"
             variant="outline"
-            size="xs"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
@@ -397,7 +398,6 @@ export function RunTable({
           <Button
             type="button"
             variant="outline"
-            size="xs"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >

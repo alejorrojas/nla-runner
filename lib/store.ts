@@ -6,6 +6,7 @@ import {
   CATALOG_EVALUATOR_ID,
   CATALOG_EXPERIMENT_ID,
 } from "./urls";
+import { assignMissingRunNumbers } from "./run-numbers";
 import { emptyStore } from "./seed";
 import { createSecretClient } from "./supabase";
 import type {
@@ -37,7 +38,10 @@ function mergeExperiments(server: Experiment[], client: Experiment[]): Experimen
       e.rows.length >= prev.rows.length ||
       (e.status === "done" && prev.status !== "done")
     ) {
-      byId.set(e.id, e);
+      byId.set(e.id, {
+        ...e,
+        runNumber: e.runNumber ?? prev?.runNumber,
+      });
     }
   }
   return [...byId.values()].sort((a, b) =>
@@ -132,6 +136,7 @@ function mapStore(
     status: row.status as Experiment["status"],
     error: (row.error as string | null) ?? undefined,
     createdAt: row.created_at as string,
+    runNumber: row.run_number as number,
     isStarter: Boolean(row.is_starter),
   }));
 
@@ -235,8 +240,9 @@ async function writeOwnedStore(
   }
 
   if (store.experiments.length) {
+    const experiments = assignMissingRunNumbers(store.experiments);
     const ex = await sb.from("experiments").upsert(
-      store.experiments.map((e) => ({
+      experiments.map((e) => ({
         id: e.id,
         dataset_id: e.datasetId,
         name: e.name,
@@ -246,13 +252,14 @@ async function writeOwnedStore(
         status: e.status,
         error: e.error ?? null,
         created_at: e.createdAt,
+        run_number: e.runNumber,
         owner_id: ownerId,
         is_catalog: flags.catalog,
         is_starter: Boolean(e.isStarter) || flags.catalog,
       })),
     );
     throwIf(ex.error);
-    for (const experiment of store.experiments) {
+    for (const experiment of experiments) {
       const wipe = await sb.from("experiment_rows").delete().eq("experiment_id", experiment.id);
       throwIf(wipe.error);
       if (!experiment.rows.length) continue;

@@ -122,18 +122,19 @@ function LoginForm() {
           {message ? (
             <p className="text-[13px] text-[var(--muted)]">{message}</p>
           ) : null}
-          <Button type="submit" className="h-10 w-full" disabled={busy}>
+          <Button type="submit" className="w-full" disabled={busy}>
             {mode === "signin" ? "Sign in" : "Create account"}
           </Button>
         </form>
-        <div className="mt-3 flex flex-wrap gap-3 text-[13px]">
-          <button
+        <div className="mt-3 flex flex-wrap gap-3">
+          <Button
             type="button"
-            className="text-[var(--muted)] hover:text-[var(--ink)]"
+            variant="link"
+            className="text-[var(--muted)]"
             onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
           >
             {mode === "signin" ? "Need an account?" : "Already have an account?"}
-          </button>
+          </Button>
         </div>
         </div>
       </div>

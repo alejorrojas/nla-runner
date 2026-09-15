@@ -33,13 +33,9 @@ function KeyField({
       <div className="flex items-center justify-between gap-3">
         <Label htmlFor={id}>{label}</Label>
         {locked ? (
-          <button
-            type="button"
-            className="text-[13px] text-[var(--accent)] hover:underline"
-            onClick={onReplace}
-          >
+          <Button type="button" variant="link" onClick={onReplace}>
             Replace key
-          </button>
+          </Button>
         ) : null}
       </div>
       <Input

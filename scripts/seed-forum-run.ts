@@ -11,6 +11,7 @@ import {
 } from "../lib/urls";
 import { runJudge } from "../lib/judge";
 import { runNlaExample } from "../lib/neuronpedia";
+import { nextRunNumber } from "../lib/run-numbers";
 import { emptyStore } from "../lib/seed";
 import { createSecretClient } from "../lib/supabase";
 import { readCatalogStore, writeCatalogStore } from "../lib/store";
@@ -62,6 +63,7 @@ async function copyToStarterWorkspaces(experiment: Experiment) {
       status: experiment.status,
       error: experiment.error ?? null,
       created_at: experiment.createdAt,
+      run_number: experiment.runNumber,
       owner_id: starter.owner_id,
       is_catalog: false,
       is_starter: true,
@@ -118,6 +120,7 @@ async function main() {
     rows: [],
     status: "running",
     createdAt: new Date().toISOString(),
+    runNumber: nextRunNumber(catalog.experiments, dataset.id),
     isStarter: true,
   };
 

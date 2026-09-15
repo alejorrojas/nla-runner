@@ -9,6 +9,7 @@ import { CompareCharts } from "@/components/compare-charts";
 import { PageHeader } from "@/components/page-chrome";
 import { RunExperimentDialog } from "@/components/run-experiment-dialog";
 import { RunProgress, type RunPhase, type RunTick } from "@/components/run-progress";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,7 @@ import { defaultCompareIds } from "@/lib/compare-ids";
 import { attachedEvaluatorIds, withDatasetEvaluators } from "@/lib/dataset-evaluators";
 import { meanScores } from "@/lib/feedback-display";
 import { useKeys } from "@/lib/keys";
+import { runNumberMap, runTag } from "@/lib/run-numbers";
 import { useStore } from "@/lib/store-client";
 import { NLA_SOURCES, type Experiment, type ExperimentRow, type TokenPolicy } from "@/lib/types";
 
@@ -63,7 +65,11 @@ export default function DatasetPage() {
 
   const dataset = store?.datasets.find((d) => d.id === id);
   const experiments = useMemo(
-    () => store?.experiments.filter((e) => e.datasetId === id) ?? [],
+    () =>
+      [...(store?.experiments.filter((e) => e.datasetId === id) ?? [])].sort(
+        (a, b) =>
+          b.createdAt.localeCompare(a.createdAt) || b.id.localeCompare(a.id),
+      ),
     [store, id],
   );
   const chosen = selected ?? defaultCompareIds(experiments);
@@ -75,6 +81,7 @@ export default function DatasetPage() {
   const metricKeys = [
     ...new Set(experiments.flatMap((ex) => Object.keys(meanScores(ex)))),
   ];
+  const numbers = runNumberMap(experiments);
 
   useEffect(() => {
     if (!store || !dataset) return;
@@ -353,7 +360,7 @@ export default function DatasetPage() {
             ) : null}
             {experiments.length > 0 ? (
               <div className="surface mb-6 overflow-hidden">
-                <CompareCharts experiments={experiments} compact />
+                <CompareCharts experiments={experiments} numbers={numbers} compact />
               </div>
             ) : null}
             <section>
@@ -376,6 +383,7 @@ export default function DatasetPage() {
                   <thead>
                     <tr>
                       <th className="w-10"></th>
+                      <th className="w-12">#</th>
                       <th>Experiment</th>
                       <th>Progress</th>
                       {metricKeys.map((key) => (
@@ -389,7 +397,7 @@ export default function DatasetPage() {
                     {experiments.length === 0 ? (
                       <tr>
                         <td
-                          colSpan={5 + metricKeys.length}
+                          colSpan={6 + metricKeys.length}
                           className="text-[var(--muted)]"
                         >
                           No runs yet. Start one with + Experiment.
@@ -399,6 +407,7 @@ export default function DatasetPage() {
                       experiments.map((ex) => {
                         const scores = meanScores(ex);
                         const done = ex.rows.filter((row) => !row.error).length;
+                        const n = numbers.get(ex.id);
                         return (
                           <tr key={ex.id}>
                             <td>
@@ -415,6 +424,9 @@ export default function DatasetPage() {
                                 }
                                 aria-label={`Select ${ex.name}`}
                               />
+                            </td>
+                            <td className="font-mono text-[var(--muted)]">
+                              {n != null ? runTag(n) : "—"}
                             </td>
                             <td>
                               <Link
@@ -624,24 +636,16 @@ function StatusBadge({ status }: { status: Experiment["status"] }) {
   switch (status) {
     case "running":
       return (
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--active)] px-2 py-0.5 text-[13px]">
-          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--accent)]" />
+        <Badge tone="accent">
+          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--clay)]" />
           running
-        </span>
+        </Badge>
       );
     case "error":
-      return (
-        <span className="inline-flex rounded-full bg-[var(--hover)] px-2 py-0.5 text-[13px] text-[var(--muted)]">
-          error
-        </span>
-      );
+      return <Badge tone="danger">error</Badge>;
     case "done":
     case "idle":
-      return (
-        <span className="inline-flex rounded-full bg-[var(--active)] px-2 py-0.5 text-[13px]">
-          {status}
-        </span>
-      );
+      return <Badge>{status}</Badge>;
     default: {
       const _exhaustive: never = status;
       return _exhaustive;

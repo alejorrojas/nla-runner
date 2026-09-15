@@ -82,11 +82,11 @@ function NavLink({
     >
       {active ? (
         limited ? (
-          <span className="absolute inset-0 rounded-lg bg-[var(--active)]" />
+          <span className="absolute inset-0 rounded-lg bg-[color-mix(in_srgb,var(--clay)_16%,transparent)]" />
         ) : (
           <motion.span
             layoutId="nav-pill"
-            className="absolute inset-0 rounded-lg bg-[var(--active)]"
+            className="absolute inset-0 rounded-lg bg-[color-mix(in_srgb,var(--clay)_16%,transparent)]"
             transition={spring}
           />
         )
@@ -129,16 +129,11 @@ function AccountMenu({
   const [open, setOpen] = useState(false);
   const initials = initialsFromName(displayName === "Account" ? null : displayName);
 
-  const itemClass =
-    "flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left text-[13px] text-[var(--ink)] hover:bg-[var(--hover)]";
-
   const trigger = (
-    <button
+    <Button
       type="button"
-      className={cn(
-        "flex w-full items-center rounded-xl text-left transition-colors hover:bg-[var(--hover)]",
-        collapsed ? "justify-center p-1.5" : "gap-2.5 px-1.5 py-1.5",
-      )}
+      variant="nav"
+      className={collapsed ? "justify-center px-1.5 py-1.5" : undefined}
       aria-label="Account menu"
     >
       <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--ok)] text-[12px] font-medium text-[#faf9f5]">
@@ -149,7 +144,7 @@ function AccountMenu({
           {hydrated ? displayName : <Skeleton className="h-3.5 w-28" />}
         </span>
       )}
-    </button>
+    </Button>
   );
 
   return (
@@ -173,30 +168,30 @@ function AccountMenu({
         </div>
         <div className="my-1 h-px bg-[var(--line)]" />
         {missingKeys ? (
-          <Link
-            href="/settings"
-            className={cn(itemClass, "text-[var(--accent)]")}
-            onClick={() => setOpen(false)}
-          >
-            <KeyRound size={15} />
-            Add API keys
-          </Link>
+          <Button asChild variant="nav" className="text-[var(--accent)]">
+            <Link href="/settings" onClick={() => setOpen(false)}>
+              <KeyRound />
+              Add API keys
+            </Link>
+          </Button>
         ) : null}
-        <Link href="/settings" className={itemClass} onClick={() => setOpen(false)}>
-          <Settings size={15} />
-          Settings
-        </Link>
-        <button
+        <Button asChild variant="nav">
+          <Link href="/settings" onClick={() => setOpen(false)}>
+            <Settings />
+            Settings
+          </Link>
+        </Button>
+        <Button
           type="button"
-          className={itemClass}
+          variant="nav"
           onClick={() => {
             setOpen(false);
             void signOut();
           }}
         >
-          <LogOut size={15} />
+          <LogOut />
           Log out
-        </button>
+        </Button>
       </PopoverContent>
     </Popover>
   );
@@ -231,11 +226,7 @@ function LandingBar() {
         <Link href={toAppPath("/login")} className="hover:text-white">
           Home
         </Link>
-        <Button
-          asChild
-          size="lg"
-          className="h-11 bg-[#faf9f5] px-6 text-[#141413] [text-shadow:none] hover:bg-white"
-        >
+        <Button asChild size="lg">
           <Link href={toAppPath("/login")}>Get started</Link>
         </Button>
       </nav>
@@ -330,13 +321,13 @@ function ShellInner({ children }: { children: ReactNode }) {
                 <Button
                   type="button"
                   variant="ghost"
-                  size="icon-xs"
+                  size="icon"
                   className="shrink-0 text-[var(--muted)]"
                   aria-expanded={!collapsed}
                   aria-label={collapsed ? "Open sidebar" : "Close sidebar"}
                   onClick={toggleSidebar}
                 >
-                  <PanelLeft size={16} />
+                  <PanelLeft />
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="right">

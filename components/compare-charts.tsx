@@ -6,9 +6,10 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { expColor, expLetter } from "@/lib/exp-colors";
+import { expColor } from "@/lib/exp-colors";
 import { aggregateSeries } from "@/lib/compare-metrics";
 import { meanScores } from "@/lib/feedback-display";
+import { runNumberMap, shortenRunLabel } from "@/lib/run-numbers";
 import type { Experiment } from "@/lib/types";
 
 type Panel = {
@@ -40,14 +41,16 @@ function panelsFor(experiments: Experiment[]): Panel[] {
 
 export function CompareCharts({
   experiments,
+  numbers,
   compact = false,
 }: {
   experiments: Experiment[];
+  numbers?: Map<string, number>;
   compact?: boolean;
 }) {
-  const series = aggregateSeries(experiments);
+  const series = aggregateSeries(experiments, numbers ?? runNumberMap(experiments));
   const panels = panelsFor(experiments);
-  const chartH = compact ? "h-[140px]" : "h-[160px]";
+  const chartH = compact ? "h-[148px]" : "h-[168px]";
   const trackPct = Math.max(100, (panels.length / 3) * 100);
 
   return (
@@ -70,13 +73,15 @@ export function CompareCharts({
               }}
               className={`${chartH} w-full`}
             >
-              <BarChart accessibilityLayer data={series} barGap={4}>
+              <BarChart accessibilityLayer data={series} barGap={4} margin={{ bottom: 8 }}>
                 <CartesianGrid vertical={false} stroke="var(--line)" />
                 <XAxis
                   dataKey="run"
                   tickLine={false}
                   axisLine={false}
+                  interval={0}
                   tick={{ fontSize: 10 }}
+                  tickFormatter={(value) => shortenRunLabel(String(value))}
                 />
                 <YAxis
                   tickLine={false}
@@ -87,8 +92,8 @@ export function CompareCharts({
                 />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Bar dataKey={panel.dataKey} radius={[3, 3, 0, 0]} maxBarSize={28}>
-                  {experiments.map((_, i) => (
-                    <Cell key={expLetter(i)} fill={expColor(i)} />
+                  {experiments.map((ex, i) => (
+                    <Cell key={ex.id} fill={expColor(i)} />
                   ))}
                 </Bar>
               </BarChart>

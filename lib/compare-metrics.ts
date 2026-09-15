@@ -8,6 +8,7 @@ import {
   rowMse,
 } from "./nla-signals";
 import type { Experiment } from "./types";
+import { runChartLabel, runNumberMap } from "./run-numbers";
 
 function median(vals: number[]): number {
   if (!vals.length) return 0;
@@ -49,12 +50,16 @@ export function experimentKpis(ex: Experiment) {
   };
 }
 
-export function aggregateSeries(experiments: Experiment[]) {
+export function aggregateSeries(
+  experiments: Experiment[],
+  numbers = runNumberMap(experiments),
+) {
   return experiments.map((ex, i) => {
     const kpis = experimentKpis(ex);
     const scores = meanScores(ex);
+    const n = numbers.get(ex.id) ?? i + 1;
     const row: Record<string, string | number | null> = {
-      run: String.fromCharCode(65 + i),
+      run: runChartLabel(n, ex.name),
       mse: kpis.meanMse,
       chars: kpis.meanChars,
       lexical_reddit: kpis.lexicalReddit,

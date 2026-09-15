@@ -8,7 +8,8 @@ import { CompareCharts } from "@/components/compare-charts";
 import { RunTable } from "@/components/run-table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { defaultCompareIds } from "@/lib/compare-ids";
-import { expColor, expLetter } from "@/lib/exp-colors";
+import { expColor } from "@/lib/exp-colors";
+import { runNumberMap, runTag } from "@/lib/run-numbers";
 import { useStore } from "@/lib/store-client";
 import { NLA_SOURCES, type Experiment } from "@/lib/types";
 
@@ -97,6 +98,9 @@ function CompareInner() {
   const evaluators = store.evaluators.filter((ev) =>
     experiments.some((ex) => ex.evaluatorIds.includes(ev.id)),
   );
+  const numbers = runNumberMap(
+    store.experiments.filter((e) => e.datasetId === dataset.id),
+  );
 
   return (
     <div>
@@ -116,7 +120,7 @@ function CompareInner() {
             {experiments.map((ex, i) => (
               <span key={ex.id} className="pill">
                 <span className="letter" style={{ background: expColor(i) }}>
-                  {expLetter(i)}
+                  {runTag(numbers.get(ex.id) ?? i + 1)}
                 </span>
                 <span className="max-w-[220px] truncate font-mono text-[11px]">
                   {sourceLabel(ex)} · {ex.tokenPolicy}
@@ -127,7 +131,7 @@ function CompareInner() {
         }
       />
 
-      <CompareCharts experiments={experiments} />
+      <CompareCharts experiments={experiments} numbers={numbers} />
 
       <RunTable
         dataset={dataset}
