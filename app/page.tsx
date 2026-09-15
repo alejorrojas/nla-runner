@@ -114,7 +114,13 @@ export default function LandingPage() {
       <section className="relative isolate flex min-h-screen items-center justify-center overflow-hidden px-6">
         <GradientBackground />
         <div className="absolute inset-0 z-[1] bg-[#141413]/10 md:bg-[#141413]/15" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] h-44 bg-gradient-to-t from-[#faf9f5] to-transparent" />
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] h-[min(52vh,28rem)]"
+          style={{
+            background:
+              "linear-gradient(to top, #faf9f5 0%, rgb(250 249 245 / 0.55) 18%, rgb(250 249 245 / 0.22) 40%, rgb(250 249 245 / 0.06) 62%, transparent 86%)",
+          }}
+        />
         <div className="relative z-10 mx-auto max-w-3xl px-4 py-28 text-center">
           <FadeIn>
             <p className="text-[13px] font-medium tracking-[0.14em] text-white/70 uppercase">
@@ -147,7 +153,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section id="motivation" className="-mt-16 px-6 pb-8 md:px-8">
+      <section id="motivation" className="-mt-24 px-6 pb-8 md:px-8">
         <div className="relative z-10 mx-auto max-w-[1180px]">
           <RevealGroup className="grid gap-4 lg:grid-cols-12">
             <RevealItem as="article" className="overflow-hidden rounded-2xl bg-[#c4785a] lg:col-span-7">
