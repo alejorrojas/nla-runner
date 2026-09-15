@@ -81,7 +81,7 @@ export function KeysProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (pathname === "/" || pathname === "/login") {
+    if (pathname === "/" || pathname === "/login" || pathname === "/contact") {
       setHydrated(true);
       return;
     }

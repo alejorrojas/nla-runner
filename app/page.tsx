@@ -274,6 +274,7 @@ export default function LandingPage() {
               <RevealItem
                 as="article"
                 key={step.k}
+                lift
                 className="flex flex-col rounded-2xl bg-[#f0eee6] p-6"
               >
                 <h3 className="text-[22px] leading-tight font-medium tracking-tight">
@@ -329,6 +330,7 @@ export default function LandingPage() {
               <RevealItem
                 as="article"
                 key={item.t}
+                lift
                 className="overflow-hidden rounded-2xl bg-[#faf9f5] ring-1 ring-[#d1cfc5]"
               >
                 <div className="relative h-44">
@@ -440,7 +442,7 @@ export default function LandingPage() {
       </section>
 
       <footer className="overflow-hidden bg-[#141413] text-[#cccccc]">
-        <div className="flex flex-col gap-8 px-4 pt-12 md:flex-row md:items-start md:justify-between md:px-5">
+        <div className="flex flex-col gap-8 px-4 pt-12 md:flex-row md:items-start md:justify-between md:px-18">
           <p className="max-w-xl text-[14px] leading-relaxed">
             NLASmith is a research prototype from Universidad Tecnológica Nacional,
             Facultad Regional Resistencia. Built on Neuronpedia NLA and the
@@ -458,6 +460,9 @@ export default function LandingPage() {
             </Link>
             <Link href={toAppPath("/datasets")} className="hover:text-[#faf9f5]">
               Datasets
+            </Link>
+            <Link href="/contact" className="hover:text-[#faf9f5]">
+              Contact
             </Link>
           </div>
         </div>

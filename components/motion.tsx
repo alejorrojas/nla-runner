@@ -149,10 +149,12 @@ export function RevealItem({
   children,
   className,
   as = "div",
+  lift = false,
 }: {
   children: ReactNode;
   className?: string;
   as?: "div" | "article";
+  lift?: boolean;
 }) {
   const limited = useLimitedMotion();
   if (limited) {
@@ -161,7 +163,23 @@ export function RevealItem({
   }
   const MotionTag = as === "article" ? motion.article : motion.div;
   return (
-    <MotionTag className={className} variants={itemVariants}>
+    <MotionTag
+      className={className}
+      variants={itemVariants}
+      whileHover={
+        lift
+          ? {
+              y: -6,
+              transition: { duration: 0.9, ease: [0.22, 1, 0.36, 1] },
+            }
+          : undefined
+      }
+      transition={
+        lift
+          ? { y: { duration: 0.9, ease: [0.22, 1, 0.36, 1] } }
+          : undefined
+      }
+    >
       {children}
     </MotionTag>
   );

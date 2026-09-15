@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { appUrl, isApexHost, isAppHost, isLocalHost } from "@/lib/urls";
+import { appUrl, isApexHost, isAppHost, isLocalHost, siteUrl } from "@/lib/urls";
 
 const PUBLIC_PREFIXES = [
   "/login",
@@ -10,7 +10,7 @@ const PUBLIC_PREFIXES = [
 ];
 
 function isPublicPath(pathname: string): boolean {
-  if (pathname === "/") return true;
+  if (pathname === "/" || pathname === "/contact") return true;
   return PUBLIC_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
 
@@ -29,11 +29,21 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (isApexHost(host)) {
-    if (pathname === "/" || isStaticish(pathname) || pathname.startsWith("/opengraph") || pathname.startsWith("/twitter")) {
+    if (
+      pathname === "/" ||
+      pathname === "/contact" ||
+      isStaticish(pathname) ||
+      pathname.startsWith("/opengraph") ||
+      pathname.startsWith("/twitter")
+    ) {
       return NextResponse.next();
     }
     const dest = new URL(pathname + request.nextUrl.search, appUrl());
     return NextResponse.redirect(dest);
+  }
+
+  if (isAppHost(host) && pathname === "/contact") {
+    return NextResponse.redirect(new URL("/contact", siteUrl()));
   }
 
   if (isAppHost(host) && pathname === "/") {

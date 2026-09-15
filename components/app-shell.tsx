@@ -281,7 +281,7 @@ function ShellInner({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (path === "/" || path === "/login") return;
+    if (path === "/" || path === "/login" || path === "/contact") return;
     void (async () => {
       const supabase = createBrowserSupabase();
       const {
@@ -303,7 +303,7 @@ function ShellInner({ children }: { children: ReactNode }) {
     setCollapsed((value) => !value);
   }
 
-  if (path === "/login") {
+  if (path === "/login" || path === "/contact") {
     return <>{children}</>;
   }
 
