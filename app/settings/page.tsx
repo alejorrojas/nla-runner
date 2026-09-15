@@ -110,8 +110,8 @@ export default function SettingsPage() {
       <div className="mx-auto max-w-xl page-body">
         <div className="surface stack p-6">
           <p className="hint">
-            We will never read your keys. They are stored encrypted used only by
-            the server. After you save, the keys cannot be shown again.
+            Your keys are encrypted in Vault and used only by the server. After
+            you save them, they cannot be shown again.
           </p>
           {hydrated ? (
             <>

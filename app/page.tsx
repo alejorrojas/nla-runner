@@ -424,9 +424,9 @@ export default function LandingPage() {
             Configure once. Run the dataset. Keep the trail.
           </h2>
           <p className="font-editorial mx-auto mt-5 max-w-xl text-[22px] leading-snug text-[#cccccc]">
-            Keys stay in this tab. Datasets, evaluators, and experiment rows
-            persist. Open the prototype, attach a judge, and turn a one-off
-            inspection into a configuration you can repeat.
+            Datasets, evaluators, and experiment rows persist. Open the prototype,
+            attach a judge, and turn a one-off inspection into a configuration
+            you can repeat.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
             <Button asChild size="lg">
