@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { MotionConfig } from "framer-motion";
+import { ExperimentIllustration } from "@/components/experiment-illustration";
 import { GradientBackground } from "@/components/gradient-background";
 import { Mark } from "@/components/mark";
 import { FooterWordmark } from "@/components/footer-wordmark";
 import { FadeIn, Reveal, RevealGroup, RevealItem } from "@/components/motion";
+import { MotivationIllustration } from "@/components/motivation-illustration";
+import { ProductIllustration } from "@/components/product-illustration";
+import { TokenPolicyIllustration } from "@/components/token-policy-illustration";
 import { Button } from "@/components/ui/button";
 import { toAppPath } from "@/lib/urls";
 
@@ -53,31 +56,37 @@ const PIECES = [
     t: "Datasets",
     d: "Create a prompt list, identify each example, and optionally attach a reference. The dataset is what makes two runs comparable.",
     image: "/dataset.png",
+    kind: "dataset" as const,
   },
   {
     t: "Token policy",
     d: "Keep the position rule constant so last-user vs first-assistant is an experimental factor, not an afterthought.",
     image: "/tokenpolicy.png",
+    kind: "token-policy" as const,
   },
   {
     t: "NLA source",
     d: "Neuronpedia hosts the language model and the NLA. The lab wraps completion and explain into one internal schema.",
     image: "/nlasource.png",
+    kind: "nla-source" as const,
   },
   {
     t: "Evaluators",
     d: "Natural-language rubric, judge model, and feedback keys. The same loop can detect a theme, score a criterion, or classify verbalizations.",
     image: "/evaluators.png",
+    kind: "evaluators" as const,
   },
   {
     t: "Live runs",
     d: "The orchestrator walks the dataset, records progress per example, and separates API failures from negative judgments.",
     image: "/liveruns.png",
+    kind: "live-runs" as const,
   },
   {
     t: "Compare",
     d: "Tables and charts on the same prompts. Inspect a single verbalization without losing the global view of the experiment.",
     image: "/metrics.png",
+    kind: "metrics" as const,
   },
 ];
 
@@ -147,12 +156,11 @@ export default function LandingPage() {
           <RevealGroup className="grid gap-4 lg:grid-cols-12">
             <RevealItem as="article" className="overflow-hidden rounded-2xl bg-[#c4785a] lg:col-span-7">
               <div className="relative aspect-[3/1] min-h-[180px] w-full">
-                <Image
+                <MotivationIllustration
+                  kind="gap"
                   src="/thegap.png"
                   alt="A prompt connecting into a cluster of activations"
-                  fill
                   sizes="(min-width: 1024px) 680px, 100vw"
-                  className="object-cover"
                 />
               </div>
               <div className="bg-[#faf9f5] p-7">
@@ -192,12 +200,11 @@ export default function LandingPage() {
           <RevealGroup className="grid gap-4 lg:grid-cols-12">
             <RevealItem as="article" className="overflow-hidden rounded-2xl bg-[#e3dacc] lg:col-span-5">
               <div className="relative aspect-[5/3] w-full">
-                <Image
+                <MotivationIllustration
+                  kind="method"
                   src="/method.png"
                   alt="LangSmith’s loop applied to NLA"
-                  fill
                   sizes="(min-width: 1024px) 480px, 100vw"
-                  className="object-cover"
                 />
               </div>
               <div className="bg-[#faf9f5] p-7">
@@ -315,7 +322,7 @@ export default function LandingPage() {
         <div className="mx-auto max-w-[1180px]">
           <Reveal>
             <p className="text-[13px] font-medium tracking-[0.12em] text-[var(--muted)] uppercase">
-              Prototype
+              Product
             </p>
             <h2 className="mt-4 max-w-2xl font-display text-[clamp(32px,4vw,48px)] leading-[1.05]">
               A working loop for configuration, execution, and comparison.
@@ -334,19 +341,18 @@ export default function LandingPage() {
                 className="overflow-hidden rounded-2xl bg-[#faf9f5] ring-1 ring-[#d1cfc5]"
               >
                 <div className="relative h-44">
-                  <Image
-                    src={item.image}
-                    alt={item.t}
-                    fill
-                    sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 100vw"
-                    className="object-cover"
-                  />
+                  {item.kind === "token-policy" ? (
+                    <TokenPolicyIllustration />
+                  ) : (
+                    <ProductIllustration
+                      kind={item.kind}
+                      src={item.image}
+                      alt={item.t}
+                    />
+                  )}
                 </div>
                 <div className="p-6">
-                  <p className="text-[12px] font-medium tracking-[0.12em] text-[var(--muted)] uppercase">
-                    Product
-                  </p>
-                  <h3 className="mt-2 text-[20px] leading-tight font-medium tracking-tight">
+                  <h3 className="text-[20px] leading-tight font-medium tracking-tight">
                     {item.t}
                   </h3>
                   <p className="mt-3 text-[14px] leading-relaxed text-[var(--muted)]">
@@ -362,14 +368,7 @@ export default function LandingPage() {
       <section id="use-case" className="px-6 py-16 md:px-8">
         <Reveal className="mx-auto grid max-w-[1180px] overflow-hidden rounded-2xl bg-[#FAF8F4] lg:grid-cols-2">
           <div className="relative min-h-[240px] bg-[#FAF8F4] lg:min-h-full">
-            <Image
-              src="/experiment.jpg"
-              alt="A question passing through Reddit-like discourse before the visible reply"
-              fill
-              unoptimized
-              sizes="(min-width: 1024px) 590px, 100vw"
-              className="object-cover object-center"
-            />
+            <ExperimentIllustration />
           </div>
           <div className="flex flex-col justify-center bg-[#d4a08a] px-10 py-16 text-[#141413]">
             <p className="text-[13px] font-semibold tracking-[0.18em] uppercase">

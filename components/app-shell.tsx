@@ -252,7 +252,7 @@ function LandingBar() {
           href="#product"
           className="hidden hover:text-white lg:inline"
         >
-          Prototype
+          Product
         </a>
         <Link href={toAppPath("/login")} className="hover:text-white">
           Home

@@ -99,6 +99,25 @@ Letter-spacing on UI is slightly tight (`-0.012em` on body). Do not add Inter-st
 
 Framer Motion is already in the shell. Prefer CSS transitions on color. Honor `useLimitedMotion`. Do not add springy logo tricks or layout-shifting header animations.
 
+##### Animated editorial illustrations
+
+Marketing illustrations use a **pixel-faithful base plus animated overlays**. The PNG or JPG is always rendered unchanged as the bottom layer, so the composition, watercolor texture, colors, and idle state remain exactly as designed. Animation is added with a pointer-inert SVG positioned over that image; never redraw or replace the original artwork just to make it move.
+
+Use this structure:
+
+1. Wrap the original `next/image` and overlay SVG in the same `relative`, `overflow-hidden` container.
+2. Give the SVG the source asset's exact `viewBox` and the same `preserveAspectRatio="xMidYMid slice"` behavior as `object-cover`, so paths align at every responsive size.
+3. Animate only semantic parts already present in the illustration: trace an existing route, pulse a node, redraw a check, grow a bar, or highlight a document line.
+4. Keep overlays `pointer-events-none`; the wrapper owns `onPointerEnter` and `onPointerLeave`.
+5. Set `initial={false}` on overlay motion elements to prevent a mount animation or hydration mismatch.
+6. Disable overlays for reduced motion and leave the original asset visible.
+
+Every illustration needs its own motion idea. Do not apply one generic zoom or floating effect to all cards. Examples in the landing are intentionally distinct: token selection shifts tokens, datasets trace records, NLA lights a graph, evaluators resolve checks, live runs travel through a route, compare grows bars, The gap propagates through activation nodes, Method branches into outputs, and An experiment traces the conversation loop.
+
+The standard interaction lasts `1.05s`. Entry uses `[0.22, 1, 0.36, 1]`; return uses its temporal inverse `[0.64, 0, 0.78, 0]`. For animations whose overlay must remain visible while returning, control `hovered` and `active` separately: start both on pointer enter, clear only `hovered` on pointer leave, and clear `active` in `onAnimationComplete`. Do not rely on an implicit `whileHover` reset when the reverse animation must finish before revealing the static base.
+
+Keep the effect restrained. The resting illustration must remain the authored image, the animation should happen once per hover rather than loop indefinitely, and decorative overlays must not introduce new symbols or colors that are absent from the visual language.
+
 ### 4. Components — reuse, don't restyle
 
 | Job | Use |
