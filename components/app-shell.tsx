@@ -33,7 +33,6 @@ import { createBrowserSupabase } from "@/lib/supabase/browser";
 import { toAppPath } from "@/lib/urls";
 import { cn } from "@/lib/utils";
 
-const SIDEBAR_KEY = "nlasmith-sidebar-collapsed";
 const SIDEBAR_EXPANDED = 248;
 
 function initialsFromName(name: string | null) {
@@ -274,13 +273,11 @@ function ShellInner({ children }: { children: ReactNode }) {
   const missing = hydrated && (!hints.openaiHint || !hints.neuronpediaHint);
   const running = store?.experiments.filter((e) => e.status === "running") ?? [];
   const [collapsed, setCollapsed] = useState(false);
-  const [sidebarReady, setSidebarReady] = useState(false);
   const [fullName, setFullName] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
 
   useEffect(() => {
-    setCollapsed(window.localStorage.getItem(SIDEBAR_KEY) === "1");
-    setSidebarReady(true);
+    window.localStorage.removeItem("nlasmith-sidebar-collapsed");
   }, []);
 
   useEffect(() => {
@@ -303,11 +300,7 @@ function ShellInner({ children }: { children: ReactNode }) {
   }, [path]);
 
   function toggleSidebar() {
-    setCollapsed((value) => {
-      const next = !value;
-      window.localStorage.setItem(SIDEBAR_KEY, next ? "1" : "0");
-      return next;
-    });
+    setCollapsed((value) => !value);
   }
 
   if (path === "/login") {
@@ -332,7 +325,7 @@ function ShellInner({ children }: { children: ReactNode }) {
           className={cn(
             "flex h-full min-h-0 shrink-0 flex-col overflow-hidden border-r border-[var(--line)] bg-[var(--sidebar)]",
             collapsed ? "w-16" : "w-[248px]",
-            sidebarReady && !limited && "transition-[width] duration-200 ease-out",
+            !limited && "transition-[width] duration-200 ease-out",
           )}
         >
           <div

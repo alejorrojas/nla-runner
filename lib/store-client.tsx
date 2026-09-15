@@ -8,6 +8,8 @@ import {
   useEffect,
   useState,
 } from "react";
+import { usePathname } from "next/navigation";
+import { createBrowserSupabase } from "@/lib/supabase/browser";
 
 const Ctx = createContext<{
   store: Store | null;
@@ -16,20 +18,44 @@ const Ctx = createContext<{
   upsertExperiment: (experiment: Experiment) => void;
 } | null>(null);
 
+const EMPTY: Store = { datasets: [], evaluators: [], experiments: [] };
+
+function isAppPath(pathname: string) {
+  return pathname !== "/" && pathname !== "/login";
+}
+
 export function StoreProvider({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
   const [store, setStore] = useState<Store | null>(null);
 
   const reload = useCallback(async () => {
-    const res = await fetch("/api/store");
-    if (!res.ok) {
-      setStore({ datasets: [], evaluators: [], experiments: [] });
-      return;
-    }
-    setStore((await res.json()) as Store);
+    const load = async () => {
+      const res = await fetch("/api/store", { cache: "no-store" });
+      if (!res.ok) return false;
+      setStore((await res.json()) as Store);
+      return true;
+    };
+    if (await load()) return;
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    if (await load()) return;
   }, []);
 
   useEffect(() => {
+    if (!isAppPath(pathname)) return;
     void reload();
+  }, [pathname, reload]);
+
+  useEffect(() => {
+    const supabase = createBrowserSupabase();
+    const { data } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+        void reload();
+      }
+      if (event === "SIGNED_OUT") {
+        setStore(EMPTY);
+      }
+    });
+    return () => data.subscription.unsubscribe();
   }, [reload]);
 
   const save = useCallback(async (next: Store) => {
