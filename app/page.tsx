@@ -113,7 +113,7 @@ export default function LandingPage() {
       <div className="bg-[#faf9f5]">
       <section className="relative isolate flex min-h-screen items-center justify-center overflow-hidden px-6">
         <GradientBackground />
-        <div className="absolute inset-0 z-[1] bg-[#141413]/15" />
+        <div className="absolute inset-0 z-[1] bg-[#141413]/10 md:bg-[#141413]/15" />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] h-44 bg-gradient-to-t from-[#faf9f5] to-transparent" />
         <div className="relative z-10 mx-auto max-w-3xl px-4 py-28 text-center">
           <FadeIn>
@@ -357,9 +357,9 @@ export default function LandingPage() {
             <LineArt kind="constellation" className="h-64 w-full max-w-[420px]" />
           </div>
           <div className="flex flex-col justify-center bg-[#d4a08a] px-10 py-16 text-[#141413]">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <Mark className="h-9 w-9" />
-              <p className="text-[13px] font-medium tracking-[0.18em] uppercase">
+              <p className="text-[13px] font-semibold tracking-[0.18em] uppercase">
                 NLASMITH
               </p>
             </div>

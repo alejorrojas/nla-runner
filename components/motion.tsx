@@ -28,14 +28,14 @@ export function useLimitedMotion(): boolean {
   return Boolean(reduce) || lowPower;
 }
 
-/** Skip shaders until we know the machine can take them. */
+/** Skip shaders only when the user asked for less motion. Mobile still gets the grain. */
 export function useSkipHeavyEffects(): boolean {
   const reduce = useReducedMotion();
-  const [skip, setSkip] = useState(true);
+  const [mounted, setMounted] = useState(false);
   useEffect(() => {
-    setSkip(Boolean(reduce) || hardwareIsLimited());
-  }, [reduce]);
-  return skip;
+    setMounted(true);
+  }, []);
+  return !mounted || Boolean(reduce);
 }
 
 export function PageFade({

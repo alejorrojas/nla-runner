@@ -3,7 +3,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion, MotionConfig } from "framer-motion";
+import { MotionConfig } from "framer-motion";
 import {
   Database,
   FlaskConical,
@@ -14,7 +14,7 @@ import {
   Settings,
 } from "lucide-react";
 import { Mark } from "@/components/mark";
-import { PageFade, spring, useLimitedMotion } from "@/components/motion";
+import { PageFade, useLimitedMotion } from "@/components/motion";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -34,6 +34,7 @@ import { toAppPath } from "@/lib/urls";
 import { cn } from "@/lib/utils";
 
 const SIDEBAR_KEY = "nlasmith-sidebar-collapsed";
+const SIDEBAR_EXPANDED = 248;
 
 function initialsFromName(name: string | null) {
   if (!name) return "?";
@@ -66,49 +67,44 @@ function NavLink({
   icon: ReactNode;
   collapsed: boolean;
 }) {
-  const limited = useLimitedMotion();
   const link = (
     <Link
       href={href}
       className={cn(
-        "relative flex items-center rounded-lg text-[13px]",
-        collapsed
-          ? "justify-center px-0 py-[9px]"
-          : "gap-2 px-2.5 py-[7px]",
+        "relative flex items-center gap-2 whitespace-nowrap rounded-lg px-2.5 py-[7px] text-[13px]",
         active
           ? "font-medium text-[var(--ink)]"
           : "text-[var(--muted)] hover:bg-[var(--hover)] hover:text-[var(--ink)]",
       )}
     >
       {active ? (
-        limited ? (
-          <span className="absolute inset-0 rounded-lg bg-[color-mix(in_srgb,var(--clay)_16%,transparent)]" />
-        ) : (
-          <motion.span
-            layoutId="nav-pill"
-            className="absolute inset-0 rounded-lg bg-[color-mix(in_srgb,var(--clay)_16%,transparent)]"
-            transition={spring}
-          />
-        )
+        <span className="absolute inset-0 rounded-lg bg-[color-mix(in_srgb,var(--clay)_16%,transparent)]" />
       ) : null}
-      <span className="relative z-10">{icon}</span>
-      {collapsed ? null : (
-        <>
-          <span className="relative z-10 min-w-0 flex-1 truncate">{label}</span>
-          {countPending ? (
-            <Skeleton className="relative z-10 h-3 w-4" />
-          ) : count != null ? (
-            <span className="relative z-10 font-mono text-[13px] text-[var(--muted)]">
-              {count}
-            </span>
-          ) : null}
-        </>
-      )}
+      <span className="relative z-10 shrink-0">{icon}</span>
+      <span
+        className={cn(
+          "relative z-10 min-w-0 flex-1 truncate",
+          collapsed && "opacity-0",
+        )}
+      >
+        {label}
+      </span>
+      {countPending ? (
+        <Skeleton className={cn("relative z-10 h-3 w-4", collapsed && "opacity-0")} />
+      ) : count != null ? (
+        <span
+          className={cn(
+            "relative z-10 font-mono text-[13px] text-[var(--muted)]",
+            collapsed && "opacity-0",
+          )}
+        >
+          {count}
+        </span>
+      ) : null}
     </Link>
   );
-  if (!collapsed) return link;
   return (
-    <Tooltip>
+    <Tooltip delayDuration={collapsed ? 200 : 1_000_000}>
       <TooltipTrigger asChild>{link}</TooltipTrigger>
       <TooltipContent side="right">{label}</TooltipContent>
     </Tooltip>
@@ -125,8 +121,8 @@ function CollapsedBrandToggle({ onOpen }: { onOpen: () => void }) {
     >
       <Mark
         className={cn(
-          "pointer-events-none h-8 w-8",
-          armed ? "invisible" : "visible",
+          "pointer-events-none h-8 w-8 transition-opacity duration-150",
+          armed ? "opacity-0" : "opacity-100",
         )}
       />
       <Button
@@ -134,7 +130,7 @@ function CollapsedBrandToggle({ onOpen }: { onOpen: () => void }) {
         variant="ghost"
         size="icon"
         className={cn(
-          "absolute inset-0 size-8 text-[var(--muted)]",
+          "absolute inset-0 size-8 text-[var(--muted)] transition-opacity duration-150",
           armed ? "opacity-100" : "opacity-0",
         )}
         aria-expanded={false}
@@ -167,17 +163,19 @@ function AccountMenu({
     <Button
       type="button"
       variant="nav"
-      className={collapsed ? "justify-center px-1.5 py-1.5" : undefined}
       aria-label="Account menu"
     >
       <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--ok)] text-[12px] font-medium text-[#faf9f5]">
         {hydrated ? initials : " "}
       </span>
-      {collapsed ? null : (
-        <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-[var(--ink)]">
-          {hydrated ? displayName : <Skeleton className="h-3.5 w-28" />}
-        </span>
-      )}
+      <span
+        className={cn(
+          "min-w-0 flex-1 truncate text-[13px] font-medium text-[var(--ink)] transition-opacity duration-150",
+          collapsed && "opacity-0",
+        )}
+      >
+        {hydrated ? displayName : <Skeleton className="h-3.5 w-28" />}
+      </span>
     </Button>
   );
 
@@ -236,7 +234,7 @@ function LandingBar() {
     <header className="relative z-30 mx-auto flex max-w-[1180px] items-center justify-between px-6 py-5 md:px-8">
       <Link href="/" className="flex items-center gap-2 text-white">
         <Mark className="h-8 w-8" />
-        <span className="text-[15px] font-medium tracking-tight">NLASmith</span>
+        <span className="text-[15px] font-semibold tracking-tight">NLASmith</span>
       </Link>
       <nav className="flex items-center gap-5 text-[13px] font-medium text-[#faf9f5] [text-shadow:0_1px_2px_rgba(20,20,19,0.55),0_0_18px_rgba(20,20,19,0.45)]">
         <a
@@ -276,11 +274,13 @@ function ShellInner({ children }: { children: ReactNode }) {
   const missing = hydrated && (!hints.openaiHint || !hints.neuronpediaHint);
   const running = store?.experiments.filter((e) => e.status === "running") ?? [];
   const [collapsed, setCollapsed] = useState(false);
+  const [sidebarReady, setSidebarReady] = useState(false);
   const [fullName, setFullName] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
 
   useEffect(() => {
     setCollapsed(window.localStorage.getItem(SIDEBAR_KEY) === "1");
+    setSidebarReady(true);
   }, []);
 
   useEffect(() => {
@@ -328,135 +328,152 @@ function ShellInner({ children }: { children: ReactNode }) {
   return (
     <MotionConfig reducedMotion={limited ? "always" : "user"}>
       <div className="flex h-svh overflow-hidden">
-        <motion.aside
-          initial={false}
-          animate={{ width: collapsed ? 64 : 248 }}
-          transition={
-            limited ? { duration: 0 } : { duration: 0.2, ease: [0.32, 0.72, 0, 1] }
-          }
-          className="flex h-full min-h-0 shrink-0 flex-col overflow-x-clip border-r border-[var(--line)] bg-[var(--sidebar)]"
+        <aside
+          className={cn(
+            "flex h-full min-h-0 shrink-0 flex-col overflow-hidden border-r border-[var(--line)] bg-[var(--sidebar)]",
+            collapsed ? "w-16" : "w-[248px]",
+            sidebarReady && !limited && "transition-[width] duration-200 ease-out",
+          )}
         >
           <div
-            className={cn(
-              "flex items-center pb-4 pt-5",
-              collapsed ? "justify-center px-2" : "justify-between gap-2 px-3",
-            )}
+            className="flex h-full min-h-0 shrink-0 flex-col"
+            style={{ width: SIDEBAR_EXPANDED }}
           >
-            {collapsed ? (
-              <CollapsedBrandToggle onOpen={toggleSidebar} />
-            ) : (
-              <>
-                <Link href="/" className="flex min-w-0 items-center gap-2.5">
-                  <Mark className="h-8 w-8 shrink-0" />
-                  <span className="min-w-0 truncate text-[15px] font-medium leading-tight tracking-tight">
-                    NLASmith
-                  </span>
-                </Link>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="shrink-0 text-[var(--muted)]"
-                  aria-expanded
-                  aria-label="Close sidebar"
-                  onClick={toggleSidebar}
-                >
-                  <PanelLeft />
-                </Button>
-              </>
-            )}
-          </div>
-          {collapsed ? null : (
-            <div className="px-3 pb-1 text-[13px] font-medium text-[var(--muted)]">
-              Application
+            <div className="flex items-center gap-2 px-3 pb-4 pt-5">
+              <div className="relative size-8 shrink-0">
+                {collapsed ? (
+                  <CollapsedBrandToggle onOpen={toggleSidebar} />
+                ) : (
+                  <Link href="/" className="block size-8" aria-label="NLASmith">
+                    <Mark className="h-8 w-8" />
+                  </Link>
+                )}
+              </div>
+              <Link
+                href="/"
+                tabIndex={collapsed ? -1 : 0}
+                className={cn(
+                  "min-w-0 flex-1 truncate text-[15px] font-semibold leading-tight tracking-tight",
+                  collapsed && "pointer-events-none opacity-0",
+                )}
+              >
+                NLASmith
+              </Link>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className={cn(
+                  "shrink-0 text-[var(--muted)]",
+                  collapsed && "pointer-events-none opacity-0",
+                )}
+                aria-expanded={!collapsed}
+                aria-label="Close sidebar"
+                tabIndex={collapsed ? -1 : 0}
+                onClick={toggleSidebar}
+              >
+                <PanelLeft />
+              </Button>
             </div>
-          )}
-          <nav className="flex flex-col gap-0.5 px-2">
-            <NavLink
-              href="/lab"
-              label="Home"
-              icon={<Home size={15} />}
-              active={path === "/lab"}
-              collapsed={collapsed}
-            />
-            <NavLink
-              href="/datasets"
-              label="Datasets & Experiments"
-              icon={<Database size={15} />}
-              count={store?.datasets.length}
-              countPending={!store}
-              active={path.startsWith("/datasets")}
-              collapsed={collapsed}
-            />
-            <NavLink
-              href="/evaluators"
-              label="Evaluators"
-              icon={<FlaskConical size={15} />}
-              count={store?.evaluators.length}
-              countPending={!store}
-              active={path.startsWith("/evaluators")}
-              collapsed={collapsed}
-            />
-          </nav>
-          {collapsed ? (
-            <div className="mt-4" />
-          ) : (
-            <div className="mt-6 px-3 pb-1 text-[13px] font-medium text-[var(--muted)]">
-              Workspace
-            </div>
-          )}
-          <nav className="flex flex-col gap-0.5 px-2">
-            <NavLink
-              href="/settings"
-              label="Settings"
-              icon={<Settings size={15} />}
-              active={path.startsWith("/settings")}
-              collapsed={collapsed}
-            />
-          </nav>
-          <div
-            className={cn(
-              "mt-auto space-y-2 border-t border-[var(--line)] py-3",
-              collapsed ? "px-2" : "px-3",
-            )}
-          >
-            {running.length > 0 ? (
-              collapsed ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="flex justify-center py-1">
-                      <span className="relative flex h-2 w-2">
-                        {limited ? null : (
-                          <span className="absolute inline-flex h-full w-2 animate-ping rounded-full bg-[var(--accent)] opacity-40" />
-                        )}
-                        <span className="relative h-2 w-2 rounded-full bg-[var(--accent)]" />
-                      </span>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent side="right">
-                    {running.length} run{running.length === 1 ? "" : "s"} live
-                  </TooltipContent>
-                </Tooltip>
-              ) : (
-                <div className="flex items-center gap-2 text-[13px]">
-                  <span className="relative flex h-2 w-2">
-                    {limited ? null : (
-                      <span className="absolute inline-flex h-full w-2 animate-ping rounded-full bg-[var(--accent)] opacity-40" />
-                    )}
-                    <span className="relative h-2 w-2 rounded-full bg-[var(--accent)]" />
-                  </span>
-                  {running.length} run{running.length === 1 ? "" : "s"} live
+            <div
+              className={cn(
+                "grid",
+                collapsed ? "grid-rows-[0fr]" : "grid-rows-[1fr]",
+              )}
+            >
+              <div className="overflow-hidden">
+                <div className="px-3 pb-1 text-[13px] font-medium text-[var(--muted)]">
+                  Application
                 </div>
-              )
-            ) : null}
-            <AccountMenu
-              collapsed={collapsed}
-              displayName={fullName ?? email ?? "Account"}
-              missingKeys={missing}
-              hydrated={hydrated}
-            />
+              </div>
+            </div>
+            <nav className="flex flex-col gap-0.5 px-2">
+              <NavLink
+                href="/lab"
+                label="Home"
+                icon={<Home size={15} />}
+                active={path === "/lab"}
+                collapsed={collapsed}
+              />
+              <NavLink
+                href="/datasets"
+                label="Datasets & Experiments"
+                icon={<Database size={15} />}
+                count={store?.datasets.length}
+                countPending={!store}
+                active={path.startsWith("/datasets")}
+                collapsed={collapsed}
+              />
+              <NavLink
+                href="/evaluators"
+                label="Evaluators"
+                icon={<FlaskConical size={15} />}
+                count={store?.evaluators.length}
+                countPending={!store}
+                active={path.startsWith("/evaluators")}
+                collapsed={collapsed}
+              />
+            </nav>
+            <div
+              className={cn(
+                "grid",
+                collapsed ? "mt-0 grid-rows-[0fr]" : "mt-6 grid-rows-[1fr]",
+              )}
+            >
+              <div className="overflow-hidden">
+                <div className="px-3 pb-1 text-[13px] font-medium text-[var(--muted)]">
+                  Workspace
+                </div>
+              </div>
+            </div>
+            <nav className="flex flex-col gap-0.5 px-2">
+              <NavLink
+                href="/settings"
+                label="Settings"
+                icon={<Settings size={15} />}
+                active={path.startsWith("/settings")}
+                collapsed={collapsed}
+              />
+            </nav>
+            <div className="mt-auto space-y-2 border-t border-[var(--line)] px-3 py-3">
+              {running.length > 0 ? (
+                collapsed ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex py-1">
+                        <span className="relative flex h-2 w-2">
+                          {limited ? null : (
+                            <span className="absolute inline-flex h-full w-2 animate-ping rounded-full bg-[var(--accent)] opacity-40" />
+                          )}
+                          <span className="relative h-2 w-2 rounded-full bg-[var(--accent)]" />
+                        </span>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="right">
+                      {running.length} run{running.length === 1 ? "" : "s"} live
+                    </TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <div className="flex items-center gap-2 text-[13px]">
+                    <span className="relative flex h-2 w-2">
+                      {limited ? null : (
+                        <span className="absolute inline-flex h-full w-2 animate-ping rounded-full bg-[var(--accent)] opacity-40" />
+                      )}
+                      <span className="relative h-2 w-2 rounded-full bg-[var(--accent)]" />
+                    </span>
+                    {running.length} run{running.length === 1 ? "" : "s"} live
+                  </div>
+                )
+              ) : null}
+              <AccountMenu
+                collapsed={collapsed}
+                displayName={fullName ?? email ?? "Account"}
+                missingKeys={missing}
+                hydrated={hydrated}
+              />
+            </div>
           </div>
-        </motion.aside>
+        </aside>
         <main className="min-h-0 min-w-0 flex-1 overflow-y-auto bg-[var(--bg)]">
           <PageFade key={path} className="min-h-full">
             {children}

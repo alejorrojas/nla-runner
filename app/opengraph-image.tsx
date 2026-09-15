@@ -100,7 +100,7 @@ export default async function Image() {
             left: 52,
             display: "flex",
             alignItems: "center",
-            gap: 12,
+            gap: 10,
           }}
         >
           <div
@@ -108,8 +108,6 @@ export default async function Image() {
               display: "flex",
               width: 40,
               height: 40,
-              borderRadius: 10,
-              overflow: "hidden",
             }}
           >
             <img src={logoSrc} width={40} height={40} />
@@ -118,7 +116,7 @@ export default async function Image() {
             style={{
               display: "flex",
               fontSize: 16,
-              fontWeight: 500,
+              fontWeight: 600,
               color: "#ffffff",
               letterSpacing: -0.3,
             }}

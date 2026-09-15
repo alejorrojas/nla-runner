@@ -75,9 +75,9 @@ function LoginForm() {
       </div>
       <div className="relative z-10 flex min-h-dvh items-center justify-center px-6 py-16">
         <div className="w-full max-w-md rounded-2xl bg-[#faf9f5]/72 px-7 py-8 ring-1 ring-[#d1cfc5]/70 backdrop-blur-sm">
-        <a href={siteUrl()} className="mb-10 flex items-center gap-2.5">
+        <a href={siteUrl()} className="mb-10 flex items-center gap-2">
           <Mark className="h-8 w-8" />
-          <span className="text-[15px] font-medium tracking-tight">NLASmith</span>
+          <span className="text-[15px] font-semibold tracking-tight">NLASmith</span>
         </a>
         <h1 className="font-display text-[clamp(28px,4vw,36px)] leading-[1.05]">
           {mode === "signin" ? "Sign in to the lab" : "Create your workspace"}
