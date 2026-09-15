@@ -3,24 +3,23 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { Plus } from "lucide-react";
+import { AttachEvaluatorDialog } from "@/components/attach-evaluator-dialog";
+import { CompareCharts } from "@/components/compare-charts";
 import { PageHeader } from "@/components/page-chrome";
+import { RunExperimentDialog } from "@/components/run-experiment-dialog";
 import { RunProgress, type RunPhase, type RunTick } from "@/components/run-progress";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton, TableRowsSkeleton } from "@/components/ui/skeleton";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { useKeys } from "@/lib/keys";
 import { defaultCompareIds } from "@/lib/compare-ids";
+import { attachedEvaluatorIds, withDatasetEvaluators } from "@/lib/dataset-evaluators";
+import { meanScores } from "@/lib/feedback-display";
+import { useKeys } from "@/lib/keys";
 import { useStore } from "@/lib/store-client";
 import { NLA_SOURCES, type Experiment, type ExperimentRow, type TokenPolicy } from "@/lib/types";
 
@@ -34,6 +33,18 @@ type StreamEvent = {
   phase?: RunPhase;
 };
 
+type DatasetTab = "experiments" | "evaluators" | "examples";
+
+function formatWhen(iso: string) {
+  return new Date(iso).toLocaleString(undefined, {
+    month: "numeric",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
 export default function DatasetPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
@@ -46,7 +57,9 @@ export default function DatasetPage() {
   const [log, setLog] = useState("");
   const [tick, setTick] = useState<RunTick | null>(null);
   const [selected, setSelected] = useState<string[] | null>(null);
-  const [tab, setTab] = useState<"experiments" | "examples">("experiments");
+  const [tab, setTab] = useState<DatasetTab>("experiments");
+  const [runOpen, setRunOpen] = useState(false);
+  const [attachOpen, setAttachOpen] = useState(false);
 
   const dataset = store?.datasets.find((d) => d.id === id);
   const experiments = useMemo(
@@ -54,12 +67,39 @@ export default function DatasetPage() {
     [store, id],
   );
   const chosen = selected ?? defaultCompareIds(experiments);
+  const attachedIds = dataset
+    ? attachedEvaluatorIds(dataset, experiments)
+    : [];
+  const attachedEvaluators =
+    store?.evaluators.filter((ev) => attachedIds.includes(ev.id)) ?? [];
+  const metricKeys = [
+    ...new Set(experiments.flatMap((ex) => Object.keys(meanScores(ex)))),
+  ];
 
   useEffect(() => {
-    if (!store || evaluatorIds.length > 0) return;
-    const first = store.evaluators[0];
-    if (first) setEvaluatorIds([first.id]);
-  }, [store, evaluatorIds.length]);
+    if (!store || !dataset) return;
+    if ((dataset.evaluatorIds ?? []).length > 0) return;
+    const inferred = [
+      ...new Set(experiments.flatMap((e) => e.evaluatorIds)),
+    ];
+    if (!inferred.length) return;
+    persistDatasetEvaluators(inferred);
+  }, [store, dataset, experiments]);
+
+  useEffect(() => {
+    if (evaluatorIds.length > 0 || attachedIds.length === 0) return;
+    setEvaluatorIds(attachedIds);
+  }, [attachedIds, evaluatorIds.length]);
+
+  function persistDatasetEvaluators(nextIds: string[]) {
+    if (!store || !dataset) return;
+    void save({
+      ...store,
+      datasets: store.datasets.map((d) =>
+        d.id === dataset.id ? withDatasetEvaluators(d, nextIds) : d,
+      ),
+    });
+  }
 
   if (!store) {
     return (
@@ -73,10 +113,25 @@ export default function DatasetPage() {
             </>
           }
           title={<Skeleton className="h-6 w-56" />}
+          action={
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" disabled>
+                <Plus />
+                Evaluator
+              </Button>
+              <Button type="button" disabled>
+                <Plus />
+                Experiment
+              </Button>
+            </div>
+          }
           tabs={
             <Tabs value="experiments" onValueChange={() => {}}>
               <TabsList variant="line" className="h-auto p-0">
                 <TabsTrigger value="experiments">Experiments</TabsTrigger>
+                <TabsTrigger value="evaluators" disabled>
+                  Evaluators
+                </TabsTrigger>
                 <TabsTrigger value="examples" disabled>
                   Examples
                 </TabsTrigger>
@@ -85,92 +140,20 @@ export default function DatasetPage() {
           }
         />
         <div className="page-body">
-          <section className="surface p-6">
-            <div className="flex items-end justify-between gap-4">
-              <div>
-                <h2 className="section-title">Run experiment</h2>
-                <p className="hint mt-2">
-                  You will see which prompt is in flight and whether we are on
-                  NLA or the judge.
-                </p>
-              </div>
-              <Button type="button" disabled>
-                Run experiment
-              </Button>
-            </div>
-            <div className="mt-5 grid gap-5 md:grid-cols-3">
-              <div className="field">
-                <Label>NLA source</Label>
-                <Select value={sourceId} onValueChange={setSourceId}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {NLA_SOURCES.map((s) => (
-                      <SelectItem key={s.id} value={s.id}>
-                        {s.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="field">
-                <Label>Token policy</Label>
-                <Select
-                  value={tokenPolicy}
-                  onValueChange={(value) =>
-                    setTokenPolicy(value as TokenPolicy)
-                  }
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="last_user">Last user token</SelectItem>
-                    <SelectItem value="first_assistant">
-                      First assistant token
-                    </SelectItem>
-                    <SelectItem value="both">Both</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="field">
-                <Label>Evaluators</Label>
-                <div className="flex flex-col gap-2">
-                  <Skeleton className="h-4 w-40" />
-                  <Skeleton className="h-4 w-36" />
-                  <Skeleton className="h-4 w-44" />
-                </div>
-              </div>
-            </div>
-          </section>
-          <section className="mt-6">
-            <div className="mb-3 flex items-center justify-end">
-              <Button variant="outline" type="button" disabled>
-                Compare selected
-              </Button>
-            </div>
-            <div className="surface overflow-hidden">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th className="w-10"></th>
-                    <th>Name</th>
-                    <th>Source</th>
-                    <th>Token</th>
-                    <th>Rows</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <TableRowsSkeleton
-                    rows={3}
-                    columns={["w-4", "w-40", "w-24", "w-16", "w-8", "w-12"]}
-                  />
-                </tbody>
-              </table>
-            </div>
-          </section>
+          <div className="surface overflow-hidden">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Progress</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <TableRowsSkeleton rows={4} columns={["w-40", "w-16", "w-12"]} />
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     );
@@ -185,6 +168,8 @@ export default function DatasetPage() {
       </div>
     );
   }
+
+  const current = dataset;
 
   const updateExample = (
     exampleId: string,
@@ -218,8 +203,8 @@ export default function DatasetPage() {
     setLog("Starting experiment…");
     setTick({
       index: 0,
-      total: dataset!.examples.length,
-      prompt: dataset!.examples[0]?.prompt ?? "",
+      total: current.examples.length,
+      prompt: current.examples[0]?.prompt ?? "",
       phase: "nla",
       completed: 0,
     });
@@ -227,7 +212,7 @@ export default function DatasetPage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        datasetId: dataset!.id,
+        datasetId: current.id,
         sourceId,
         tokenPolicy,
         evaluatorIds,
@@ -276,7 +261,7 @@ export default function DatasetPage() {
               ? { ...prev, completed }
               : {
                   index: ev.index ?? completed - 1,
-                  total: ev.total ?? dataset!.examples.length,
+                  total: ev.total ?? current.examples.length,
                   prompt: ev.row?.prompt ?? "",
                   phase: "judge",
                   completed,
@@ -319,15 +304,39 @@ export default function DatasetPage() {
           />
         }
         hint={`${dataset.examples.length} prompts · ${experiments.length} experiments`}
+        action={
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setTab("evaluators");
+                setAttachOpen(true);
+              }}
+            >
+              <Plus />
+              Evaluator
+            </Button>
+            <Button
+              type="button"
+              onClick={() => {
+                setTab("experiments");
+                setRunOpen(true);
+              }}
+            >
+              <Plus />
+              Experiment
+            </Button>
+          </div>
+        }
         tabs={
           <Tabs
             value={tab}
-            onValueChange={(value) =>
-              setTab(value as "experiments" | "examples")
-            }
+            onValueChange={(value) => setTab(value as DatasetTab)}
           >
             <TabsList variant="line" className="h-auto p-0">
               <TabsTrigger value="experiments">Experiments</TabsTrigger>
+              <TabsTrigger value="evaluators">Evaluators</TabsTrigger>
               <TabsTrigger value="examples">Examples</TabsTrigger>
             </TabsList>
           </Tabs>
@@ -337,98 +346,17 @@ export default function DatasetPage() {
       <div className="page-body">
         {tab === "experiments" ? (
           <>
-            <section className="surface p-6">
-              <div className="flex items-end justify-between gap-4">
-                <div>
-                  <h2 className="section-title">Run experiment</h2>
-                  <p className="hint mt-2">
-                    You will see which prompt is in flight and whether we are on
-                    NLA or the judge.
-                  </p>
-                </div>
-                <Button
-                  type="button"
-                  disabled={running}
-                  onClick={() => {
-                    setTab("experiments");
-                    void run();
-                  }}
-                >
-                  {running ? "Running…" : "Run experiment"}
-                </Button>
+            {running && tick ? (
+              <div className="mb-6">
+                <RunProgress tick={tick} />
               </div>
-              <div className="mt-5 grid gap-5 md:grid-cols-3">
-                <div className="field">
-                  <Label>NLA source</Label>
-                  <Select value={sourceId} onValueChange={setSourceId}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {NLA_SOURCES.map((s) => (
-                        <SelectItem key={s.id} value={s.id}>
-                          {s.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="field">
-                  <Label>Token policy</Label>
-                  <Select
-                    value={tokenPolicy}
-                    onValueChange={(value) =>
-                      setTokenPolicy(value as TokenPolicy)
-                    }
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="last_user">Last user token</SelectItem>
-                      <SelectItem value="first_assistant">
-                        First assistant token
-                      </SelectItem>
-                      <SelectItem value="both">Both</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="field">
-                  <Label>Evaluators</Label>
-                  <div className="flex flex-col gap-2">
-                    {store.evaluators.map((ev) => (
-                      <div key={ev.id} className="flex items-center gap-2">
-                        <Checkbox
-                          id={`evaluator-${ev.id}`}
-                          checked={evaluatorIds.includes(ev.id)}
-                          onCheckedChange={(checked) =>
-                            setEvaluatorIds((ids) =>
-                              checked === true
-                                ? [...ids, ev.id]
-                                : ids.filter((x) => x !== ev.id),
-                            )
-                          }
-                        />
-                        <Label
-                          htmlFor={`evaluator-${ev.id}`}
-                          className="font-normal text-[var(--ink)]"
-                        >
-                          {ev.name}
-                        </Label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+            ) : null}
+            {experiments.length > 0 ? (
+              <div className="surface mb-6 overflow-hidden">
+                <CompareCharts experiments={experiments} compact />
               </div>
-              {log ? (
-                <p className="hint font-mono">
-                  {log}
-                </p>
-              ) : null}
-              <RunProgress tick={tick} />
-            </section>
-
-            <section className="mt-6">
+            ) : null}
+            <section>
               <div className="mb-3 flex items-center justify-end">
                 <Button
                   variant="outline"
@@ -448,65 +376,145 @@ export default function DatasetPage() {
                   <thead>
                     <tr>
                       <th className="w-10"></th>
-                      <th>Name</th>
-                      <th>Source</th>
-                      <th>Token</th>
-                      <th>Rows</th>
+                      <th>Experiment</th>
+                      <th>Progress</th>
+                      {metricKeys.map((key) => (
+                        <th key={key}>{key}</th>
+                      ))}
+                      <th>Created</th>
                       <th>Status</th>
                     </tr>
                   </thead>
                   <tbody>
                     {experiments.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="text-[var(--muted)]">
-                          No runs yet. Start one above — the list updates while it
-                          runs.
+                        <td
+                          colSpan={5 + metricKeys.length}
+                          className="text-[var(--muted)]"
+                        >
+                          No runs yet. Start one with + Experiment.
                         </td>
                       </tr>
                     ) : (
-                      experiments.map((ex) => (
-                        <tr key={ex.id}>
-                          <td>
-                            <Checkbox
-                              checked={chosen.includes(ex.id)}
-                              onCheckedChange={(checked) =>
-                                setSelected((ids) => {
-                                  const current = ids ?? defaultCompareIds(experiments);
-                                  return checked === true
-                                    ? [...current, ex.id]
-                                    : current.filter((x) => x !== ex.id);
-                                })
-                              }
-                              aria-label={`Select ${ex.name}`}
-                            />
-                          </td>
-                          <td>
-                            <Link
-                              href={`/datasets/${dataset.id}/compare?ids=${defaultCompareIds(experiments).join(",")}`}
-                              className="font-medium hover:underline"
-                            >
-                              {ex.name}
-                            </Link>
-                          </td>
-                          <td className="font-mono text-[12px] text-[var(--muted)]">
-                            {ex.sourceId}
-                          </td>
-                          <td className="font-mono text-[12px] text-[var(--muted)]">
-                            {ex.tokenPolicy}
-                          </td>
-                          <td className="font-mono">{ex.rows.length}</td>
-                          <td>
-                            <StatusBadge status={ex.status} />
-                          </td>
-                        </tr>
-                      ))
+                      experiments.map((ex) => {
+                        const scores = meanScores(ex);
+                        const done = ex.rows.filter((row) => !row.error).length;
+                        return (
+                          <tr key={ex.id}>
+                            <td>
+                              <Checkbox
+                                checked={chosen.includes(ex.id)}
+                                onCheckedChange={(checked) =>
+                                  setSelected((ids) => {
+                                    const current =
+                                      ids ?? defaultCompareIds(experiments);
+                                    return checked === true
+                                      ? [...current, ex.id]
+                                      : current.filter((x) => x !== ex.id);
+                                  })
+                                }
+                                aria-label={`Select ${ex.name}`}
+                              />
+                            </td>
+                            <td>
+                              <Link
+                                href={`/datasets/${dataset.id}/compare?ids=${ex.id}`}
+                                className="font-medium hover:underline"
+                              >
+                                {ex.name}
+                              </Link>
+                              <div className="mt-0.5 font-mono text-[12px] text-[var(--muted)]">
+                                {ex.sourceId} · {ex.tokenPolicy}
+                              </div>
+                            </td>
+                            <td className="font-mono">
+                              {done} / {dataset.examples.length}
+                            </td>
+                            {metricKeys.map((key) => (
+                              <td key={key} className="font-mono">
+                                {scores[key] == null ? "—" : scores[key].toFixed(2)}
+                              </td>
+                            ))}
+                            <td className="text-[var(--muted)]">
+                              {formatWhen(ex.createdAt)}
+                            </td>
+                            <td>
+                              <StatusBadge status={ex.status} />
+                            </td>
+                          </tr>
+                        );
+                      })
                     )}
                   </tbody>
                 </table>
               </div>
             </section>
           </>
-        ) : (
+        ) : null}
+
+        {tab === "evaluators" ? (
+          <div className="surface overflow-hidden">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Evaluator</th>
+                  <th>Type</th>
+                  <th>Feedback</th>
+                  <th>Runs on this dataset</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {attachedEvaluators.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="text-[var(--muted)]">
+                      No evaluators on this dataset yet. Add one with + Evaluator.
+                    </td>
+                  </tr>
+                ) : (
+                  attachedEvaluators.map((ev) => {
+                    const runs = experiments.filter((ex) =>
+                      ex.evaluatorIds.includes(ev.id),
+                    ).length;
+                    return (
+                      <tr key={ev.id}>
+                        <td>
+                          <Link
+                            href={`/evaluators/${ev.id}`}
+                            className="font-medium hover:underline"
+                          >
+                            {ev.name}
+                          </Link>
+                        </td>
+                        <td className="text-[var(--muted)]">LLM-as-judge</td>
+                        <td className="text-[var(--muted)]">
+                          {ev.feedback.map((f) => f.key).join(", ") || "—"}
+                        </td>
+                        <td className="font-mono">{runs || "—"}</td>
+                        <td>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            className="text-[var(--muted)]"
+                            onClick={() =>
+                              persistDatasetEvaluators(
+                                attachedIds.filter((eid) => eid !== ev.id),
+                              )
+                            }
+                          >
+                            Remove
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        ) : null}
+
+        {tab === "examples" ? (
           <section>
             <div className="mb-3 flex items-center justify-end">
               <Button
@@ -576,8 +584,38 @@ export default function DatasetPage() {
               })}
             </div>
           </section>
-        )}
+        ) : null}
       </div>
+
+      <RunExperimentDialog
+        open={runOpen}
+        onOpenChange={setRunOpen}
+        sourceId={sourceId}
+        tokenPolicy={tokenPolicy}
+        evaluatorIds={evaluatorIds}
+        evaluators={attachedEvaluators.length ? attachedEvaluators : store.evaluators}
+        running={running}
+        log={log}
+        tick={tick}
+        onSourceId={setSourceId}
+        onTokenPolicy={setTokenPolicy}
+        onEvaluatorIds={setEvaluatorIds}
+        onRun={() => {
+          void run();
+        }}
+        keysReady={Boolean(hints.openaiHint && hints.neuronpediaHint)}
+      />
+      <AttachEvaluatorDialog
+        open={attachOpen}
+        onOpenChange={setAttachOpen}
+        datasetId={dataset.id}
+        evaluators={store.evaluators}
+        attachedIds={attachedIds}
+        onAttach={(ids) => {
+          persistDatasetEvaluators(ids);
+          setAttachOpen(false);
+        }}
+      />
     </div>
   );
 }

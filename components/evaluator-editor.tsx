@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { PageHeader } from "@/components/page-chrome";
 import { FeedbackConfig } from "@/components/feedback-config";
@@ -16,7 +16,76 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { mustacheVars } from "@/lib/mustache";
-import { JUDGE_VARS, OPENAI_MODELS, type Evaluator, type JudgeVar } from "@/lib/types";
+import { JUDGE_VARS, type Evaluator, type JudgeVar } from "@/lib/types";
+import { KeysRequiredTooltip } from "@/components/keys-required-tooltip";
+import { useKeys } from "@/lib/keys";
+
+function OpenAIModelSelect({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const { hints, hydrated } = useKeys();
+  const needsKey = hydrated && !hints.openaiHint;
+  const [models, setModels] = useState<string[]>([]);
+  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+
+  useEffect(() => {
+    if (!hydrated) return;
+    if (needsKey) {
+      setStatus("error");
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch("/api/openai/models");
+        const body = (await res.json()) as { models?: string[]; error?: string };
+        if (!res.ok) throw new Error(body.error || "Could not load models");
+        if (cancelled) return;
+        setModels(body.models ?? []);
+        setStatus("ready");
+      } catch {
+        if (cancelled) return;
+        setStatus("error");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [hydrated, needsKey]);
+
+  const options = models.includes(value)
+    ? models
+    : value
+      ? [value, ...models]
+      : models;
+  const disabled = !hydrated || needsKey || status === "loading";
+
+  return (
+    <div className="field">
+      <Label>OpenAI model</Label>
+      <KeysRequiredTooltip active={needsKey} className="block w-full">
+        <Select value={value} onValueChange={onChange} disabled={disabled}>
+          <SelectTrigger className="w-full">
+            <SelectValue
+              placeholder={status === "loading" && !needsKey ? "Loading models…" : "Select a model"}
+            />
+          </SelectTrigger>
+          <SelectContent className="max-h-72">
+            {options.map((model) => (
+              <SelectItem key={model} value={model}>
+                {model}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </KeysRequiredTooltip>
+    </div>
+  );
+}
 
 export function EvaluatorEditor({
   initial,
@@ -85,24 +154,10 @@ export function EvaluatorEditor({
                 structured JSON the judge must return.
               </p>
             </div>
-            <div className="field">
-              <Label>OpenAI model</Label>
-              <Select
-                value={ev.openaiModel}
-                onValueChange={(value) => patch({ ...ev, openaiModel: value })}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {OPENAI_MODELS.map((m) => (
-                    <SelectItem key={m} value={m}>
-                      {m}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <OpenAIModelSelect
+              value={ev.openaiModel}
+              onChange={(openaiModel) => patch({ ...ev, openaiModel })}
+            />
             <div className="field">
               <Label htmlFor="evaluator-prompt">Prompt</Label>
               <Textarea

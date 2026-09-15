@@ -14,12 +14,12 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 import type { FeedbackCategory, FeedbackField, FeedbackKind } from "@/lib/types";
 
 function categoriesOf(field: FeedbackField): FeedbackCategory[] {
@@ -162,8 +162,8 @@ function FormatFields({
             ))}
           </div>
           <Button
-            variant="link"
-            className="h-auto w-fit px-0"
+            variant="ghost"
+            className="w-fit text-[var(--muted)]"
             type="button"
             onClick={() =>
               onChange({
@@ -172,7 +172,7 @@ function FormatFields({
               })
             }
           >
-            <Plus className="size-3.5" />
+            <Plus />
             Add category
           </Button>
         </div>
@@ -204,160 +204,158 @@ export function FeedbackConfig({
   if (!field) return null;
 
   return (
-    <section className="rounded-xl border border-[var(--line)] p-6">
-      <h2 className="section-title">Feedback Configuration</h2>
-      <p className="hint mt-2">
-        Define the score fields the judge returns. Name each metric, describe
-        what it measures, then pick a response format.
-      </p>
+    <div className="stack">
+      <div>
+        <div className="section-title">Feedback Configuration</div>
+        <p className="hint mt-2">
+          Define the score fields the judge returns. Name each metric, describe
+          what it measures, then pick a response format.
+        </p>
+      </div>
 
-      <div className="mt-5 flex flex-col gap-5">
-        <div className="flex flex-wrap items-center gap-2">
-          <ToggleGroup
-            type="single"
-            variant="outline"
-            spacing={2}
-            value={String(i)}
-            onValueChange={(value) => {
-              if (value) setSelected(Number(value));
-            }}
-          >
-            {feedback.map((f, j) => (
-              <ToggleGroupItem
-                key={j}
-                value={String(j)}
-                className="rounded-lg px-3 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-              >
-                {f.key || "untitled"}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
+      <div className="flex flex-wrap items-center gap-2">
+        {feedback.map((f, j) => (
           <Button
-            variant="link"
-            className="h-auto px-1"
+            key={j}
+            type="button"
+            variant={j === i ? "secondary" : "ghost"}
+            className={cn(
+              j === i
+                ? "bg-[var(--active)] text-[var(--ink)]"
+                : "text-[var(--muted)]",
+            )}
+            onClick={() => setSelected(j)}
+          >
+            {f.key || "untitled"}
+          </Button>
+        ))}
+        <Button
+          variant="ghost"
+          className="text-[var(--muted)]"
+          type="button"
+          onClick={() => {
+            onChange([
+              ...feedback,
+              {
+                key: "metric",
+                description: "",
+                kind: "boolean",
+                includeReasoning: true,
+              },
+            ]);
+            setSelected(feedback.length);
+          }}
+        >
+          <Plus />
+          Add metric
+        </Button>
+      </div>
+
+      <div className="field max-w-xs">
+        <Label htmlFor="feedback-key">Metric key</Label>
+        <Input
+          id="feedback-key"
+          value={field.key}
+          onChange={(e) => {
+            const next = feedback.map((item, k) =>
+              k === i ? { ...item, key: e.target.value } : item,
+            );
+            onChange(next);
+          }}
+        />
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex h-8 items-center gap-2">
+          <Switch
+            id="include-reasoning"
+            size="sm"
+            checked={field.includeReasoning !== false}
+            onCheckedChange={(checked) =>
+              setField({ ...field, includeReasoning: checked })
+            }
+          />
+          <Label htmlFor="include-reasoning" className="text-[var(--muted)]">
+            Include reasoning
+          </Label>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                className="text-[var(--muted)]"
+                aria-label="About include reasoning"
+              >
+                <Info />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-xs">
+              The judge returns a short justification alongside the score.
+            </TooltipContent>
+          </Tooltip>
+        </div>
+        <Button
+          variant="outline"
+          type="button"
+          onClick={() => setAdvanced((v) => !v)}
+        >
+          Advanced
+        </Button>
+        {feedback.length > 1 ? (
+          <Button
+            variant="ghost"
+            className="text-[var(--muted)]"
             type="button"
             onClick={() => {
-              onChange([
-                ...feedback,
-                {
-                  key: "metric",
-                  description: "",
-                  kind: "boolean",
-                  includeReasoning: true,
-                },
-              ]);
-              setSelected(feedback.length);
+              onChange(feedback.filter((_, j) => j !== i));
+              setSelected(Math.max(0, i - 1));
             }}
           >
-            <Plus className="size-3.5" />
-            Add metric
+            <Trash2 />
+            Remove metric
           </Button>
-        </div>
-
-        <div className="field max-w-xs">
-          <Label htmlFor="feedback-key">Metric key</Label>
-          <Input
-            id="feedback-key"
-            value={field.key}
-            onChange={(e) => {
-              const next = feedback.map((item, k) =>
-                k === i ? { ...item, key: e.target.value } : item,
-              );
-              onChange(next);
-            }}
-          />
-        </div>
-
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Switch
-              id="include-reasoning"
-              checked={field.includeReasoning !== false}
-              onCheckedChange={(checked) =>
-                setField({ ...field, includeReasoning: checked })
-              }
-            />
-            <Label htmlFor="include-reasoning" className="font-normal text-[var(--ink)]">
-              Include reasoning
-            </Label>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-xs"
-                  className="text-[var(--muted)]"
-                  aria-label="About include reasoning"
-                >
-                  <Info />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent className="max-w-xs">
-                The judge returns a short justification alongside the score.
-              </TooltipContent>
-            </Tooltip>
-          </div>
-          <Button
-            variant="outline"
-            type="button"
-            onClick={() => setAdvanced((v) => !v)}
-          >
-            Advanced
-          </Button>
-          {feedback.length > 1 ? (
-            <Button
-              variant="ghost"
-              type="button"
-              onClick={() => {
-                onChange(feedback.filter((_, j) => j !== i));
-                setSelected(Math.max(0, i - 1));
-              }}
-            >
-              <Trash2 />
-              Remove metric
-            </Button>
-          ) : null}
-        </div>
-
-        {advanced ? (
-          <p className="hint">
-            The key name is the JSON field the judge returns. Charts plot that
-            key.
-          </p>
         ) : null}
-
-        <div className="field">
-          <Label htmlFor="feedback-description">Description</Label>
-          <Textarea
-            id="feedback-description"
-            className="min-h-[88px]"
-            value={field.description}
-            onChange={(e) => setField({ ...field, description: e.target.value })}
-            placeholder="Is the output concise?"
-          />
-        </div>
-
-        <div className="field max-w-xs">
-          <Label>Response format</Label>
-          <Select
-            value={field.kind}
-            onValueChange={(value) =>
-              setField(withKind(field, value as FeedbackKind))
-            }
-          >
-            <SelectTrigger className="w-48">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="boolean">Boolean</SelectItem>
-              <SelectItem value="continuous">Score</SelectItem>
-              <SelectItem value="categorical">Categorical</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <FormatFields field={field} onChange={setField} />
       </div>
-    </section>
+
+      {advanced ? (
+        <p className="hint">
+          The key name is the JSON field the judge returns. Charts plot that
+          key.
+        </p>
+      ) : null}
+
+      <div className="field">
+        <Label htmlFor="feedback-description">Description</Label>
+        <Textarea
+          id="feedback-description"
+          className="min-h-[88px]"
+          value={field.description}
+          onChange={(e) => setField({ ...field, description: e.target.value })}
+          placeholder="Is the output concise?"
+        />
+      </div>
+
+      <div className="field max-w-xs">
+        <Label>Response format</Label>
+        <Select
+          value={field.kind}
+          onValueChange={(value) =>
+            setField(withKind(field, value as FeedbackKind))
+          }
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="boolean">Boolean</SelectItem>
+            <SelectItem value="continuous">Score</SelectItem>
+            <SelectItem value="categorical">Categorical</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <FormatFields field={field} onChange={setField} />
+    </div>
   );
 }

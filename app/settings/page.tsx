@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { KEY_HINT_LENGTH, maskStoredKey, useKeys } from "@/lib/keys";
+import { maskStoredKey, useKeys } from "@/lib/keys";
 
 function KeyField({
   id,
@@ -66,7 +66,6 @@ function KeyField({
 
 export default function SettingsPage() {
   const { hints, saveKeys, hydrated } = useKeys();
-  const ready = Boolean(hints.openaiHint && hints.neuronpediaHint);
   const [openaiDraft, setOpenaiDraft] = useState("");
   const [neuronpediaDraft, setNeuronpediaDraft] = useState("");
   const [replaceOpenai, setReplaceOpenai] = useState(false);
@@ -115,29 +114,9 @@ export default function SettingsPage() {
       <div className="mx-auto max-w-xl page-body">
         <div className="surface stack p-6">
           <p className="hint">
-            We will never read your keys. They are stored encrypted in Supabase
-            Vault and used only by the server to call OpenAI and Neuronpedia on
-            your behalf. After you save, we keep the first {KEY_HINT_LENGTH}{" "}
-            characters so you can recognize the key — the rest cannot be shown
-            again.
+            We will never read your keys. They are stored encrypted used only by
+            the server. After you save, the keys cannot be shown again.
           </p>
-          <div
-            className={`inline-flex w-fit rounded-full px-3 py-1 text-[13px] ${
-              !hydrated
-                ? "bg-[var(--hover)] text-[var(--muted)]"
-                : ready
-                  ? "bg-[var(--active)]"
-                  : "bg-[var(--hover)] text-[var(--muted)]"
-            }`}
-          >
-            {!hydrated ? (
-              <Skeleton className="h-3 w-24" />
-            ) : ready ? (
-              "both keys set"
-            ) : (
-              "missing a key"
-            )}
-          </div>
           {hydrated ? (
             <>
               <KeyField

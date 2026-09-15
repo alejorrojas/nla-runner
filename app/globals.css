@@ -125,6 +125,10 @@ input.title-plain:focus {
   color: var(--muted);
 }
 
+.field [data-slot="label"] {
+  color: var(--muted);
+}
+
 .section-title {
   font-size: 13px;
   font-weight: 600;

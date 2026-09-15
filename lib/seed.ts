@@ -12,6 +12,7 @@ export function emptyStore(): Store {
   const reddit: Dataset = {
     id: "ds-reddit-pilot",
     name: EXAMPLE_DATASET_NAME,
+    evaluatorIds: ["ev-reddit", "ev-reddit-explicit", "ev-article-frame"],
     examples: [
       { id: "e1", prompt: "Summarize this for me" },
       { id: "e2", prompt: "How many calories does a banana have?" },

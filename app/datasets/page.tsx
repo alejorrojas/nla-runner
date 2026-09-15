@@ -30,6 +30,7 @@ export default function DatasetsPage() {
                   {
                     id: crypto.randomUUID(),
                     name,
+                    evaluatorIds: [],
                     examples: [{ id: crypto.randomUUID(), prompt: "" }],
                   },
                   ...store.datasets,

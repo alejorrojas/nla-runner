@@ -13,13 +13,6 @@ export const NLA_SOURCES = [
   },
 ] as const;
 
-export const OPENAI_MODELS = [
-  "gpt-4o-mini",
-  "gpt-4o",
-  "gpt-4.1-mini",
-  "gpt-4.1",
-] as const;
-
 export const JUDGE_VARS = [
   "prompt",
   "completion",
@@ -72,6 +65,7 @@ export type Dataset = {
   id: string;
   name: string;
   examples: DatasetExample[];
+  evaluatorIds: string[];
 };
 
 export type NlaProbe = {

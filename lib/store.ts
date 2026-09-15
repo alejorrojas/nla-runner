@@ -91,6 +91,7 @@ function mapStore(
   const datasets: Dataset[] = (datasetsRes.data ?? []).map((row) => ({
     id: row.id as string,
     name: row.name as string,
+    evaluatorIds: (row.evaluator_ids as string[]) ?? [],
     examples: examplesByDs.get(row.id as string) ?? [],
   }));
 
@@ -193,6 +194,7 @@ async function writeOwnedStore(
       store.datasets.map((d) => ({
         id: d.id,
         name: d.name,
+        evaluator_ids: d.evaluatorIds ?? [],
         owner_id: ownerId,
         is_catalog: flags.catalog,
       })),
@@ -275,15 +277,19 @@ async function writeOwnedStore(
 function remapCatalog(catalog: Store): Store {
   const dsMap = new Map<string, string>();
   const evMap = new Map<string, string>();
-  const datasets = catalog.datasets.map((d) => {
-    const id = crypto.randomUUID();
-    dsMap.set(d.id, id);
-    return { ...d, id };
-  });
   const evaluators = catalog.evaluators.map((e) => {
     const id = crypto.randomUUID();
     evMap.set(e.id, id);
     return { ...e, id };
+  });
+  const datasets = catalog.datasets.map((d) => {
+    const id = crypto.randomUUID();
+    dsMap.set(d.id, id);
+    return {
+      ...d,
+      id,
+      evaluatorIds: (d.evaluatorIds ?? []).map((eid) => evMap.get(eid) ?? eid),
+    };
   });
   const experiments = catalog.experiments.map((e) => ({
     ...e,
