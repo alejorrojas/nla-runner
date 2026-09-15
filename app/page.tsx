@@ -363,11 +363,12 @@ export default function LandingPage() {
         <Reveal className="mx-auto grid max-w-[1180px] overflow-hidden rounded-2xl bg-[#FAF8F4] lg:grid-cols-2">
           <div className="relative min-h-[240px] bg-[#FAF8F4] lg:min-h-full">
             <Image
-              src="/experiment.png"
+              src="/experiment.jpg"
               alt="A question passing through Reddit-like discourse before the visible reply"
               fill
+              unoptimized
               sizes="(min-width: 1024px) 590px, 100vw"
-              className="object-contain object-center"
+              className="object-cover object-center"
             />
           </div>
           <div className="flex flex-col justify-center bg-[#d4a08a] px-10 py-16 text-[#141413]">
