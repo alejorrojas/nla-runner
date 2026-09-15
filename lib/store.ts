@@ -121,6 +121,7 @@ function mapStore(
       scores: (row.scores ?? {}) as ExperimentRow["scores"],
       comments: (row.comments ?? {}) as ExperimentRow["comments"],
       error: (row.error as string | null) ?? undefined,
+      repetition: (row.repetition as number | null) ?? 1,
     });
     rowsByExp.set(experimentId, list);
   }
@@ -137,6 +138,7 @@ function mapStore(
     error: (row.error as string | null) ?? undefined,
     createdAt: row.created_at as string,
     runNumber: row.run_number as number,
+    repetitions: (row.repetitions as number | null) ?? 1,
     isStarter: Boolean(row.is_starter),
   }));
 
@@ -253,6 +255,7 @@ async function writeOwnedStore(
         error: e.error ?? null,
         created_at: e.createdAt,
         run_number: e.runNumber,
+        repetitions: Math.max(1, e.repetitions ?? 1),
         owner_id: ownerId,
         is_catalog: flags.catalog,
         is_starter: Boolean(e.isStarter) || flags.catalog,
@@ -274,6 +277,7 @@ async function writeOwnedStore(
           scores: row.scores,
           comments: row.comments,
           error: row.error ?? null,
+          repetition: Math.max(1, row.repetition ?? 1),
         })),
       );
       throwIf(ins.error);

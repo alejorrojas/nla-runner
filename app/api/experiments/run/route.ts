@@ -1,4 +1,5 @@
 import { nextRunNumber } from "@/lib/run-numbers";
+import { nlaRunBudget } from "@/lib/neuronpedia-limits";
 import { NLA_SOURCES } from "@/lib/types";
 import { runJudge } from "@/lib/judge";
 import { runNlaExample } from "@/lib/neuronpedia";
@@ -31,6 +32,7 @@ export async function POST(req: Request) {
     sourceId: string;
     tokenPolicy: TokenPolicy;
     evaluatorIds: string[];
+    repetitions?: number;
     name?: string;
   };
 
@@ -53,6 +55,23 @@ export async function POST(req: Request) {
   if (evaluators.length === 0) {
     return Response.json({ error: "Pick at least one evaluator" }, { status: 400 });
   }
+  const repetitions = Math.max(1, Math.floor(body.repetitions ?? 1));
+  const budget = nlaRunBudget({
+    promptCount: dataset.examples.length,
+    repetitions,
+    tokenPolicy: body.tokenPolicy,
+  });
+  if (budget.overLimit) {
+    return Response.json(
+      {
+        error:
+          "This run exceeds Neuronpedia's hourly NLA limits. Use fewer prompts or lower repetitions.",
+        completions: budget.completions,
+        explanations: budget.explanations,
+      },
+      { status: 400 },
+    );
+  }
 
   const experiment: Experiment = {
     id: crypto.randomUUID(),
@@ -67,6 +86,7 @@ export async function POST(req: Request) {
     status: "running",
     createdAt: new Date().toISOString(),
     runNumber: nextRunNumber(store.experiments, dataset.id),
+    repetitions,
   };
   await persistExperiment(user.id, experiment);
 
@@ -76,58 +96,64 @@ export async function POST(req: Request) {
       const send = (event: unknown) => {
         controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`));
       };
-      const total = dataset.examples.length;
+      const examples = dataset.examples;
+      const total = examples.length * repetitions;
       send({ type: "start", experiment, total });
       try {
-        for (let i = 0; i < dataset.examples.length; i++) {
-          const example = dataset.examples[i];
-          send({
-            type: "progress",
-            index: i,
-            total,
-            prompt: example.prompt,
-            phase: "nla",
-          });
-          let row: ExperimentRow = {
-            exampleId: example.id,
-            prompt: example.prompt,
-            completion: "",
-            probes: [],
-            scores: {},
-            comments: {},
-          };
-          try {
-            const nla = await runNlaExample({
-              apiKey: neuronpedia,
-              modelId: source.modelId,
-              nlaSourceId: source.nlaSourceId,
-              prompt: example.prompt,
-              tokenPolicy: body.tokenPolicy,
-            });
-            row = { ...row, ...nla };
+        let step = 0;
+        for (let i = 0; i < examples.length; i++) {
+          const example = examples[i];
+          for (let rep = 1; rep <= repetitions; rep++) {
             send({
               type: "progress",
-              index: i,
+              index: step,
               total,
               prompt: example.prompt,
-              phase: "judge",
+              phase: "nla",
             });
-            for (const ev of evaluators) {
-              const judged = await runJudge({
-                apiKey: openai,
-                evaluator: ev,
-                row,
-                reference: example.reference,
+            let row: ExperimentRow = {
+              exampleId: example.id,
+              prompt: example.prompt,
+              completion: "",
+              probes: [],
+              scores: {},
+              comments: {},
+              repetition: rep,
+            };
+            try {
+              const nla = await runNlaExample({
+                apiKey: neuronpedia,
+                modelId: source.modelId,
+                nlaSourceId: source.nlaSourceId,
+                prompt: example.prompt,
+                tokenPolicy: body.tokenPolicy,
               });
-              row.scores = { ...row.scores, ...judged.scores };
-              row.comments = { ...row.comments, ...judged.comments };
+              row = { ...row, ...nla, repetition: rep };
+              send({
+                type: "progress",
+                index: step,
+                total,
+                prompt: example.prompt,
+                phase: "judge",
+              });
+              for (const ev of evaluators) {
+                const judged = await runJudge({
+                  apiKey: openai,
+                  evaluator: ev,
+                  row,
+                  reference: example.reference,
+                });
+                row.scores = { ...row.scores, ...judged.scores };
+                row.comments = { ...row.comments, ...judged.comments };
+              }
+            } catch (err) {
+              row.error = err instanceof Error ? err.message : String(err);
             }
-          } catch (err) {
-            row.error = err instanceof Error ? err.message : String(err);
+            experiment.rows.push(row);
+            await persistExperiment(user.id, experiment);
+            send({ type: "row", row, index: step, total, experiment });
+            step += 1;
           }
-          experiment.rows.push(row);
-          await persistExperiment(user.id, experiment);
-          send({ type: "row", row, index: i, total, experiment });
         }
         experiment.status = "done";
       } catch (err) {

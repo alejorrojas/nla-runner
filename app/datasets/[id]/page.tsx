@@ -21,6 +21,7 @@ import { defaultCompareIds } from "@/lib/compare-ids";
 import { attachedEvaluatorIds, withDatasetEvaluators } from "@/lib/dataset-evaluators";
 import { meanScores } from "@/lib/feedback-display";
 import { useKeys } from "@/lib/keys";
+import { nlaRunBudget } from "@/lib/neuronpedia-limits";
 import { runNumberMap, runTag } from "@/lib/run-numbers";
 import { useStore } from "@/lib/store-client";
 import { NLA_SOURCES, type Experiment, type ExperimentRow, type TokenPolicy } from "@/lib/types";
@@ -54,6 +55,7 @@ export default function DatasetPage() {
   const { hints } = useKeys();
   const [sourceId, setSourceId] = useState<string>(NLA_SOURCES[0].id);
   const [tokenPolicy, setTokenPolicy] = useState<TokenPolicy>("last_user");
+  const [repetitions, setRepetitions] = useState(1);
   const [evaluatorIds, setEvaluatorIds] = useState<string[]>([]);
   const [running, setRunning] = useState(false);
   const [log, setLog] = useState("");
@@ -206,11 +208,20 @@ export default function DatasetPage() {
       setLog("Pick at least one evaluator.");
       return;
     }
+    const budget = nlaRunBudget({
+      promptCount: current.examples.length,
+      repetitions,
+      tokenPolicy,
+    });
+    if (budget.overLimit) {
+      setLog("This run exceeds Neuronpedia's hourly NLA limits.");
+      return;
+    }
     setRunning(true);
     setLog("Starting experiment…");
     setTick({
       index: 0,
-      total: current.examples.length,
+      total: current.examples.length * repetitions,
       prompt: current.examples[0]?.prompt ?? "",
       phase: "nla",
       completed: 0,
@@ -223,6 +234,7 @@ export default function DatasetPage() {
         sourceId,
         tokenPolicy,
         evaluatorIds,
+        repetitions,
       }),
     });
     if (!res.ok || !res.body) {
@@ -435,12 +447,15 @@ export default function DatasetPage() {
                               >
                                 {ex.name}
                               </Link>
-                              <div className="mt-0.5 font-mono text-[12px] text-[var(--muted)]">
+                              <div className="font-mono text-[var(--muted)]">
                                 {ex.sourceId} · {ex.tokenPolicy}
+                                {(ex.repetitions ?? 1) > 1
+                                  ? ` · ${ex.repetitions}×`
+                                  : ""}
                               </div>
                             </td>
                             <td className="font-mono">
-                              {done} / {dataset.examples.length}
+                              {done} / {dataset.examples.length * (ex.repetitions ?? 1)}
                             </td>
                             {metricKeys.map((key) => (
                               <td key={key} className="font-mono">
@@ -606,12 +621,15 @@ export default function DatasetPage() {
         tokenPolicy={tokenPolicy}
         evaluatorIds={evaluatorIds}
         evaluators={attachedEvaluators.length ? attachedEvaluators : store.evaluators}
+        promptCount={dataset.examples.length}
+        repetitions={repetitions}
         running={running}
         log={log}
         tick={tick}
         onSourceId={setSourceId}
         onTokenPolicy={setTokenPolicy}
         onEvaluatorIds={setEvaluatorIds}
+        onRepetitions={setRepetitions}
         onRun={() => {
           void run();
         }}

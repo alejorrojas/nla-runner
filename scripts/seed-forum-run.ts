@@ -64,6 +64,7 @@ async function copyToStarterWorkspaces(experiment: Experiment) {
       error: experiment.error ?? null,
       created_at: experiment.createdAt,
       run_number: experiment.runNumber,
+      repetitions: experiment.repetitions ?? 1,
       owner_id: starter.owner_id,
       is_catalog: false,
       is_starter: true,
@@ -83,6 +84,7 @@ async function copyToStarterWorkspaces(experiment: Experiment) {
         scores: row.scores,
         comments: row.comments,
         error: row.error ?? null,
+        repetition: row.repetition ?? 1,
       })),
     );
     if (ins.error) throw ins.error;
@@ -121,6 +123,7 @@ async function main() {
     status: "running",
     createdAt: new Date().toISOString(),
     runNumber: nextRunNumber(catalog.experiments, dataset.id),
+    repetitions: 1,
     isStarter: true,
   };
 
@@ -134,6 +137,7 @@ async function main() {
       probes: [],
       scores: {},
       comments: {},
+      repetition: 1,
     };
     try {
       const nla = await runNlaExample({

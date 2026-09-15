@@ -1,14 +1,19 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Plus } from "lucide-react";
+import { NewDatasetDialog } from "@/components/new-dataset-dialog";
 import { PageHeader } from "@/components/page-chrome";
 import { Button } from "@/components/ui/button";
 import { TableRowsSkeleton } from "@/components/ui/skeleton";
 import { useStore } from "@/lib/store-client";
 
 export default function DatasetsPage() {
+  const router = useRouter();
   const { store, save } = useStore();
+  const [open, setOpen] = useState(false);
 
   return (
     <div>
@@ -17,27 +22,7 @@ export default function DatasetsPage() {
         title="Datasets"
         hint="Prompt lists you own. New accounts start with an Example dataset and two finished Example runs so you can compare aggregates before you run anything."
         action={
-          <Button
-            type="button"
-            disabled={!store}
-            onClick={() => {
-              if (!store) return;
-              const name = window.prompt("Dataset name");
-              if (!name) return;
-              void save({
-                ...store,
-                datasets: [
-                  {
-                    id: crypto.randomUUID(),
-                    name,
-                    evaluatorIds: [],
-                    examples: [{ id: crypto.randomUUID(), prompt: "" }],
-                  },
-                  ...store.datasets,
-                ],
-              });
-            }}
-          >
+          <Button type="button" disabled={!store} onClick={() => setOpen(true)}>
             <Plus />
             Dataset
           </Button>
@@ -90,6 +75,27 @@ export default function DatasetsPage() {
           </table>
         </div>
       </div>
+      <NewDatasetDialog
+        open={open}
+        onOpenChange={setOpen}
+        onCreate={async (name) => {
+          if (!store) return;
+          const id = crypto.randomUUID();
+          await save({
+            ...store,
+            datasets: [
+              {
+                id,
+                name,
+                evaluatorIds: [],
+                examples: [{ id: crypto.randomUUID(), prompt: "" }],
+              },
+              ...store.datasets,
+            ],
+          });
+          router.push(`/datasets/${id}`);
+        }}
+      />
     </div>
   );
 }

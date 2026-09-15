@@ -84,6 +84,7 @@ export type ExperimentRow = {
   scores: Record<string, number | boolean | string>;
   comments: Record<string, string>;
   error?: string;
+  repetition?: number;
 };
 
 export type Experiment = {
@@ -98,6 +99,7 @@ export type Experiment = {
   error?: string;
   createdAt: string;
   runNumber?: number;
+  repetitions?: number;
   isStarter?: boolean;
 };
 

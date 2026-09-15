@@ -115,6 +115,40 @@ function NavLink({
   );
 }
 
+function CollapsedBrandToggle({ onOpen }: { onOpen: () => void }) {
+  const [armed, setArmed] = useState(false);
+  return (
+    <div
+      className="relative size-8"
+      onMouseEnter={() => setArmed(true)}
+      onMouseLeave={() => setArmed(false)}
+    >
+      <Mark
+        className={cn(
+          "pointer-events-none h-8 w-8",
+          armed ? "invisible" : "visible",
+        )}
+      />
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className={cn(
+          "absolute inset-0 size-8 text-[var(--muted)]",
+          armed ? "opacity-100" : "opacity-0",
+        )}
+        aria-expanded={false}
+        aria-label="Open sidebar"
+        onFocus={() => setArmed(true)}
+        onBlur={() => setArmed(false)}
+        onClick={onOpen}
+      >
+        <PanelLeft />
+      </Button>
+    </div>
+  );
+}
+
 function AccountMenu({
   collapsed,
   displayName,
@@ -308,32 +342,29 @@ function ShellInner({ children }: { children: ReactNode }) {
               collapsed ? "justify-center px-2" : "justify-between gap-2 px-3",
             )}
           >
-            {collapsed ? null : (
-              <Link href="/" className="flex min-w-0 items-center gap-2.5">
-                <Mark className="h-8 w-8 shrink-0" />
-                <span className="min-w-0 truncate text-[15px] font-medium leading-tight tracking-tight">
-                  NLASmith
-                </span>
-              </Link>
-            )}
-            <Tooltip>
-              <TooltipTrigger asChild>
+            {collapsed ? (
+              <CollapsedBrandToggle onOpen={toggleSidebar} />
+            ) : (
+              <>
+                <Link href="/" className="flex min-w-0 items-center gap-2.5">
+                  <Mark className="h-8 w-8 shrink-0" />
+                  <span className="min-w-0 truncate text-[15px] font-medium leading-tight tracking-tight">
+                    NLASmith
+                  </span>
+                </Link>
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
                   className="shrink-0 text-[var(--muted)]"
-                  aria-expanded={!collapsed}
-                  aria-label={collapsed ? "Open sidebar" : "Close sidebar"}
+                  aria-expanded
+                  aria-label="Close sidebar"
                   onClick={toggleSidebar}
                 >
                   <PanelLeft />
                 </Button>
-              </TooltipTrigger>
-              <TooltipContent side="right">
-                {collapsed ? "Open sidebar" : "Close sidebar"}
-              </TooltipContent>
-            </Tooltip>
+              </>
+            )}
           </div>
           {collapsed ? null : (
             <div className="px-3 pb-1 text-[13px] font-medium text-[var(--muted)]">

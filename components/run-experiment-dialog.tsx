@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -19,6 +20,14 @@ import {
 } from "@/components/ui/select";
 import { RunProgress, type RunTick } from "@/components/run-progress";
 import { KeysRequiredTooltip } from "@/components/keys-required-tooltip";
+import {
+  NLA_COMPLETION_PER_WINDOW,
+  NLA_EXPLAIN_PER_WINDOW,
+  NLA_MAX_POSITIONS_PER_EXPLAIN,
+  NLA_WINDOW,
+  nlaBudgetCopy,
+  nlaRunBudget,
+} from "@/lib/neuronpedia-limits";
 import { NLA_SOURCES, type Evaluator, type TokenPolicy } from "@/lib/types";
 
 export function RunExperimentDialog({
@@ -28,12 +37,15 @@ export function RunExperimentDialog({
   tokenPolicy,
   evaluatorIds,
   evaluators,
+  promptCount,
+  repetitions,
   running,
   log,
   tick,
   onSourceId,
   onTokenPolicy,
   onEvaluatorIds,
+  onRepetitions,
   onRun,
   keysReady,
 }: {
@@ -43,23 +55,32 @@ export function RunExperimentDialog({
   tokenPolicy: TokenPolicy;
   evaluatorIds: string[];
   evaluators: Evaluator[];
+  promptCount: number;
+  repetitions: number;
   running: boolean;
   log: string;
   tick: RunTick | null;
   onSourceId: (id: string) => void;
   onTokenPolicy: (policy: TokenPolicy) => void;
   onEvaluatorIds: (ids: string[]) => void;
+  onRepetitions: (value: number) => void;
   onRun: () => void;
   keysReady: boolean;
 }) {
+  const budget = nlaRunBudget({
+    promptCount,
+    repetitions,
+    tokenPolicy,
+  });
+  const blocked = budget.overLimit;
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-xl">
         <DialogHeader>
           <DialogTitle>New experiment</DialogTitle>
           <DialogDescription>
-            Pick a source, token policy, and judges. Progress shows which prompt
-            is in flight.
+            Pick a source, token policy, repetitions, and judges. Progress shows
+            which prompt is in flight.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-5">
@@ -93,6 +114,40 @@ export function RunExperimentDialog({
                 <SelectItem value="both">Both</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+          <div className="field">
+            <Label htmlFor="run-repetitions">Repetitions</Label>
+            <Input
+              id="run-repetitions"
+              type="number"
+              min={1}
+              step={1}
+              value={repetitions}
+              disabled={running}
+              onChange={(e) =>
+                onRepetitions(Math.max(1, Math.floor(Number(e.target.value) || 1)))
+              }
+            />
+            <p className="hint">
+              Each prompt is completed and explained this many times. Aggregates
+              average across repetitions.
+            </p>
+          </div>
+          <div
+            className={
+              blocked
+                ? "rounded-xl border border-[var(--clay)] bg-[color-mix(in_srgb,var(--clay)_10%,transparent)] px-3 py-2"
+                : "rounded-xl border border-[var(--line)] bg-[var(--paper)] px-3 py-2"
+            }
+          >
+            <p className={blocked ? "text-[13px] text-[var(--ink)]" : "hint"}>
+              {nlaBudgetCopy(budget)}
+            </p>
+            <p className="hint mt-2">
+              Caps: {NLA_EXPLAIN_PER_WINDOW} explanations / {NLA_COMPLETION_PER_WINDOW}{" "}
+              completions per {NLA_WINDOW}. Max {NLA_MAX_POSITIONS_PER_EXPLAIN}{" "}
+              positions per explanation.
+            </p>
           </div>
           <div className="field">
             <Label>Evaluators</Label>
@@ -138,7 +193,7 @@ export function RunExperimentDialog({
             <KeysRequiredTooltip active={!keysReady}>
               <Button
                 type="button"
-                disabled={running || !keysReady}
+                disabled={running || !keysReady || blocked}
                 onClick={onRun}
               >
                 {running ? "Running…" : "Run experiment"}
