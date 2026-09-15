@@ -76,6 +76,31 @@ export async function nlaExplain(opts: {
   return json.results ?? [];
 }
 
+function assistantTextFromTokens(tokens: TokenRow[]): string {
+  let lastHeader = -1;
+  tokens.forEach((t, i) => {
+    const tok = t.token || "";
+    if (tok === "assistant" || tok === "model") lastHeader = i;
+  });
+  if (lastHeader < 0) return "";
+  return tokens
+    .slice(lastHeader + 1)
+    .map((t) => t.token || "")
+    .join("");
+}
+
+function modelOutput(body: CompletionBody, prompt: string): string {
+  const direct = body.completion?.trim();
+  if (direct) return body.completion!.trimEnd();
+  const fromTokens = assistantTextFromTokens(body.tokens ?? []).trim();
+  if (fromTokens) return fromTokens;
+  const full = (body.full_text || body.text || "").trim();
+  if (!full) return "";
+  const prefix = prompt.trim();
+  if (prefix && full.startsWith(prefix)) return full.slice(prefix.length).trim();
+  return full;
+}
+
 export async function runNlaExample(opts: {
   apiKey: string;
   modelId: string;
@@ -86,7 +111,7 @@ export async function runNlaExample(opts: {
   const body = await nlaComplete(opts);
   const tokens = body.tokens ?? [];
   const fullText = body.full_text || body.text || "";
-  const completion = body.completion || "";
+  const completion = modelOutput(body, opts.prompt);
   const probes = pickProbes(tokens, opts.tokenPolicy);
   const explained = await nlaExplain({
     ...opts,

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { filterJudgeChatModels } from "@/lib/openai-judge-models";
 import { requireUser } from "@/lib/supabase/server";
 import { readUserKeys } from "@/lib/user-keys";
 
@@ -21,7 +22,7 @@ export async function GET() {
 
   const res = await fetch("https://api.openai.com/v1/models", {
     headers: { Authorization: `Bearer ${openai}` },
-    cache: "no-store",
+    next: { revalidate: 60 * 60 * 24 * 7 },
   });
 
   if (!res.ok) {
@@ -32,13 +33,18 @@ export async function GET() {
   }
 
   const body = (await res.json()) as { data?: OpenAIModel[] };
-  const models = [
-    ...new Set(
-      (body.data ?? [])
-        .map((model) => model.id?.trim())
-        .filter((id): id is string => Boolean(id)),
-    ),
-  ].sort((a, b) => a.localeCompare(b));
+  const models = filterJudgeChatModels(
+    (body.data ?? [])
+      .map((model) => model.id?.trim())
+      .filter((id): id is string => Boolean(id)),
+  );
 
-  return NextResponse.json({ models });
+  return NextResponse.json(
+    { models },
+    {
+      headers: {
+        "Cache-Control": "private, max-age=604800, stale-while-revalidate=86400",
+      },
+    },
+  );
 }

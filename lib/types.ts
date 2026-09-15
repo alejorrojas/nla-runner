@@ -15,6 +15,7 @@ export const NLA_SOURCES = [
 
 export const JUDGE_VARS = [
   "prompt",
+  "output",
   "completion",
   "nla",
   "nla_last_user",

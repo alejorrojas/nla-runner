@@ -19,7 +19,8 @@ import {
   formatScore,
   inferKind,
   meanScores,
-  rowOutput,
+  nlaVerbalization,
+  rowModelOutput,
   scoreCellStyle,
 } from "@/lib/feedback-display";
 import { experimentKpis } from "@/lib/compare-metrics";
@@ -31,7 +32,7 @@ import {
   nlaText,
   rowMse,
 } from "@/lib/nla-signals";
-import { expLetter } from "@/lib/exp-colors";
+import { runNumberMap, runTag } from "@/lib/run-numbers";
 import { Button } from "@/components/ui/button";
 
 const features = tableFeatures({
@@ -52,6 +53,7 @@ type CompareRow = {
   prompt: string;
   reference: string;
   outputs: Record<string, string>;
+  nlas: Record<string, string>;
   mse: Record<string, number | null>;
   chars: Record<string, number>;
   scores: Record<string, Record<string, unknown>>;
@@ -83,6 +85,9 @@ export function RunTable({
     ),
   ];
   const single = experiments.length === 1;
+  const numbers = useMemo(() => runNumberMap(experiments), [experiments]);
+  const tagFor = (experiment: Experiment) =>
+    runTag(numbers.get(experiment.id) ?? experiment.runNumber ?? 1);
   const kpis = useMemo(
     () => experiments.map((ex) => experimentKpis(ex)),
     [experiments],
@@ -99,6 +104,7 @@ export function RunTable({
       const reference =
         dataset.examples.find((ex) => ex.id === eid)?.reference ?? "";
       const outputs: CompareRow["outputs"] = {};
+      const nlas: CompareRow["nlas"] = {};
       const mse: CompareRow["mse"] = {};
       const chars: CompareRow["chars"] = {};
       const scores: CompareRow["scores"] = {};
@@ -107,7 +113,8 @@ export function RunTable({
       const lexicalArticle: CompareRow["lexicalArticle"] = {};
       for (const ex of experiments) {
         const row = ex.rows.find((r) => r.exampleId === eid);
-        outputs[ex.id] = row?.error ? row.error : row ? rowOutput(row) : "—";
+        outputs[ex.id] = row ? rowModelOutput(row) : "—";
+        nlas[ex.id] = row ? nlaVerbalization(row) || "—" : "—";
         mse[ex.id] = row ? rowMse(row) : null;
         chars[ex.id] = row ? nlaCharCount(row) : 0;
         scores[ex.id] = row?.scores ?? {};
@@ -122,6 +129,7 @@ export function RunTable({
         prompt,
         reference,
         outputs,
+        nlas,
         mse,
         chars,
         scores,
@@ -160,10 +168,24 @@ export function RunTable({
             <span className="text-[var(--muted)]">{info.getValue() || "—"}</span>
           ),
         }),
-        ...experiments.map((ex, i) =>
+        ...experiments.map((ex) =>
           helper.accessor((row) => row.outputs[ex.id], {
             id: `out-${ex.id}`,
-            header: single ? "Outputs" : `Outputs ${expLetter(i)}`,
+            header: single ? "Output" : `Output ${tagFor(ex)}`,
+            size: 240,
+            minSize: 120,
+            sortFn: "alphanumeric",
+            cell: (info) => (
+              <div className="max-h-36 overflow-auto whitespace-pre-wrap leading-relaxed text-[var(--muted)]">
+                {info.getValue()}
+              </div>
+            ),
+          }),
+        ),
+        ...experiments.map((ex) =>
+          helper.accessor((row) => row.nlas[ex.id], {
+            id: `nla-${ex.id}`,
+            header: single ? "NLA" : `NLA ${tagFor(ex)}`,
             size: 280,
             minSize: 140,
             sortFn: "alphanumeric",
@@ -189,7 +211,7 @@ export function RunTable({
                       className="mt-0.5 text-[11px] font-normal text-[var(--muted)]"
                     >
                       {avg.toFixed(3)} AVG
-                      {single ? null : ` ${expLetter(i)}`}
+                      {single ? null : ` ${tagFor(experiments[i])}`}
                     </div>
                   ),
                 )}
@@ -240,7 +262,7 @@ export function RunTable({
                     className="mt-0.5 text-[11px] font-normal text-[var(--muted)]"
                   >
                     {avg.toFixed(3)} AVG
-                    {single ? null : ` ${expLetter(i)}`}
+                    {single ? null : ` ${tagFor(experiments[i])}`}
                   </div>
                 ))}
               </div>
@@ -270,10 +292,10 @@ export function RunTable({
             },
           });
         }),
-        ...experiments.map((ex, i) =>
+        ...experiments.map((ex) =>
           helper.accessor((row) => row.mse[ex.id], {
             id: `mse-${ex.id}`,
-            header: single ? "MSE" : `MSE ${expLetter(i)}`,
+            header: single ? "MSE" : `MSE ${tagFor(ex)}`,
             size: 88,
             minSize: 64,
             sortFn: "basic",
@@ -287,10 +309,10 @@ export function RunTable({
             },
           }),
         ),
-        ...experiments.map((ex, i) =>
+        ...experiments.map((ex) =>
           helper.accessor((row) => row.chars[ex.id], {
             id: `chars-${ex.id}`,
-            header: single ? "AV chars" : `AV chars ${expLetter(i)}`,
+            header: single ? "AV chars" : `AV chars ${tagFor(ex)}`,
             size: 96,
             minSize: 72,
             sortFn: "basic",
@@ -300,7 +322,7 @@ export function RunTable({
           }),
         ),
       ]),
-    [experiments, fieldByKey, keys, kpis, single],
+    [experiments, fieldByKey, keys, kpis, numbers, single],
   );
 
   const table = useTable(

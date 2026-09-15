@@ -2,11 +2,25 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { CheckIcon, ChevronsUpDownIcon } from "lucide-react";
 import { PageHeader } from "@/components/page-chrome";
 import { FeedbackConfig } from "@/components/feedback-config";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -15,10 +29,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { fieldControlClass, fieldRadiusClass } from "@/lib/control-styles";
 import { mustacheVars } from "@/lib/mustache";
+import {
+  loadOpenAIJudgeModels,
+  peekOpenAIJudgeModels,
+} from "@/lib/openai-models-client";
 import { JUDGE_VARS, type Evaluator, type JudgeVar } from "@/lib/types";
 import { KeysRequiredTooltip } from "@/components/keys-required-tooltip";
 import { useKeys } from "@/lib/keys";
+import { cn } from "@/lib/utils";
 
 function OpenAIModelSelect({
   value,
@@ -29,8 +49,13 @@ function OpenAIModelSelect({
 }) {
   const { hints, hydrated } = useKeys();
   const needsKey = hydrated && !hints.openaiHint;
-  const [models, setModels] = useState<string[]>([]);
-  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [models, setModels] = useState<string[]>(
+    () => peekOpenAIJudgeModels(hints.openaiHint) ?? [],
+  );
+  const [open, setOpen] = useState(false);
+  const [status, setStatus] = useState<"loading" | "ready" | "error">(() =>
+    peekOpenAIJudgeModels(hints.openaiHint) ? "ready" : "loading",
+  );
 
   useEffect(() => {
     if (!hydrated) return;
@@ -38,51 +63,98 @@ function OpenAIModelSelect({
       setStatus("error");
       return;
     }
+    const cached = peekOpenAIJudgeModels(hints.openaiHint);
+    if (cached) {
+      setModels(cached);
+      setStatus("ready");
+      return;
+    }
     let cancelled = false;
-    void (async () => {
-      try {
-        const res = await fetch("/api/openai/models");
-        const body = (await res.json()) as { models?: string[]; error?: string };
-        if (!res.ok) throw new Error(body.error || "Could not load models");
-        if (cancelled) return;
-        setModels(body.models ?? []);
-        setStatus("ready");
-      } catch {
-        if (cancelled) return;
+    void loadOpenAIJudgeModels(hints.openaiHint).then((next) => {
+      if (cancelled) return;
+      if (!next) {
         setStatus("error");
+        return;
       }
-    })();
+      setModels(next);
+      setStatus("ready");
+    });
     return () => {
       cancelled = true;
     };
-  }, [hydrated, needsKey]);
+  }, [hydrated, hints.openaiHint, needsKey]);
 
-  const options = models.includes(value)
+  const catalog = models.includes(value)
     ? models
     : value
       ? [value, ...models]
       : models;
   const disabled = !hydrated || needsKey || status === "loading";
+  const label =
+    status === "loading" && !needsKey ? "Loading models…" : value || "Select a model";
 
   return (
     <div className="field">
       <Label>OpenAI model</Label>
       <KeysRequiredTooltip active={needsKey} className="block w-full">
-        <Select value={value} onValueChange={onChange} disabled={disabled}>
-          <SelectTrigger className="w-full">
-            <SelectValue
-              placeholder={status === "loading" && !needsKey ? "Loading models…" : "Select a model"}
-            />
-          </SelectTrigger>
-          <SelectContent className="max-h-72">
-            {options.map((model) => (
-              <SelectItem key={model} value={model}>
-                {model}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              role="combobox"
+              aria-expanded={open}
+              disabled={disabled}
+              className={cn(
+                "flex h-8 w-full items-center justify-between gap-2 px-3 text-left font-normal whitespace-nowrap",
+                fieldControlClass,
+                fieldRadiusClass,
+                !value && "text-[var(--muted)]",
+              )}
+            >
+              <span className="min-w-0 truncate">{label}</span>
+              <ChevronsUpDownIcon className="size-3.5 shrink-0 opacity-50" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent
+            align="start"
+            className="w-[var(--radix-popover-trigger-width)] overflow-hidden rounded-xl p-0"
+          >
+            <Command>
+              <CommandInput placeholder="Search models" />
+              <CommandList>
+                <CommandEmpty>No models match that search.</CommandEmpty>
+                <CommandGroup>
+                  {catalog.map((model) => (
+                    <CommandItem
+                      key={model}
+                      value={model}
+                      onSelect={(current) => {
+                        const next =
+                          catalog.find((item) => item.toLowerCase() === current) ??
+                          current;
+                        onChange(next);
+                        setOpen(false);
+                      }}
+                    >
+                      <CheckIcon
+                        className={cn(
+                          "size-3.5",
+                          model === value ? "opacity-100" : "opacity-0",
+                        )}
+                      />
+                      {model}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
       </KeysRequiredTooltip>
+      <p className="hint">
+        Current chat aliases from GPT-4o mini onward. Dated snapshots, audio,
+        video, and Codex are hidden.
+      </p>
     </div>
   );
 }
@@ -217,8 +289,10 @@ export function EvaluatorEditor({
             After Neuronpedia returns AVs, we fill Mustache from the mapping.
             Defaults that matter for NLA: <code>nla</code>,{" "}
             <code>nla_last_user</code>, <code>nla_first_assistant</code>,{" "}
-            <code>prompt</code>, <code>completion</code>, <code>mse</code>,{" "}
-            <code>token</code>, <code>reference</code>.
+            <code>prompt</code>, <code>output</code>, <code>mse</code>,{" "}
+            <code>token</code>, <code>reference</code>. Use{" "}
+            <code>{"{{output}}"}</code> for the model reply (same as{" "}
+            <code>completion</code>).
           </p>
           <p className="hint">
             Attach this evaluator on Run experiment. Compare two experiments
@@ -235,8 +309,9 @@ export function blankEvaluator(id: string): Evaluator {
     id,
     name: "new_judge",
     openaiModel: "gpt-4o-mini",
-    prompt: "You grade an NLA verbalization.\n\nNLA:\n{{nla}}\n\nPrompt:\n{{prompt}}",
-    mapping: { nla: "nla", prompt: "prompt" },
+    prompt:
+      "You grade an NLA verbalization.\n\nNLA:\n{{nla}}\n\nPrompt:\n{{prompt}}\n\nOutput:\n{{output}}",
+    mapping: { nla: "nla", prompt: "prompt", output: "output" },
     feedback: [
       {
         key: "conciseness",

@@ -20,14 +20,7 @@ import {
 } from "@/components/ui/select";
 import { RunProgress, type RunTick } from "@/components/run-progress";
 import { KeysRequiredTooltip } from "@/components/keys-required-tooltip";
-import {
-  NLA_COMPLETION_PER_WINDOW,
-  NLA_EXPLAIN_PER_WINDOW,
-  NLA_MAX_POSITIONS_PER_EXPLAIN,
-  NLA_WINDOW,
-  nlaBudgetCopy,
-  nlaRunBudget,
-} from "@/lib/neuronpedia-limits";
+import { nlaBudgetCopy, nlaRunBudget } from "@/lib/neuronpedia-limits";
 import { NLA_SOURCES, type Evaluator, type TokenPolicy } from "@/lib/types";
 
 export function RunExperimentDialog({
@@ -133,22 +126,11 @@ export function RunExperimentDialog({
               average across repetitions.
             </p>
           </div>
-          <div
-            className={
-              blocked
-                ? "rounded-xl border border-[var(--clay)] bg-[color-mix(in_srgb,var(--clay)_10%,transparent)] px-3 py-2"
-                : "rounded-xl border border-[var(--line)] bg-[var(--paper)] px-3 py-2"
-            }
-          >
-            <p className={blocked ? "text-[13px] text-[var(--ink)]" : "hint"}>
-              {nlaBudgetCopy(budget)}
-            </p>
-            <p className="hint mt-2">
-              Caps: {NLA_EXPLAIN_PER_WINDOW} explanations / {NLA_COMPLETION_PER_WINDOW}{" "}
-              completions per {NLA_WINDOW}. Max {NLA_MAX_POSITIONS_PER_EXPLAIN}{" "}
-              positions per explanation.
-            </p>
-          </div>
+          {blocked ? (
+            <div className="rounded-xl border border-[var(--clay)] bg-[color-mix(in_srgb,var(--clay)_10%,transparent)] px-3 py-2">
+              <p className="text-[13px] text-[var(--ink)]">{nlaBudgetCopy(budget)}</p>
+            </div>
+          ) : null}
           <div className="field">
             <Label>Evaluators</Label>
             {evaluators.length === 0 ? (

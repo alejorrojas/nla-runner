@@ -132,7 +132,7 @@ export default function SettingsPage() {
                 id="neuronpedia-key"
                 label="Neuronpedia"
                 hint={hints.neuronpediaHint}
-                placeholder="x-api-key from neuronpedia.org"
+                placeholder="sk-np-..."
                 draft={neuronpediaDraft}
                 replacing={replaceNeuronpedia}
                 onDraft={setNeuronpediaDraft}

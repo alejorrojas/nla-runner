@@ -83,11 +83,18 @@ export function scoreCellStyle(
   }
 }
 
-export function rowOutput(row: ExperimentRow): string {
-  if (row.error) return row.error;
-  const avs = row.probes
+export function nlaVerbalization(row: ExperimentRow): string {
+  return row.probes
     .map((p) => p.description.trim())
-    .filter(Boolean);
-  if (avs.length) return avs.join("\n\n");
-  return row.completion || "—";
+    .filter(Boolean)
+    .join("\n\n");
+}
+
+export function rowModelOutput(row: ExperimentRow): string {
+  if (row.error) return row.error;
+  return row.completion.trim() || "—";
+}
+
+export function rowOutput(row: ExperimentRow): string {
+  return nlaVerbalization(row) || rowModelOutput(row);
 }

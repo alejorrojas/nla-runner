@@ -10,6 +10,10 @@ import {
 } from "react";
 import { usePathname } from "next/navigation";
 import { createBrowserSupabase } from "@/lib/supabase/browser";
+import {
+  clearOpenAIJudgeModelsCache,
+  prefetchOpenAIJudgeModels,
+} from "@/lib/openai-models-client";
 
 export const KEY_HINT_LENGTH = 8;
 
@@ -24,6 +28,21 @@ export function maskStoredKey(hint: string): string {
 
 const EMPTY: KeyHints = { openaiHint: null, neuronpediaHint: null };
 
+/** Pre-Vault plaintext keys. Vault is the only store now. */
+const LEGACY_BROWSER_KEY_STORES = ["nla-eval-keys"];
+
+function purgeLegacyBrowserKeyStores() {
+  if (typeof window === "undefined") return;
+  for (const key of LEGACY_BROWSER_KEY_STORES) {
+    try {
+      window.sessionStorage.removeItem(key);
+      window.localStorage.removeItem(key);
+    } catch {
+      /* private mode / blocked storage */
+    }
+  }
+}
+
 const Ctx = createContext<{
   hints: KeyHints;
   hydrated: boolean;
@@ -33,6 +52,10 @@ const Ctx = createContext<{
 export function KeysProvider({ children }: { children: React.ReactNode }) {
   const [hints, setHints] = useState<KeyHints>(EMPTY);
   const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    purgeLegacyBrowserKeyStores();
+  }, []);
 
   const reload = useCallback(async () => {
     const load = async () => {
@@ -49,6 +72,11 @@ export function KeysProvider({ children }: { children: React.ReactNode }) {
     await new Promise((resolve) => setTimeout(resolve, 200));
     await load();
   }, []);
+
+  useEffect(() => {
+    if (!hydrated || !hints.openaiHint) return;
+    prefetchOpenAIJudgeModels(hints.openaiHint);
+  }, [hydrated, hints.openaiHint]);
 
   const pathname = usePathname();
 
@@ -67,6 +95,7 @@ export function KeysProvider({ children }: { children: React.ReactNode }) {
         void reload().finally(() => setHydrated(true));
       }
       if (event === "SIGNED_OUT") {
+        clearOpenAIJudgeModelsCache();
         setHints(EMPTY);
       }
     });
@@ -82,6 +111,7 @@ export function KeysProvider({ children }: { children: React.ReactNode }) {
       });
       const data = (await res.json()) as KeyHints & { error?: string };
       if (!res.ok) throw new Error(data.error || "Could not save keys");
+      if (patch.openai !== undefined) clearOpenAIJudgeModelsCache();
       setHints({
         openaiHint: data.openaiHint || null,
         neuronpediaHint: data.neuronpediaHint || null,

@@ -23,9 +23,11 @@ function valuesFor(
 ): Record<string, string> {
   const lastUser = probeText(row, "last_user");
   const firstAsst = probeText(row, "first_assistant");
+  const modelText = row.completion;
   const bag: Record<JudgeVar, string> = {
     prompt: row.prompt,
-    completion: row.completion,
+    output: modelText,
+    completion: modelText,
     nla: probeText(row),
     nla_last_user: lastUser,
     nla_first_assistant: firstAsst,
@@ -33,7 +35,7 @@ function valuesFor(
     mse: row.probes.map((p) => String(p.mse ?? "")).join(" | "),
     reference,
   };
-  const out: Record<string, string> = {};
+  const out: Record<string, string> = { ...bag };
   for (const [placeholder, src] of Object.entries(mapping)) {
     if (!src) continue;
     out[placeholder] = bag[src];

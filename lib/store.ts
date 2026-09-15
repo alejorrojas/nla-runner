@@ -116,7 +116,9 @@ function mapStore(
     list.push({
       exampleId: row.example_id as string,
       prompt: row.prompt as string,
-      completion: row.completion as string,
+      completion: String(
+        (row.output as string | null) || (row.completion as string) || "",
+      ),
       probes: (row.probes ?? []) as NlaProbe[],
       scores: (row.scores ?? {}) as ExperimentRow["scores"],
       comments: (row.comments ?? {}) as ExperimentRow["comments"],
@@ -273,6 +275,7 @@ async function writeOwnedStore(
           position,
           prompt: row.prompt,
           completion: row.completion,
+          output: row.completion,
           probes: row.probes,
           scores: row.scores,
           comments: row.comments,

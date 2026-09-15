@@ -80,6 +80,7 @@ async function copyToStarterWorkspaces(experiment: Experiment) {
         position,
         prompt: row.prompt,
         completion: row.completion,
+        output: row.completion,
         probes: row.probes,
         scores: row.scores,
         comments: row.comments,

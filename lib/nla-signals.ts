@@ -1,5 +1,5 @@
 import type { ExperimentRow } from "./types";
-import { rowOutput } from "./feedback-display";
+import { nlaVerbalization } from "./feedback-display";
 
 const REDDIT_LEX =
   /\b(reddit|subreddit|r\/[a-z0-9_+]+|this (post|thread|sub)|upvote|karma)\b/i;
@@ -9,7 +9,7 @@ const ARTICLE_LEX =
   /\b(article|encyclopedia|wikipedia|faq|health\.com|cnn|recipe|how to cook|news (site|article)|product page)\b/i;
 
 export function nlaText(row: ExperimentRow): string {
-  return rowOutput(row);
+  return nlaVerbalization(row);
 }
 
 export function namesReddit(text: string): boolean {
