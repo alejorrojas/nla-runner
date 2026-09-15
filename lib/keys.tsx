@@ -50,8 +50,14 @@ const Ctx = createContext<{
 } | null>(null);
 
 export function KeysProvider({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isPublicPage =
+    pathname === "/" ||
+    pathname === "/login" ||
+    pathname === "/contact" ||
+    pathname === "/paper";
   const [hints, setHints] = useState<KeyHints>(EMPTY);
-  const [hydrated, setHydrated] = useState(false);
+  const [hydrated, setHydrated] = useState(isPublicPage);
 
   useEffect(() => {
     purgeLegacyBrowserKeyStores();
@@ -78,15 +84,10 @@ export function KeysProvider({ children }: { children: React.ReactNode }) {
     prefetchOpenAIJudgeModels(hints.openaiHint);
   }, [hydrated, hints.openaiHint]);
 
-  const pathname = usePathname();
-
   useEffect(() => {
-    if (pathname === "/" || pathname === "/login" || pathname === "/contact") {
-      setHydrated(true);
-      return;
-    }
+    if (isPublicPage) return;
     void reload().finally(() => setHydrated(true));
-  }, [pathname, reload]);
+  }, [isPublicPage, reload]);
 
   useEffect(() => {
     const supabase = createBrowserSupabase();

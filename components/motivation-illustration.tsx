@@ -184,13 +184,19 @@ export function MotivationIllustration({
       onPointerEnter={reduce ? undefined : () => setHovered(true)}
       onPointerLeave={reduce ? undefined : () => setHovered(false)}
     >
-      <Image src={src} alt={alt} fill sizes={sizes} className="object-cover" />
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        sizes={sizes}
+        className={kind === "gap" ? "object-contain md:object-cover" : "object-cover"}
+      />
       {reduce ? null : (
         <svg
           aria-hidden
           className="pointer-events-none absolute inset-0 h-full w-full"
           viewBox={viewBox}
-          preserveAspectRatio="xMidYMid slice"
+          preserveAspectRatio={kind === "gap" ? "xMidYMid meet" : "xMidYMid slice"}
         >
           {kind === "gap" ? <GapMotion hovered={hovered} /> : null}
           {kind === "method" ? <MethodMotion hovered={hovered} /> : null}

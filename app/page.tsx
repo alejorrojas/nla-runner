@@ -26,7 +26,7 @@ const PIPELINE = [
     t: "Token policy",
     object: "Probe position",
     details: "Held constant",
-    d: "The observed position is part of the definition — last user token, first assistant token, or both — not something decided after reading each reply.",
+    d: "The observed position is part of the definition: last user token, first assistant token, or both. It is not something decided after reading each reply.",
   },
   {
     k: "03",
@@ -47,7 +47,7 @@ const PIPELINE = [
     t: "Aggregate",
     object: "Metrics",
     details: "Inspectable trail",
-    d: "Per-example artifacts stay inspectable. Presence rate, mean score, and category mix let you see patterns instead of isolated screenshots.",
+    d: "Per example artifacts stay inspectable. Presence rate, mean score, and category mix let you see patterns instead of isolated screenshots.",
   },
 ];
 
@@ -60,7 +60,7 @@ const PIECES = [
   },
   {
     t: "Token policy",
-    d: "Keep the position rule constant so last-user vs first-assistant is an experimental factor, not an afterthought.",
+    d: "Keep the position rule constant so last user versus first assistant is an experimental factor, not an afterthought.",
     image: "/tokenpolicy.png",
     kind: "token-policy" as const,
   },
@@ -72,7 +72,7 @@ const PIECES = [
   },
   {
     t: "Evaluators",
-    d: "Natural-language rubric, judge model, and feedback keys. The same loop can detect a theme, score a criterion, or classify verbalizations.",
+    d: "Natural language rubric, judge model, and feedback keys. The same loop can detect a theme, score a criterion, or classify verbalizations.",
     image: "/evaluators.png",
     kind: "evaluators" as const,
   },
@@ -97,7 +97,7 @@ const LIMITS = [
   },
   {
     t: "The judge is an instrument",
-    d: "An LLM-as-a-judge moves with the rubric, the judge model, and what you put in context. Those choices are stored with the run so the measurement can be audited.",
+    d: "An LLM judge moves with the rubric, the judge model, and what you put in context. Those choices are stored with the run so the measurement can be audited.",
   },
   {
     t: "Coverage has edges",
@@ -136,8 +136,8 @@ export default function LandingPage() {
             <p className="mx-auto mt-6 max-w-2xl text-[16px] leading-relaxed text-white/80">
               Neuronpedia makes Natural Language Activations easy to inspect one at a
               time. NLASmith is the missing loop: datasets, token policies,
-              configurable judges, and aggregated metrics — so hypotheses about
-              internal representations can be run, reproduced, and compared.
+              configurable judges, and aggregated metrics. This lets hypotheses
+              about internal representations be run, reproduced, and compared.
             </p>
           </FadeIn>
           <FadeIn delay={0.18} className="mt-9 flex flex-wrap items-center justify-center gap-3">
@@ -173,7 +173,7 @@ export default function LandingPage() {
                 <p className="mt-4 text-[15px] leading-relaxed text-[var(--muted)]">
                   Natural Language Autoencoders turn a hidden activation into a
                   sentence and can reconstruct the activation from that text. Those
-                  verbalizations are interpretable — they are not a literal or
+                  verbalizations are interpretable, but they are not a literal or
                   infallible readout of the model’s state.
                 </p>
               </div>
@@ -188,8 +188,8 @@ export default function LandingPage() {
               </h3>
               <p className="mt-4 text-[15px] leading-relaxed text-[var(--muted)]">
                 Neuronpedia already exposes NLA through a web UI and an API.
-                Coordinating that across many examples — and keeping the decisions
-                that produced each result — is still left to ad-hoc scripts.
+                Coordinating that across many examples while keeping the decisions
+                that produced each result is still left to ad hoc scripts.
               </p>
               <p className="font-editorial mt-auto pt-8 text-[20px] leading-snug text-[#3d3d3a]">
                 The artifact under test is not only the visible reply. It is the NLA
@@ -217,7 +217,7 @@ export default function LandingPage() {
                 <p className="mt-3 text-[15px] leading-relaxed text-[var(--muted)]">
                   Datasets, repeated runs, automatic evaluators, comparative views.
                   NLASmith applies that methodological shape to the NLA at positions
-                  fixed by the experiment — not only the visible reply.
+                  fixed by the experiment, rather than only the visible reply.
                 </p>
               </div>
             </RevealItem>
@@ -375,11 +375,11 @@ export default function LandingPage() {
               An experiment
             </p>
             <h2 className="mt-5 font-display text-[clamp(28px,3.2vw,42px)] leading-[1.08]">
-              Forum-like associations that never appear in the reply.
+              Forum style associations that never appear in the reply.
             </h2>
             <p className="mt-6 max-w-md text-[16px] leading-relaxed">
               In some open-ended questions, verbalizations seemed tied to Reddit
-              or forum-like discourse even when the generated answer never named
+              or forum style discourse even when the generated answer never named
               that source. We ran that hunch as an experiment in the prototype:
               dataset, token position, NLA source, rubric, and aggregated
               metrics.
@@ -424,7 +424,7 @@ export default function LandingPage() {
           </h2>
           <p className="font-editorial mx-auto mt-5 max-w-xl text-[22px] leading-snug text-[#cccccc]">
             Datasets, evaluators, and experiment rows persist. Open the prototype,
-            attach a judge, and turn a one-off inspection into a configuration
+            attach a judge, and turn a one time inspection into a configuration
             you can repeat.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3">

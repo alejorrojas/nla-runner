@@ -33,14 +33,14 @@ export const metadata: Metadata = {
   ),
   title: {
     default: "NLASmith",
-    template: "%s - NLASmith",
+    template: "%s | NLASmith",
   },
   description:
-    "A framework for systematic evaluation of Natural Language Activations: datasets, token policies, Neuronpedia NLA, and LLM-as-judge.",
+    "A framework for systematic evaluation of Natural Language Activations: datasets, token policies, Neuronpedia NLA, and LLM judges.",
   openGraph: {
     title: "NLASmith",
     description:
-      "From one activation to a systematic experiment. Datasets, token policies, Neuronpedia NLA, and LLM-as-judge.",
+      "From one activation to a systematic experiment. Datasets, token policies, Neuronpedia NLA, and LLM judges.",
     type: "website",
     locale: "en_US",
   },
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "NLASmith",
     description:
-      "From one activation to a systematic experiment. Datasets, token policies, Neuronpedia NLA, and LLM-as-judge.",
+      "From one activation to a systematic experiment. Datasets, token policies, Neuronpedia NLA, and LLM judges.",
   },
   icons: {
     icon: [

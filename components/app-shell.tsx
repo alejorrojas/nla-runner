@@ -254,8 +254,8 @@ function LandingBar() {
         >
           Product
         </a>
-        <Link href={toAppPath("/login")} className="hover:text-white">
-          Home
+        <Link href="/paper" className="hover:text-white">
+          Paper
         </Link>
         <Button asChild size="lg">
           <Link href={toAppPath("/login")}>Get started</Link>
@@ -281,7 +281,14 @@ function ShellInner({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (path === "/" || path === "/login" || path === "/contact") return;
+    if (
+      path === "/" ||
+      path === "/login" ||
+      path === "/contact" ||
+      path === "/paper"
+    ) {
+      return;
+    }
     void (async () => {
       const supabase = createBrowserSupabase();
       const {
@@ -303,7 +310,7 @@ function ShellInner({ children }: { children: ReactNode }) {
     setCollapsed((value) => !value);
   }
 
-  if (path === "/login" || path === "/contact") {
+  if (path === "/login" || path === "/contact" || path === "/paper") {
     return <>{children}</>;
   }
 

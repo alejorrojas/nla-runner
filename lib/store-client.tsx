@@ -21,7 +21,12 @@ const Ctx = createContext<{
 const EMPTY: Store = { datasets: [], evaluators: [], experiments: [] };
 
 function isAppPath(pathname: string) {
-  return pathname !== "/" && pathname !== "/login" && pathname !== "/contact";
+  return (
+    pathname !== "/" &&
+    pathname !== "/login" &&
+    pathname !== "/contact" &&
+    pathname !== "/paper"
+  );
 }
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {

@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
 export const alt =
-  "NLASmith — from one activation to a systematic experiment";
+  "NLASmith, from one activation to a systematic experiment";
 export const size = {
   width: 1200,
   height: 630,
@@ -178,7 +178,7 @@ export default async function Image() {
             }}
           >
             Datasets, token policies, configurable judges, and aggregated
-            metrics — so hypotheses about internal representations can be run
+            metrics. This lets hypotheses about internal representations be run
             and compared.
           </div>
           <div

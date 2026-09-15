@@ -10,7 +10,9 @@ const PUBLIC_PREFIXES = [
 ];
 
 function isPublicPath(pathname: string): boolean {
-  if (pathname === "/" || pathname === "/contact") return true;
+  if (pathname === "/" || pathname === "/contact" || pathname === "/paper") {
+    return true;
+  }
   return PUBLIC_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
 
@@ -32,6 +34,7 @@ export async function middleware(request: NextRequest) {
     if (
       pathname === "/" ||
       pathname === "/contact" ||
+      pathname === "/paper" ||
       isStaticish(pathname) ||
       pathname.startsWith("/opengraph") ||
       pathname.startsWith("/twitter")
@@ -42,8 +45,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(dest);
   }
 
-  if (isAppHost(host) && pathname === "/contact") {
-    return NextResponse.redirect(new URL("/contact", siteUrl()));
+  if (
+    isAppHost(host) &&
+    (pathname === "/contact" || pathname === "/paper")
+  ) {
+    return NextResponse.redirect(new URL(pathname, siteUrl()));
   }
 
   if (isAppHost(host) && pathname === "/") {

@@ -26,7 +26,7 @@ export function ExperimentIllustration() {
     >
       <Image
         src="/experiment.jpg"
-        alt="A question passing through Reddit-like discourse before the visible reply"
+        alt="A question passing through Reddit style discourse before the visible reply"
         fill
         unoptimized
         sizes="(min-width: 1024px) 590px, 100vw"
