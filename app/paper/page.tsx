@@ -240,9 +240,9 @@ export default function PaperPage() {
                 activación. La Figura 1 resume este funcionamiento.
               </Paragraph>
               <Figure
-                src="/paper-images/image1.png"
-                width={1448}
-                height={1086}
+                src="/paper-images/image2.png"
+                width={1999}
+                height={1118}
                 caption="Figura 1. Esquema simplificado del funcionamiento de un Natural Language Autoencoder. Adaptado conceptualmente de [1]."
               />
               <Paragraph>
@@ -252,9 +252,9 @@ export default function PaperPage() {
                 descripción en lenguaje natural.
               </Paragraph>
               <Figure
-                src="/paper-images/image2.png"
-                width={1999}
-                height={1118}
+                src="/paper-images/image3.png"
+                width={1897}
+                height={829}
                 caption="Figura 2. Ejemplo de verbalización NLA para la activación asociada a un token."
               />
               <Paragraph>
@@ -377,9 +377,9 @@ export default function PaperPage() {
                 interpretar y comparar las explicaciones NLA.
               </Paragraph>
               <Figure
-                src="/paper-images/image3.png"
-                width={1897}
-                height={829}
+                src="/paper-images/image1.png"
+                width={1448}
+                height={1086}
                 caption="Figura 3. Pipeline conceptual de NLASmith."
               />
               <Subsection
@@ -465,9 +465,9 @@ export default function PaperPage() {
                 trazable de observaciones y métricas.
               </Paragraph>
               <Figure
-                src="/paper-images/image4.png"
-                width={1999}
-                height={1141}
+                src="/paper-images/image5.png"
+                width={1672}
+                height={941}
                 caption="Figura 4. Arquitectura general propuesta para NLASmith."
               />
               <Subsection
@@ -636,9 +636,9 @@ export default function PaperPage() {
                   .
                 </Paragraph>
                 <Figure
-                  src="/paper-images/image5.png"
-                  width={1672}
-                  height={941}
+                  src="/paper-images/image4.png"
+                  width={1999}
+                  height={1141}
                   caption="Figura 5. Interfaz del prototipo funcional de NLASmith."
                 />
               </Subsection>
